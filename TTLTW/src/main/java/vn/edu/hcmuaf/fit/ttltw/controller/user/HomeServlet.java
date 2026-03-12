@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-@WebServlet(name = "HomeServlet", urlPatterns = { "/" })
+@WebServlet(name = "HomeServlet", urlPatterns = { "/home" })
 public class HomeServlet extends HttpServlet {
     private final HomeService homeService = new HomeServiceImpl();
 
