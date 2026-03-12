@@ -1,0 +1,574 @@
+body {
+    background: var(--color-bg);
+    color: #373737;
+}
+.product-page{
+    width: 1200px;
+    margin: 10px auto;
+}
+.product-filter-bar {
+    background: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    position: relative;
+    z-index: 1;
+    margin: 15px 0;
+}
+.filter-top {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 15px;
+}
+
+.filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #dce3eb;
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.filter-btn:hover {
+    background: #f3f6fa;
+}
+
+.filter-btn i {
+    color: var(--color-button);
+    font-size: 14px;
+}
+.brand-list {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.brand {
+    background: #f3f5f7;
+    border-radius: 8px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.brand:hover {
+    background: #e7ebf0;
+}
+
+.brand img {
+    height: 22px;
+    width: 80px;
+    object-fit: contain;
+}
+
+.brand.active {
+    border: 1px solid var(--color-button);
+    transition: 0.2s;
+}
+
+.option-group button.active {
+    color:var(--color-button);
+    border: 1px solid var(--box-shadow );
+    font-weight: bold;
+}
+
+.dropdown.active {
+    display: block;
+}
+.filter-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-left: 110px;
+}
+
+.category {
+    padding: 10px 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.filter-item {
+    padding: 10px 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.filter-item:hover {
+    background: var(--color-button);
+    color: #fff;
+    border-color: var(--box-shadow);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.filter-item.active {
+    border: 1px solid var(--color-button);
+    background: var(--color-button);
+    color: #fff;
+    transition: 0.2s;
+}
+.dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    display: none;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 10px;
+    min-width: 350px;
+    z-index: 10;
+    margin-left: 50px;
+
+}
+.dropdown.active {
+    display: block;
+}
+
+.option-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+
+}
+
+.option-group button {
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--color-bg);
+    cursor: pointer;
+    color: black;
+}
+
+.option-group button:hover {
+    border-color: var(--color-button);
+
+}
+.option-group button .active {
+    border-color: var(--color-button);
+    background: var(--color-button);
+    color: white;
+}
+.price-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+
+}
+
+.price-input input {
+    width: 200px;
+    padding: 6px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.price-range {
+    width: 100%;
+    margin-bottom: 10px;
+}
+.dropdown-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+
+.dropdown-actions button {
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-apply {
+    background: #d70018;
+    color: white;
+}
+.sort-section {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+}
+
+.sort-section span {
+    font-weight: 500;
+}
+
+.sort-section ul {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+    padding: 0;
+    margin: 0;
+}
+
+.sort-section li {
+    cursor: pointer;
+    color: #000;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.sort-section li.active {
+    color: var(--color-button);
+    font-weight: 150;
+}
+
+/* Nút hoàn tác bộ lọc */
+.btn-reset-filters {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #f5f5f5;
+    color: #666;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-left: auto;
+}
+
+.btn-reset-filters:hover {
+    background: #e8e8e8;
+    color: #333;
+    border-color: #bbb;
+}
+
+.btn-reset-filters i {
+    font-size: 14px;
+}
+.product-list {
+    margin-top: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    align-items: start;
+    justify-items: center;
+}
+
+.product-card {
+    width: 100%;
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    font-size: 13px;
+
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.phone .product-card {
+    min-height: 500px;
+}
+.accessory .product-card{
+    min-height: 400px;
+}
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.product-img {
+    position: relative;
+    height: 300px;
+    flex: 0 0 auto;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-img img[loading="lazy"] {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading-shimmer 1.5s infinite;
+}
+
+.product-img img[loading="lazy"].loaded {
+    animation: none;
+    background: none;
+}
+
+@keyframes loading-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.product-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #fff;
+}
+
+.discount-badge {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 35px;
+    height: 35px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.product-info {
+    flex: 1;
+    padding: 16px;
+    padding-bottom: 0;
+
+    display: flex;
+    flex-direction: column;
+}
+
+/* Tiêu đề sản phẩm */
+.product-info h2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 1.2rem;
+    line-height: 2;
+    margin: 0 0 10px 0;
+    height: 4.4rem;
+}
+
+.price-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 10px;
+}
+
+.price-new {
+    color: #e11d48;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.price-old {
+    color: #9ca3af;
+    font-size: 1rem;
+    text-decoration: line-through;
+}
+
+
+.colors {
+    display: flex;
+    gap: 6px;
+    margin: 10px 20px;
+}
+
+.color {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    cursor: pointer;
+}
+
+.color.active {
+    border-color: #000;
+}
+
+.colors-selection {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    margin: 10px 0;
+}
+
+.colors-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+    white-space: nowrap;
+}
+
+.colors {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.colors .color {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.colors .color:hover {
+    transform: scale(1.1);
+    border-color: #999;
+}
+
+.colors .color.active {
+    border-color: #333;
+    border-width: 3px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.capacity {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.capacity button {
+    padding: 6px 10px;
+    color: black;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #f9f9f9;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+}
+
+.capacity button.active {
+    border-color: var(--color-button);
+    background: var(--color-button);
+    color: white;
+}
+
+.capacity button:hover {
+    border-color: var(--color-button);
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    gap: 2px;
+}
+
+.rating i {
+    color: #facc15;
+}
+
+/* --- PHẦN DƯỚI (ĐÃ BÁN + GIỎ HÀNG) --- */
+.bottom-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    margin-bottom: 10px;
+}
+
+
+.sold-count {
+    font-size: 0.9rem;
+    color: #6b7280;
+    transition: opacity 0.3s ease;
+}
+
+.cart-btn {
+    width: 35px;
+    height: 35px;
+    background: var(--color-button);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    font-size: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: scale(0.8);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.cart-btn:hover {
+    background: var(--color-bg-main);
+}
+
+.load-more-wrap {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.btn[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.spinner {
+    font-size: 14px;
+    color: #666;
+    margin-left: 8px;
+}
+.category-list {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin: 15px 0;
+}
+
+.category {
+    padding: 10px 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+/* Hiệu ứng hover */
+.category:hover {
+    background: var(--color-button);
+    color: #fff;
+    border-color: var(--box-shadow);
+    transform: translateY(-2px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.category.active {
+    border: 1px solid var(--color-button);
+    background: var(--color-button);
+    color: #fff;
+    transition: 0.2s;
+}

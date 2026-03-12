@@ -1,0 +1,56 @@
+
+#forgot-password{
+    max-width: 400px;
+    display : flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin: 80px auto;
+}
+#forgot-password .form-box{
+    background: #fff;
+    margin: 50px auto;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+}
+#forgot-password h2{
+    color: var(--color-button);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 20px;
+}
+#forgot-password input[type="email"] {
+    width: 100%;
+    padding: 10px;
+    margin: 15px 0;
+    border: 1px solid #c1c0c0;
+    border-radius: 4px;
+}
+#forgot-password button {
+    width: 100%;
+    padding: 12px;
+    background: var(--color-button);
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+}
+#forgot-password button:hover {
+    opacity: 0.8;
+}
+#forgot-password .links {
+    text-align: center;
+    margin-top: 15px;
+}
+#forgot-password .links a {
+    color: #3498db;
+    text-decoration: none;
+}
+#forgot-password .links a:hover {
+    opacity: 0.7;
+    text-decoration: underline;
+}
+

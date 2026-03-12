@@ -1,0 +1,45 @@
+body {
+    background: #EFEFEF;
+}
+.new-container {
+    display: flex;
+    max-width: 1500px;
+    margin: 10px 0 10px 222px;
+    gap: 20px;
+    padding: 0 20px;
+}
+.container-newpass{
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px;
+    padding: 20px;
+}
+/* Chia 2 nút thành 2 cột */
+.container-newpass #reset-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.container-newpass #reset-form .button-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.container-newpass #reset-form .button-row .btn {
+    flex: 1;
+}
+
+/* Màu riêng cho từng nút */
+.container-newpass #cancel-btn {
+    background-color: #ddd;
+    color: #333;
+}
+
+.container-newpass #update-btn {
+    color: white;
+}
+
+.container-newpass #update-btn:hover {
+    opacity: 0.8;
+}

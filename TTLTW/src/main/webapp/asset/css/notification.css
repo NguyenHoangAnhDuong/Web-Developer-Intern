@@ -1,0 +1,351 @@
+.toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    min-width: 300px;
+    max-width: 400px;
+    padding: 16px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateX(400px);
+    transition: all 0.3s ease-in-out;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.toast-success {
+    background-color: #10b981;
+    color: white;
+}
+
+.toast-error {
+    background-color: #ef4444;
+    color: white;
+}
+
+.toast-warning {
+    background-color: #f59e0b;
+    color: white;
+}
+
+.toast-info {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.toast-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.toast-message {
+    flex: 1;
+    line-height: 1.4;
+}
+
+/* Stacking multiple toasts */
+.toast:not(:first-of-type) {
+    margin-top: 10px;
+}
+
+/* ===========================
+   CONFIRM DIALOG
+=========================== */
+.confirm-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.confirm-overlay.show {
+    opacity: 1;
+}
+
+.confirm-overlay.show .confirm-dialog {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.confirm-dialog {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    transform: scale(0.9);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+/* Confirm Dialog Icons */
+.confirm-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 28px;
+}
+
+/* Icon variants */
+.confirm-icon.info {
+    background-color: #dbeafe;
+    color: #3b82f6;
+}
+
+.confirm-icon.success {
+    background-color: #d1fae5;
+    color: #10b981;
+}
+
+.confirm-icon.warning {
+    background-color: #fef3c7;
+    color: #f59e0b;
+}
+
+.confirm-icon.danger {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+/* Confirm Dialog Content */
+.confirm-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1f2937;
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.confirm-message {
+    font-size: 14px;
+    color: #6b7280;
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+/* Confirm Dialog Actions */
+.confirm-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.btn-cancel,
+.btn-confirm,
+.btn-confirm-delete,
+.btn-confirm-primary {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.btn-cancel {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+.btn-cancel:hover {
+    background-color: #e5e7eb;
+}
+
+/* Primary confirm button (blue) */
+.btn-confirm,
+.btn-confirm-primary {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.btn-confirm:hover,
+.btn-confirm-primary:hover {
+    background-color: #2563eb;
+}
+
+.btn-confirm-delete {
+    background-color: #ef4444;
+    color: white;
+}
+
+.btn-confirm-delete:hover {
+    background-color: #dc2626;
+}
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9998;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.loading-overlay.show {
+    opacity: 1;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+/* Avatar Loading Overlay (for profile image upload) */
+.avatar-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 32px;
+    border-radius: 50%;
+}
+@keyframes slideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.toast {
+    animation: slideIn 0.3s ease-out;
+}
+
+.confirm-dialog {
+    animation: scaleIn 0.3s ease-out;
+}
+@media (max-width: 768px) {
+    .toast {
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+        max-width: none;
+    }
+
+    .confirm-dialog {
+        padding: 24px;
+        width: 85%;
+    }
+
+    .confirm-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 24px;
+    }
+
+    .confirm-title {
+        font-size: 18px;
+    }
+
+    .confirm-actions {
+        flex-direction: column;
+    }
+
+    .btn-cancel,
+    .btn-confirm,
+    .btn-confirm-delete,
+    .btn-confirm-primary {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .toast {
+        font-size: 13px;
+        padding: 12px 16px;
+    }
+
+    .toast-icon {
+        width: 20px;
+        height: 20px;
+        font-size: 14px;
+    }
+
+    .confirm-dialog {
+        padding: 20px;
+    }
+}
+
+.fade-out {
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateX(-20px);
+}
+
+.fa-spinner,
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+/* Hidden class */
+.hidden {
+    display: none !important;
+}

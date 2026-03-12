@@ -1,0 +1,133 @@
+body {
+    background: #EFEFEF;
+}
+.voucher-container {
+    display: flex;
+    max-width: 1350px;
+    margin: 40px auto 40px; /* chừa chỗ cho header */
+    gap: 20px;
+    padding: 0 20px;
+}
+
+
+.voucher-container .voucher-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px;
+    padding: 20px;
+    background: #fff;
+}
+
+.voucher-container .voucher {
+    background: #fff;
+    border-radius: 10px;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.voucher-container .voucher-left {
+    background: rgba(47, 122, 135, 0.8);
+    color: white;
+    padding: 25px 10px;
+    width: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.voucher-container .voucher-left img {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    margin-bottom: 5px;
+}
+
+.voucher-container .voucher-right {
+    flex: 1;
+    padding: 15px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.voucher-container .voucher-right h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.voucher-container .voucher-right p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.voucher-container .voucher-right button {
+    background: var(--color-button);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 8px 0;
+    width: 100%;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.voucher-container .voucher-right a {
+    text-decoration: none;
+    color: rgba(22, 77, 87, 0.95);
+    font-weight: bold;
+    font-size: 14px;
+    margin-top: 5px;
+    text-align: center;
+}
+
+.voucher-container .badge {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: #ffe6e6;
+    color: var(--color-bg-header);
+    font-weight: bold;
+    border-radius: 50px;
+    padding: 3px 8px;
+    font-size: 14px;
+}
+/* Con dấu “Hết lượt sử dụng” */
+.voucher-container .expired::after {
+    content: "Hết lượt sử dụng";
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: rotate(-25deg) translateY(-50%);
+    background: rgba(200, 200, 200, 0.2);
+    border: 2px solid rgba(180, 180, 180, 0.4);
+    color: #999;
+    font-weight: bold;
+    font-size: 16px;
+    padding: 10px 20px;
+    border-radius: 6px;
+    pointer-events: none;
+}
+
+
+/* Responsive */
+@media (max-width: 992px) {
+    .voucher-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 576px) {
+    .voucher-container {
+        grid-template-columns: 1fr;
+    }
+}

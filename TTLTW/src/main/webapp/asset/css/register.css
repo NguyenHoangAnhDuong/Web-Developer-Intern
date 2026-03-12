@@ -1,0 +1,112 @@
+/*Bắt đầu css trang Register*/
+#register-form {
+    max-width: 600px;
+    margin: 50px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+#register-form h2 {
+    text-align: center;
+    color: var(--color-button);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 24px;
+}
+#register-form .row {
+    display: flex;
+    gap: 30px;
+}
+#register-form .row .input-group {
+    flex: 1;
+}
+#register-form .input-group {
+    margin-bottom: 15px;
+    position: relative;
+}
+/* Icon đặt bên phải input */
+#register-form .input-group i {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    color: #888;
+    cursor: pointer;
+    line-height: 2;
+}
+/* Chừa khoảng bên phải để icon không đè lên text */
+#register-form .input-group input[type="password"] {
+    padding-right: 40px;
+    align-items: center;
+}
+#register-form .input-group input[type="password"] ~ .fa-eye {
+    display: none;
+}
+#register-form .input-group input[type="text"] ~ .fa-eye-slash {
+    display: none;
+}
+#register-form .input-group label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: 400;
+    color: #333;
+}
+
+#register-form .input-group input[type="text"],
+#register-form .input-group input[type="email"],
+#register-form .input-group input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+#register-form .gender {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 22px;
+}
+#register-form .terms {
+    margin: 15px 0;
+    font-size: 14px;
+}
+#register-form .terms a {
+    color: #3498db;
+    text-decoration: none;
+}
+#register-form button {
+    width: 100%;
+    padding: 12px;
+    background: var(--color-button);
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+#register-form button:hover {
+    opacity: 0.8;
+}
+#register-form .links {
+    text-align: center;
+    margin-top: 15px;
+}
+#register-form .links a {
+    color: #3498db;
+    text-decoration: none;
+}
+#register-form .links a:hover {
+    opacity: 0.7;
+    text-decoration: underline;
+}
+.error-message {
+    color: red;
+    font-size: 14px;
+    text-align: center;
+    margin: 10px;
+
+}
+
+/*Kết thúc css trang Register*/

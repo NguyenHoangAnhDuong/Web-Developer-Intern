@@ -1,0 +1,94 @@
+#verify-step, #confirm-step{
+    width: 400px;
+    background: #fff;
+    padding: 40px 32px;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    margin: 50px auto;
+    text-align: center;
+}
+#verify-step h2, #confirm-step h2{
+    text-transform: uppercase;
+    color: var(--color-button);
+    font-weight: bold;
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+#verify-step p, #confirm-step p{
+    font-size: 16px;
+    color: var(--color-grey);
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+#verify-step .code-inputs {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+#verify-step .code-inputs input {
+    width: 48px;
+    height: 48px;
+    text-align: center;
+    font-size: 1.2rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    outline: none;
+    transition: 0.2s;
+    margin: 10px auto 0;
+}
+
+#verify-step .code-inputs input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
+}
+
+#verify-step .btn , #confirm-step .btn, #reset-step .btn{
+    width: 100%;
+    background: var(--color-button);
+    margin-top: 20px;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 0;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#verify-step .btn:hover, #confirm-step .btn:hover, #reset-step .btn:hover {
+    opacity: 0.7;
+}
+
+#verify-step .footer {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: 16px;
+}
+
+#verify-step .footer a {
+    color: #2563eb;
+    text-decoration: none;
+}
+/* Icon đặt bên phải input */
+#verify-step .input-group i {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    color: #888;
+    cursor: pointer;
+    line-height: 2;
+}
+/* Chừa khoảng bên phải để icon không đè lên text */
+#verify-step .input-group input[type="password"] {
+    padding-right: 40px;
+    align-items: center;
+}
+
+
+.hidden {
+    display: none;
+}

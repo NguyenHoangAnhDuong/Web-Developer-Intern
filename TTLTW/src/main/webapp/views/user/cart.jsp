@@ -1,0 +1,95 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:setLocale value="vi_VN"/>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Giỏ Hàng</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/asset/css/base.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/asset/css/cart.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/asset/css/header.css">
+</head>
+<body>
+
+<jsp:include page="/views/includes/header.jsp" />
+<main class="cart-wrap">
+    <div class="container">
+        <h2 class="cart-title">Giỏ Hàng Của Bạn</h2>
+
+        <div class="table-cart">
+            <table>
+                <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAll" ></th>
+                    <th>Sản Phẩm</th>
+                    <th>Số Lượng</th>
+                    <th>Thành Tiền</th>
+                    <th> </th>
+                </tr>
+                </thead>
+                <tbody id="cart-body">
+
+                <c:choose>
+                    <c:when test="${not empty cartItems}">
+                        <c:forEach var="item" items="${cartItems}">
+                            <tr>
+                                <td><input type="checkbox" class="select-item" data-id="${item.vc_id}" data-price="${item.subTotal}"></td>
+
+                                    <td class="product-info">
+                                        <img src="${pageContext.request.contextPath}/assert/img/product/${item.main_img}" alt="${item.product_name}">
+                                        <div class="product-detail">
+                                            <span class="product-name">${item.product_name}</span>
+                                                <%-- Hiển thị phiên bản và màu sắc --%>
+                                            <small class="product-variant">${item.variant_name} | ${item.color_name}</small>
+                                        </div>
+                                    </td>
+
+                                <td>
+                                    <div class="qty-control">
+                                        <button class="minus" onclick="updateQty(${item.vc_id}, -1)">-</button>
+                                        <span class="quantity">${item.quantity}</span>
+                                        <button class="plus" onclick="updateQty(${item.vc_id}, 1)">+</button>
+                                    </div>
+                                </td>
+                                <td class="price">
+                                    <fmt:formatNumber value="${item.subTotal}" pattern="#,###" />₫ </td>
+                                <td>
+                                        <%-- Gửi vc_id (ID biến thể màu) để xóa đúng sản phẩm --%>
+                                    <button class="delete" onclick="removeItem(${item.vc_id})">Xóa</button>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </c:when>
+                    <c:otherwise>
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 50px 0;">
+                                <i class="fa-solid fa-cart-shopping" style="font-size: 48px; color: #ccc;"></i>
+                                <p>Giỏ hàng của bạn đang trống.</p>
+                                <a href="${pageContext.request.contextPath}/listproduct" class="btn-buy">Mua sắm ngay</a>
+                            </td>
+                        </tr>
+                    </c:otherwise>
+                </c:choose>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<div class="sticky-summary-bottom">
+    <div class="summary-box">
+        <span class="summary-item">Tổng cộng:
+            <span id="sub-total" class="subtotal">0đ</span>
+        </span>
+        <a href="cart?action=checkout"><button class="checkout-btn" ${empty cartItems ? 'disabled' : ''}>Thanh Toán</button></a>
+    </div>
+</div>
+
+<script src="${pageContext.request.contextPath}/asset/js/cart.js"></script>
+<script src="${pageContext.request.contextPath}/asset/js/header.js"></script>
+</body>
+</html>

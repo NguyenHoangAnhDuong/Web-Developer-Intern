@@ -1,0 +1,232 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.product-tag {
+    background: #dcfce7;
+    color: #166534;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+}
+.card {
+    background: #fff;
+    border: 1px solid var(--color-grey);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: var(--box-shadow);
+}
+
+.highlight-card {
+    background: #f0f7ff;
+    border-left: 5px solid var(--color-button);
+}
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group label {
+    font-size: var(--font-size-text);
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+    color: var(--color-grey);
+}
+
+.form-group.full {
+    grid-column: span 2;
+}
+
+input,
+textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 14px;
+}
+
+textarea {
+    resize: vertical;
+}
+
+.readonly-input {
+    background: #f1f5f9;
+    cursor: not-allowed;
+}
+.image-management {
+    grid-column: span 2;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.current-image-box {
+    width: 150px;
+    height: 150px;
+    border: 2px solid var(--color-grey);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+}
+
+.current-image-box img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.image-note {
+    font-size: 12px;
+    color: var(--color-grey);
+    margin-top: 6px;
+}
+.tech-specs-list {
+    border: 1px solid var(--color-grey);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.tech-row {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    border-bottom: 1px solid var(--color-grey);
+    align-items: center;
+}
+
+.tech-row.header {
+    background: #f1f5f9;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--color-grey);
+}
+
+.col-name { flex: 2; }
+.col-value { flex: 3; }
+.col-priority { width: 80px; }
+
+.btn-remove-tech {
+    width: 30px;
+    height: 30px;
+    border: none;
+    background: #fee2e2;
+    color: #dc2626;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.color-edit-row {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #dbeafe;
+}
+
+.input-unit {
+    flex: 1;
+}
+
+.input-unit span {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-grey);
+    display: block;
+    margin-bottom: 4px;
+}
+
+
+.dashed {
+    border-top: 2px dashed #cbd5e1;
+    margin: 24px 0;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+}
+
+/* chỉ override nhẹ button base */
+.action-buttons .btn-cancel {
+    background: #e2e8f0;
+    color: #000;
+}
+.product-switch {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.product-switch button {
+    background: #e2e8f0;
+    color: #000;
+}
+
+.product-switch button.active {
+    background: var(--color-button);
+    color: #fff;
+}
+#editFormAccessory {
+    display: none;
+}
+input[type="file"] {
+    border: none;
+    background: transparent;
+    padding: 0;
+    font-size: 14px;
+}
+.card h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    color: var(--color-button);
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+textarea {
+    font-family: inherit;
+    min-height: 100px;
+}
+
+.product-switch button:hover:not(.active) {
+    background: #cbd5e1;
+}
+.readonly-input {
+    background: #f1f5f9;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+.tech-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.col-name { flex: 2; }
+.col-value { flex: 3; }
+.col-priority { flex: 1; width: 60px; }
+.btn-remove-tech {
+    background: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
