@@ -34,11 +34,11 @@
                     <a href="${pageContext.request.contextPath}/product-detail?id=${product.id}">
                         <c:choose>
                             <c:when test="${product.categoryId == 1}">
-                                <img src="${pageContext.request.contextPath}/asset/img/product/${product.main_image}"
+                                <img src="${product.main_image}"
                                      alt="${product.name}">
                             </c:when>
                             <c:otherwise>
-                                <img src="${pageContext.request.contextPath}/asset/img/accesory/${product.main_image}"
+                                <img src="${product.main_image}"
                                      alt="${product.name}">
                             </c:otherwise>
                         </c:choose>
@@ -61,7 +61,7 @@
                     <div class="product-card">
                         <a href="${pageContext.request.contextPath}/product-detail?id=${product.id}">
                             <div class="product-img">
-                                <img src="${pageContext.request.contextPath}/assert/img/product/${product.main_image}" alt="${product.name}">
+                                <img src="${product.main_image}" alt="${product.name}">
                                 <c:if test="${product.discount_percentage > 0}">
                                     <span class="discount-badge">-${product.discount_percentage}%</span>
                                 </c:if>
@@ -179,7 +179,7 @@
                     <div class="product-card">
                         <a href="${pageContext.request.contextPath}/product-detail?id=${accessory.id}">
                             <div class="product-img">
-                                <img src="${pageContext.request.contextPath}/asset/img/accesory/${accessory.main_image}" alt="${accessory.name}">
+                                <img src="${accessory.main_image}" alt="${accessory.name}">
                                 <c:if test="${accessory.discount_percentage > 0}">
                                     <span class="discount-badge">-${accessory.discount_percentage}%</span>
                                 </c:if>
