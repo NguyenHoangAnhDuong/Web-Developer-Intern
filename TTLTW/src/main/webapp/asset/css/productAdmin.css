@@ -179,22 +179,34 @@
 .actionsProduct .btn-toggle:active {
     transform: scale(0.95);
 }
-.pagination {
-    display: flex;
-    gap: 6px;
+.pagination{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:5px;
 }
 
 .pagination a,
-.pagination span {
-    padding: 6px 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    text-decoration: none;
-    color: var(--color-button);
+.pagination span{
+    min-width:32px;
+    height:32px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid #ddd;
+    border-radius:6px;
+    text-decoration:none;
+    font-size:13px;
+    color:#4f8f96;
+    background:#fff;
 }
 
-.pagination span.active {
-    background: var(--color-button);
-    color: #fff;
+.pagination a:hover{
+    background:#f3f6f7;
 }
 
+.pagination span.active{
+    background:#4f8f96;
+    color:#fff;
+    border-color:#4f8f96;
+}

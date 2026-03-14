@@ -1,6 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-
+<fmt:setLocale value="vi_VN"/>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 
 <c:set var="isAjax" value="${param.ajax == 'true'}"/>
@@ -67,7 +67,7 @@
     <tbody>
 </c:if>
 
-<!-- ================= TBODY (AJAX + NORMAL) ================= -->
+<%--AJAX--%>
 <c:choose>
     <c:when test="${not empty orders}">
         <c:forEach var="item" items="${orders}">
