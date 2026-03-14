@@ -28,7 +28,7 @@
         <button type="button" class="${!isPhone ? 'active' : ''}">🔌 Linh kiện</button>
     </div>
 
-    <!--   FORM PHONE  -->
+
     <c:if test="${isPhone}">
         <form method="post" enctype="multipart/form-data" action="${pageContext.request.contextPath}/admin/products/edit">
 
@@ -69,9 +69,9 @@
                 </div>
             </div>
 
-            <!-- ===== TECH SPECS ===== -->
+
             <div class="card">
-                <h3>📊 Thông số kỹ thuật</h3>
+                <h3>  📊 Thông số kỹ thuật</h3>
 
                 <div class="tech-specs-list">
                     <div class="tech-row header">
@@ -157,7 +157,6 @@
         </form>
     </c:if>
 
-    <!--  FORM ACCESSORY   -->
     <c:if test="${not isPhone}">
         <form method="post" enctype="multipart/form-data" action="${pageContext.request.contextPath}/admin/products/edit">
 
@@ -212,42 +211,49 @@
                 <button type="button" class="btn-add-minor">+ Thêm thông số</button>
             </div>
 
-            <c:forEach items="${accessory.variants}" var="v">
-                <div class="card highlight-card">
-                    <h3>⚙️ ${v.variant_name}</h3>
-                    <input type="hidden" name="variantIds[]" value="${v.variant_id}">
+            <div class="card highlight-card">
+                <h3>⚙️ ${accessory.variant_name}</h3>
 
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Tên phiên bản</label>
-                            <input name="variantNames[]" value="${v.variant_name}">
-                        </div>
-                        <div class="form-group">
-                            <label>Giá bán (VNĐ)</label>
-                            <input type="number" name="colorPrices[]" value="${v.base_price}">
-                        </div>
-                        <div class="form-group">
-                            <label>Giảm giá (%)</label>
-                            <input type="number"
-                                   name="discountPercentage"
-                                   min="0"
-                                   max="100"
-                                   value="${accessory.discount_percentage}">
-                        </div>
+                <input type="hidden" name="variantIds[]" value="${accessory.variant_id}">
+                <input type="hidden" name="colorIds[]" value="${accessory.color_id}">
 
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label>Tên phiên bản</label>
+                        <input name="variantNames[]" value="${accessory.variant_name}">
                     </div>
 
-                    <c:forEach items="${v.colors}" var="c">
-                        <input type="hidden" name="colorIds[]" value="${c.vc_id}">
-                        <div class="color-edit-row">
-                            <div class="input-unit">
-                                <span>Tồn kho</span>
-                                <input type="number" name="variantQuantities[]" value="${c.quantity}">
-                            </div>
-                        </div>
-                    </c:forEach>
+                    <div class="form-group">
+                        <label>Giá bán</label>
+                        <input type="number" name="colorPrices[]" value="${accessory.color_price}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Giảm giá (%)</label>
+                        <input type="number"
+                               name="discountPercentage"
+                               min="0"
+                               max="100"
+                               value="${accessory.discount_percentage}">
+                    </div>
+
                 </div>
-            </c:forEach>
+
+                <div class="color-edit-row">
+
+                    <div class="input-unit">
+                        <span>Màu sắc</span>
+                        <input value="${accessory.color_name}" readonly class="readonly-input">
+                    </div>
+
+                    <div class="input-unit">
+                        <span>Tồn kho</span>
+                        <input type="number" name="variantQuantities[]" value="${accessory.quantity}">
+                    </div>
+
+                </div>
+            </div>
 
             <div class="action-buttons">
                 <button type="button" class="btn-cancel" onclick="history.back()">HỦY</button>

@@ -120,16 +120,14 @@
                             <i class="fa-solid fa-pencil"></i>
                         </a>
 
-                        <form action="${pageContext.request.contextPath}/admin/products"
-                              method="post" style="display:inline">
-                            <input type="hidden" name="action" value="toggle"/>
-                            <input type="hidden" name="id" value="${row.vc_id}"/>
+                        <button type="button"
+                                class="btn-toggle ajax-toggle"
+                                data-id="${row.vc_id}"
+                                title="${row.vc_status == 1 ? 'Ẩn' : 'Hiện'}">
 
-                            <button type="submit" class="btn-toggle"
-                                    title="${row.vc_status == 1 ? 'Ẩn' : 'Hiện'}">
-                                <i class="fa-solid ${row.vc_status == 1 ? 'fa-eye' : 'fa-eye-slash'}"></i>
-                            </button>
-                        </form>
+                            <i class="fa-solid ${row.vc_status == 1 ? 'fa-eye' : 'fa-eye-slash'}"></i>
+
+                        </button>
                     </td>
 
                 </tr>
@@ -138,43 +136,55 @@
         </table>
 
 
-        <div class="footer">
+            <div class="footer">
+                <div class="pagination">
 
-            <div class="pagination">
-                <!-- Previous -->
-                <c:if test="${currentPage > 1}">
-                    <a href="${pageContext.request.contextPath}/admin/products?page=${currentPage - 1}&keyword=${keyword}&status=${status}&categoryId=${categoryId}">
-                        &laquo; Trước
-                    </a>
-                </c:if>
+                    <c:set var="startPage" value="${currentPage - 2}" />
+                    <c:set var="endPage" value="${currentPage + 2}" />
 
-                <!-- Page numbers -->
-                <c:forEach begin="1" end="${totalPages}" var="i">
-                    <c:choose>
-                        <c:when test="${i == currentPage}">
-                            <span class="active">${i}</span>
-                        </c:when>
-                        <c:otherwise>
-                            <a href="${pageContext.request.contextPath}/admin/products?page=${i}&keyword=${keyword}&status=${status}&categoryId=${categoryId}">
-                                    ${i}
-                            </a>
-                        </c:otherwise>
-                    </c:choose>
-                </c:forEach>
+                    <c:if test="${startPage < 1}">
+                        <c:set var="startPage" value="1"/>
+                    </c:if>
 
-                <!-- Next -->
-                <c:if test="${currentPage < totalPages}">
-                    <a href="${pageContext.request.contextPath}/admin/products?page=${currentPage + 1}&keyword=${keyword}&status=${status}&categoryId=${categoryId}">
-                        Sau &raquo;
-                    </a>
-                </c:if>
+                    <c:if test="${endPage > totalPages}">
+                        <c:set var="endPage" value="${totalPages}"/>
+                    </c:if>
+
+
+                    <c:if test="${currentPage > 1}">
+                        <a href="${pageContext.request.contextPath}/admin/products?page=${currentPage - 1}&keyword=${keyword}&status=${status}&categoryId=${categoryId}">
+                            &laquo;
+                        </a>
+                    </c:if>
+
+
+                    <c:forEach begin="${startPage}" end="${endPage}" var="i">
+                        <c:choose>
+                            <c:when test="${i == currentPage}">
+                                <span class="active">${i}</span>
+                            </c:when>
+                            <c:otherwise>
+                                <a href="${pageContext.request.contextPath}/admin/products?page=${i}&keyword=${keyword}&status=${status}&categoryId=${categoryId}">
+                                        ${i}
+                                </a>
+                            </c:otherwise>
+                        </c:choose>
+                    </c:forEach>
+
+
+                    <c:if test="${currentPage < totalPages}">
+                        <a href="${pageContext.request.contextPath}/admin/products?page=${currentPage + 1}&keyword=${keyword}&status=${status}&categoryId=${categoryId}">
+                            &raquo;
+                        </a>
+                    </c:if>
+
+                </div>
             </div>
-        </div>
-
         </div>
     </div>
 </div>
-
+<script>const contextPath = "${pageContext.request.contextPath}";</script>
 <script src="${pageContext.request.contextPath}/asset/js/sidebarAdmin.js"></script>
+<script src="${pageContext.request.contextPath}/asset/js/productAdmin.js"></script>
 </body>
 </html>
