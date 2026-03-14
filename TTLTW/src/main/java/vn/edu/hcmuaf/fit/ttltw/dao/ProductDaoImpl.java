@@ -880,7 +880,7 @@ public class ProductDaoImpl implements ProductDao {
                         return map;
                     }).list();
 
-            // Group by product -> variant -> colors
+            // Group by product - variant - colors
             Map<Integer, Map<String, Object>> productMap = new LinkedHashMap<>();
 
             for (Map<String, Object> row : rawResults) {
@@ -1087,7 +1087,7 @@ public class ProductDaoImpl implements ProductDao {
                 return map;
             }).list();
 
-            // Group by product -> variant -> colors
+            // Group by product -  variant -  colors
             Map<Integer, Map<String, Object>> productMap = new LinkedHashMap<>();
 
             for (Map<String, Object> row : rawResults) {
@@ -1269,17 +1269,6 @@ public class ProductDaoImpl implements ProductDao {
                 }).list());
     }
 
-    // private Product mapResult(ResultSet rs) throws SQLException {
-    // Product p = new Product();
-    // p.setId(rs.getInt("id"));
-    // p.setName(rs.getString("name"));
-    // p.setMainImage(rs.getString("img"));
-    // p.setDescription(rs.getString("description"));
-    // p.setCategoryId(rs.getInt("category_id"));
-    // p.setBrandId((Integer) rs.getObject("brand_id"));
-    // p.setStatus(rs.getInt("status"));
-    // return p;
-    // }
     @Override
     // Lấy thông tin Product chính
     public Product findProductDetailById(int productId) {
@@ -1625,21 +1614,6 @@ public class ProductDaoImpl implements ProductDao {
         return new ArrayList<>(productMap.values());
     }
 
-    /**
-     * Lấy products với pagination (tối ưu hóa - load một page)
-     *
-     * @param categoryId ID danh mục
-     * @param priceMin   Giá tối thiểu (null = bỏ qua)
-     * @param priceMax   Giá tối đa (null = bỏ qua)
-     * @param memory     Bộ nhớ (null = bỏ qua)
-     * @param colors     Màu sắc (null = bỏ qua)
-     * @param year       Năm ra mắt (null = bỏ qua)
-     * @param brandName  Thương hiệu (null = bỏ qua)
-     * @param sortBy     Sắp xếp (null = mặc định)
-     * @param page       Trang (1-based)
-     * @param pageSize   Số item per page
-     * @return Danh sách products của trang hiện tại
-     */
     public List<Map<String, Object>> getProductsByCategoryPaginated(
             int categoryId,
             Double priceMin,
@@ -1774,7 +1748,7 @@ public class ProductDaoImpl implements ProductDao {
             sql.append(" ORDER BY p.id DESC, v.name ASC");
         }
 
-        // PAGINATION: LIMIT + OFFSET
+        // PAGINATION LIMIT + OFFSET
         sql.append(" LIMIT ? OFFSET ?");
         params.add(pageSize);
         params.add(offset);
@@ -1805,8 +1779,8 @@ public class ProductDaoImpl implements ProductDao {
                 return map;
             }).list();
 
-            // Group by product -> variant -> colors (giống
-            // getProductsByCategoryWithFilters)
+            // Group by product - variant - colors
+            // getProductsByCategoryWithFilters
             Map<Integer, Map<String, Object>> productMap = new LinkedHashMap<>();
             Map<String, Map<String, Object>> variantMap = new LinkedHashMap<>();
 
@@ -1872,18 +1846,7 @@ public class ProductDaoImpl implements ProductDao {
         });
     }
 
-    /**
-     * Đếm tổng số products thỏa điều kiện filter
-     *
-     * @param categoryId ID danh mục
-     * @param priceMin   Giá tối thiểu (null = bỏ qua)
-     * @param priceMax   Giá tối đa (null = bỏ qua)
-     * @param memory     Bộ nhớ (null = bỏ qua)
-     * @param colors     Màu sắc (null = bỏ qua)
-     * @param year       Năm ra mắt (null = bỏ qua)
-     * @param brandName  Thương hiệu (null = bỏ qua)
-     * @return Tổng số products
-     */
+
     public int countProductsByCategory(
             int categoryId,
             Double priceMin,
@@ -1970,9 +1933,9 @@ public class ProductDaoImpl implements ProductDao {
         });
     }
 
-    /**
-     * Lấy danh sách tất cả categories có category_id khác 1 (dành cho linh kiện)
-     */
+
+//      Lấy danh sách tất cả categories có category_id khác 1 (dành cho linh kiện)
+
     public List<Map<String, Object>> getAccessoryCategories() {
         String sql = """
                     SELECT DISTINCT c.id, c.name

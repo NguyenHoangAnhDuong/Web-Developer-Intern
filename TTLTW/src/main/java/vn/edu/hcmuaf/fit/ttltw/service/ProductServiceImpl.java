@@ -75,7 +75,7 @@ public class ProductServiceImpl implements ProductService {
 
                 String brandName = brand.getName().trim();
 
-                // 1. kiểm tra trùng
+                //  kiểm tra trùng
                 Brand existed = productDao.findBrandByName(handle, brandName);
 
                 if (existed != null) {
