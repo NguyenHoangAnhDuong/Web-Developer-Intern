@@ -130,8 +130,8 @@
                 <div class="product-card">
                     <a href="product-detail?id=${product.id}">
                         <div class="product-img">
-                            <!-- 🚀 TỐI ƯU HÓA: Lazy loading ảnh -->
-                            <img src="${pageContext.request.contextPath}/assert/img/product/${product.image}" 
+                            <!--TỐI ƯU HÓA: Lazy loading ảnh -->
+                            <img src="${product.image}"
                                  alt="${product.name}"
                                  loading="lazy">
                             <c:if test="${product.discount > 0}">
@@ -328,7 +328,7 @@
     </main>
     <jsp:include page="/views/includes/footer.jsp"/>
 
-    <!-- 🚀 TỐI ƯU HÓA: Lazy loading script -->
+    <!-- TỐI ƯU HÓA: Lazy loading script -->
     <script src="${pageContext.request.contextPath}/asset/js/lazyLoading.js"></script>
     <script src="${pageContext.request.contextPath}/asset/js/listProduct.js"></script>
     <script src="${pageContext.request.contextPath}/asset/js/header.js"></script>

@@ -114,7 +114,7 @@
             <div class="product-card">
                 <a href="product-detail?id=${product.id}">
                     <div class="product-img">
-                        <img src="${pageContext.request.contextPath}/assert/img/accesory/${product.image}" alt="${product.name}">
+                        <img src="${product.image}" alt="${product.name}">
                         <c:if test="${product.discount > 0}">
                             <span class="discount-badge">-${product.discount}%</span>
                         </c:if>
