@@ -81,4 +81,5 @@ public interface ProductUserDao {
             int limit);
 
     List<Map<String, Object>> getAccessoryCategories();
+    List<String> getSuggestions(String keyword);
 }

@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initMegaMenu();
     initLoginRedirect();
     setActiveMenuItem();
+    initSearchSuggest();
 });
 
 function initHeaderSearch() {
@@ -172,3 +173,61 @@ function getContextPath() {
 }
 
 window.getContextPath = getContextPath;
+
+function initSearchSuggest() {
+    const input = document.getElementById("header-search");
+    const suggestBox = document.getElementById("search-suggest");
+
+    if (!input || !suggestBox) return;
+
+    input.addEventListener("input", async function () {
+        const value = this.value.trim();
+
+        // rỗng thì ẩn
+        if (value === "") {
+            suggestBox.style.display = "none";
+            return;
+        }
+
+        try {
+            const contextPath = getContextPath();
+
+            const res = await fetch(
+                `${contextPath}/search-suggest?q=${encodeURIComponent(value)}`
+            );
+
+            const data = await res.json();
+
+            suggestBox.innerHTML = "";
+
+            data.forEach(item => {
+                const div = document.createElement("div");
+
+                // highlight chữ
+                div.innerHTML = item.replace(
+                    new RegExp(value, "gi"),
+                    match => `<b>${match}</b>`
+                );
+
+                div.onclick = () => {
+                    input.value = item;
+                    suggestBox.style.display = "none";
+                };
+
+                suggestBox.appendChild(div);
+            });
+
+            suggestBox.style.display = "block";
+
+        } catch (err) {
+            console.error("Lỗi search suggest:", err);
+        }
+    });
+
+
+    document.addEventListener("click", (e) => {
+        if (!document.querySelector(".search-item").contains(e.target)) {
+            suggestBox.style.display = "none";
+        }
+    });
+}
