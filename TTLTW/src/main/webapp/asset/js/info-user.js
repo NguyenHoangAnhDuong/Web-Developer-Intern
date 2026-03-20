@@ -18,7 +18,6 @@ document.addEventListener("DOMContentLoaded", function () {
         btnEdit.addEventListener("click", function () {
             firstNameInput.disabled = false;
             lastNameInput.disabled = false;
-            emailInput.disabled = false;
             btnEdit.classList.add("hidden");
             btnLogout.classList.add("hidden");
             btnSave.classList.remove("hidden");
@@ -57,7 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
             emailInput.disabled = false;
 
             const fd = new FormData(updateForm);
-            fd.append("action", "update-info");
+            fd.append("action", "update");
 
             btnSave.disabled = true;
             const originalText = btnSave.textContent;
