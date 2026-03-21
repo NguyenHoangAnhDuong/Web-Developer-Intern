@@ -77,7 +77,7 @@ public class AdminUserServlet extends HttpServlet {
                         .append("\"id\":").append(u.getId()).append(",")
                         .append("\"username\":\"").append(escapeJson(u.getUsername())).append("\",")
                         .append("\"email\":\"").append(escapeJson(u.getEmail())).append("\",")
-                        .append("\"role\":").append(u.getRole()).append(",")
+                        .append("\"role\":").append(u.getRolesId()).append(",")
                         .append("\"status\":").append(u.getStatus())
                         .append("}");
                 if (i < usersPage.size() - 1)

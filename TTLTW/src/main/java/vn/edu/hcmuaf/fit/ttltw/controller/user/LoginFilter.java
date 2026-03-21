@@ -1,13 +1,17 @@
 package vn.edu.hcmuaf.fit.ttltw.controller.user;
 
-import jakarta.servlet.*;
+import java.io.IOException;
+
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
-
-import java.io.IOException;
 
 @WebFilter(urlPatterns = {"/cart", "/checkout", "/profile", "/user/*", "/admin/*"})
 public class LoginFilter implements Filter {
@@ -50,16 +54,16 @@ public class LoginFilter implements Filter {
             request.getRequestDispatcher("/login").forward(request, response);
             return;
         }
-        int role = user.getRole(); // 0 = admin, 1 = user
+        int role = user.getRolesId(); // 1 = admin, 2 = user
         // Kiểm tra phân quyền
-        if (requestURI.startsWith(contextPath + "/admin") && role != 0) {
+        if (requestURI.startsWith(contextPath + "/admin") && role != 1) {
             // User thường không vào admin được
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập trang này!");
             return;
         }
         if ((requestURI.startsWith(contextPath + "/cart")
                 || requestURI.startsWith(contextPath + "/user")
-                || requestURI.startsWith(contextPath + "/checkout")) && role == 0) {
+                || requestURI.startsWith(contextPath + "/checkout")) && role == 1) {
             // Admin không vào trang user
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập trang này!");
             return;
