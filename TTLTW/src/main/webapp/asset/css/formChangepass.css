@@ -104,3 +104,24 @@
 .hidden {
     display: none;
 }
+.password-wrapper {
+    position: relative;
+}
+
+.field-icon {
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    pointer-events: none;
+}
+.password-wrapper input {
+    transition: border-color 0.25s ease;
+}
+.hint {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #888;
+}
