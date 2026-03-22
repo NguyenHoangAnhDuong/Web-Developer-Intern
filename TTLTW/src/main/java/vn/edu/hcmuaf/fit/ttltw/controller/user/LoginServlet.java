@@ -1,13 +1,17 @@
 
 package vn.edu.hcmuaf.fit.ttltw.controller.user;
 
+import java.io.IOException;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
 import vn.edu.hcmuaf.fit.ttltw.service.UserService;
-
-import java.io.IOException;
 
 
 @WebServlet(name = "LoginServlet", value = "/login")
@@ -60,15 +64,15 @@ public class LoginServlet extends HttpServlet {
         }
         HttpSession session = request.getSession();
         session.setAttribute("user", user);
-        session.setAttribute("role", user.getRole());
+        session.setAttribute("role", user.getRolesId());
 
-        int role = user.getRole();
+        int role = user.getRolesId();
         String contextPath = request.getContextPath();
 
         // Nếu vừa đăng xuất trước đó, buộc quay về trang home (chỉ áp dụng user)
         boolean justLoggedOut = consumeJustLoggedOutCookie(request, response);
 
-        if (role == 0) {
+        if (role == 1) {
             response.sendRedirect(contextPath + "/admin/dashboard");
             return;
         }

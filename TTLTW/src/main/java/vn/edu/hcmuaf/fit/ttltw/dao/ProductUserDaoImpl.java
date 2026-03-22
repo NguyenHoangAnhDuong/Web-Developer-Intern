@@ -7,6 +7,9 @@ import vn.edu.hcmuaf.fit.ttltw.model.ProductVariant;
 import vn.edu.hcmuaf.fit.ttltw.model.TechSpecs;
 import vn.edu.hcmuaf.fit.ttltw.model.VariantColor;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.*;
 
 public class ProductUserDaoImpl implements ProductUserDao {
@@ -594,5 +597,21 @@ public class ProductUserDaoImpl implements ProductUserDao {
     @Override
     public List<Map<String, Object>> getAccessoryCategories() {
         return List.of();
+    }
+
+    @Override
+    public List<String> getSuggestions(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return List.of();
+        }
+
+        String sql = "SELECT name FROM products WHERE name LIKE :keyword LIMIT 5";
+
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("keyword", "%" + keyword.trim() + "%")
+                        .mapTo(String.class)
+                        .list()
+        );
     }
 }

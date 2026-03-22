@@ -3,7 +3,7 @@ package vn.edu.hcmuaf.fit.ttltw.model;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
-public class User implements Serializable{
+public class User implements Serializable {
     private int id;
     private String username;
     private String password;
@@ -11,7 +11,7 @@ public class User implements Serializable{
     private String lastName;
     private String avatar;
     private String email;
-    private int role=1;
+    private int rolesId = 2; // Mặc định là khách hàng
     private int status;
     private String provider;
     private String providerId;
@@ -21,11 +21,11 @@ public class User implements Serializable{
     // Constructor rỗng
     public User() {}
 
-    public User(String fname, String lname, String username, String hashPass, String email) {
+    public User(String firstName, String lastName, String username, String password, String email) {
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.username = username;
-        this.firstName = fname;
-        this.lastName = lname;
-        this.password = hashPass;
+        this.password = password;
         this.email = email;
     }
     // Getter & Setter
@@ -50,8 +50,8 @@ public class User implements Serializable{
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 
-    public int getRole() { return role; }
-    public void setRole(int role) { this.role = role; }
+    public int getRolesId() { return rolesId; }
+    public void setRolesId(int rolesId) { this.rolesId = rolesId; }
 
     public int getStatus() { return status; }
     public void setStatus(int status) { this.status = status; }
@@ -77,7 +77,7 @@ public class User implements Serializable{
                 ", lastName='" + lastName + '\'' +
                 ", avatar='" + avatar + '\'' +
                 ", email='" + email + '\'' +
-                ", role=" + role +
+                ", rolesId=" + rolesId +
                 ", status=" + status +
                 ", provider='" + provider + '\'' +
                 ", providerId='" + providerId + '\'' +

@@ -76,7 +76,7 @@ public class RegisterServlet extends HttpServlet {
             if (registeredUser != null) {
                 HttpSession session = request.getSession();
                 session.setAttribute("user", registeredUser);
-                session.setAttribute("role", registeredUser.getRole());
+                session.setAttribute("role", registeredUser.getRolesId());
                 session.setAttribute("toastMessage", "Đăng ký thành công.");
                 session.setAttribute("toastType", "success");
                 response.sendRedirect(request.getContextPath() + "/home");
