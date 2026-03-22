@@ -14,10 +14,11 @@
   <title>Form Đổi mật khẩu</title>
 </head>
 <body>
+<%@ include file="/views/includes/toast.jsp" %>
 <div class="container" id="reset-step" style="margin: 50px auto">
   <h2>Đặt mật khẩu mới</h2>
   <p>Tạo mật khẩu mới. Đảm bảo mật khẩu khác với mật khẩu trước đó để bảo mật.</p>
-  <form id="reset-form" action="change-password" method="post">
+  <form id="reset-form" action="${pageContext.request.contextPath}/user/change-password" method="post">
     <div class="input-group">
       <label>Mật khẩu cũ</label>
       <div class="password-wrapper">
@@ -37,6 +38,9 @@
                 <i class="fa-regular fa-eye-slash"></i>
             </span>
       </div>
+        <small class="hint">
+            Ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt (@$!%*?&...).
+        </small>
     </div>
 
     <div class="input-group">

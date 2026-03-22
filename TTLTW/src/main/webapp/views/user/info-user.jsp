@@ -58,8 +58,8 @@
                         <input type="text" id="firstName" name="firstName" class="input"
                                value="<%= user != null && user.getFirstName() != null ? user.getFirstName() : "" %>"
                                placeholder="Nhập họ của bạn"
-                               disabled
-                               required>
+                               required
+                               disabled>
                     </div>
 
                     <div class="row">
@@ -77,7 +77,7 @@
                         <label for="emailInput" class="label">
                             <i class="fa-solid fa-envelope"></i> Email
                         </label>
-                        <input type="email" id="emailInput" name="email" class="input"
+                        <input type="email" id="emailInput" name="email" class="input readonly"
                                value="<%= user != null && user.getEmail() != null ? user.getEmail() : "" %>"
                                placeholder="example@email.com"
                                disabled>
@@ -109,8 +109,7 @@
                             <img id="user-avatar"
                                  src="<%= avatarPath %>"
                                  alt="User Avatar"
-                                 class="avatar-img"
-                                 onerror="this.src='${pageContext.request.contextPath}/assert/img/admin.jpg'">
+                                 class="avatar-img"/>
                         </div>
                     </div>
 
