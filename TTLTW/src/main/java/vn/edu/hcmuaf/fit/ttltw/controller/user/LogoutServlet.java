@@ -18,7 +18,7 @@ public class LogoutServlet extends HttpServlet {
         if (session != null) {
             Object userObj = session.getAttribute("user");
             if (userObj instanceof User) {
-                role = ((User) userObj).getRole();
+                role = ((User) userObj).getRolesId();
             }
         }
         // Lấy URL hiện tại từ referer hoặc parameter

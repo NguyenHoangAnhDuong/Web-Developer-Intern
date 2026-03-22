@@ -64,8 +64,8 @@ public class UserDao {
 
     public User login(String input, String password) {
         String sql = """
-                SELECT id, username, first_name, last_name, avatar, email,
-                       role, status, provider, provider_id, created_at, updated_at
+                SELECT id, username, first_name AS firstName, last_name AS lastName, avatar, email,
+                       roles_id AS rolesId, status, provider, provider_id AS providerId, created_at AS createdAt, updated_at AS updatedAt
                 FROM users
                 WHERE (email = ? OR username = ?)
                   AND password = ?
@@ -85,7 +85,7 @@ public class UserDao {
     // lây thông tin qua tìm id người dùng
     public Optional<User> findById(int id) {
         return DBConnect.getJdbi().withHandle(handle -> handle
-                .createQuery("SELECT id, username, first_name, last_name, email, avatar FROM users WHERE id = :id")
+                .createQuery("SELECT id, username, first_name AS firstName, last_name AS lastName, email, avatar FROM users WHERE id = :id")
                 .bind("id", id)
                 .mapToBean(User.class)
                 .findOne());
@@ -94,7 +94,7 @@ public class UserDao {
     // lấy thông tin qua tìm tên đăng nhập
     public Optional<User> findByUsername(String username) {
         return DBConnect.getJdbi().withHandle(handle -> handle.createQuery(
-                "SELECT id, username, first_name, last_name, email, avatar FROM users WHERE username = :username")
+                "SELECT id, username, first_name AS firstName, last_name AS lastName, email, avatar FROM users WHERE username = :username")
                 .bind("username", username)
                 .mapToBean(User.class)
                 .findOne());
@@ -111,7 +111,7 @@ public class UserDao {
         // Filter theo role
         if (roleFilter != null && !roleFilter.trim().isEmpty()) {
             int role = "Admin".equalsIgnoreCase(roleFilter) ? 0 : 1;
-            sql.append(" AND role = :role");
+            sql.append(" AND roles_id = :rolesId");
         }
 
         // Filter theo status
@@ -127,7 +127,7 @@ public class UserDao {
             }
             if (roleFilter != null && !roleFilter.trim().isEmpty()) {
                 int role = "Admin".equalsIgnoreCase(roleFilter) ? 0 : 1;
-                query.bind("role", role);
+                query.bind("rolesId", role);
             }
             if (statusFilter != null && !statusFilter.trim().isEmpty()) {
                 int status = "Hoạt động".equalsIgnoreCase(statusFilter) ? 1 : 0;
@@ -140,7 +140,7 @@ public class UserDao {
     public List<User> getUsersPaginated(String searchTerm, String roleFilter, String statusFilter, int offset,
             int limit) {
         StringBuilder sql = new StringBuilder("""
-                    SELECT id, username, first_name, last_name, avatar, email, role, status
+                    SELECT id, username, first_name AS firstName, last_name AS lastName, avatar, email, roles_id AS rolesId, status
                     FROM users
                     WHERE 1=1
                 """);
@@ -151,7 +151,7 @@ public class UserDao {
         }
         // Filter theo role
         if (roleFilter != null && !roleFilter.trim().isEmpty()) {
-            sql.append(" AND role = :role");
+            sql.append(" AND roles_id = :rolesId");
         }
         // Filter theo status
         if (statusFilter != null && !statusFilter.trim().isEmpty()) {
@@ -168,7 +168,7 @@ public class UserDao {
             }
             if (roleFilter != null && !roleFilter.trim().isEmpty()) {
                 int role = "Admin".equalsIgnoreCase(roleFilter) ? 0 : 1;
-                query.bind("role", role);
+                query.bind("rolesId", role);
             }
             if (statusFilter != null && !statusFilter.trim().isEmpty()) {
                 int status = "Hoạt động".equalsIgnoreCase(statusFilter) ? 1 : 0;
@@ -181,7 +181,7 @@ public class UserDao {
     // Lấy danh sachs người dùng load từ database
     public List<User> getAllUsers() {
         String sql = """
-                    SELECT id, username, first_name, last_name, avatar, email, role, status
+                    SELECT id, username, first_name AS firstName, last_name AS lastName, avatar, email, roles_id AS rolesId, status
                     FROM users
                 """;
         return DBConnect.getJdbi().withHandle(handle -> handle.createQuery(sql)
@@ -193,11 +193,11 @@ public class UserDao {
     public boolean updateUser(int id, int role, int status) {
         String sql = """
                     UPDATE users
-                    SET role = :role, status = :status
+                    SET roles_id = :rolesId, status = :status
                     WHERE id = :id
                 """;
         int rows = DBConnect.getJdbi().withHandle(handle -> handle.createUpdate(sql)
-                .bind("role", role)
+                .bind("rolesId", role)
                 .bind("status", status)
                 .bind("id", id)
                 .execute());
@@ -252,18 +252,18 @@ public class UserDao {
         if (isEmail) {
             // Nếu là email, chỉ tìm theo email
             sql = """
-                        SELECT id, username, first_name, last_name, avatar, email,
-                               role, status, provider, provider_id, password,
-                               created_at, updated_at
+                        SELECT id, username, first_name AS firstName, last_name AS lastName, avatar, email,
+                               roles_id AS rolesId, status, provider, provider_id AS providerId, password,
+                               created_at AS createdAt, updated_at AS updatedAt
                         FROM users
                         WHERE email = :input
                         LIMIT 1
                     """;
         } else {
             sql = """
-                        SELECT id, username, first_name, last_name, avatar, email,
-                               role, status, provider, provider_id, password,
-                               created_at, updated_at
+                        SELECT id, username, first_name AS firstName, last_name AS lastName, avatar, email,
+                               roles_id AS rolesId, status, provider, provider_id AS providerId, password,
+                               created_at AS createdAt, updated_at AS updatedAt
                         FROM users
                         WHERE username = :input
                         LIMIT 1
@@ -280,8 +280,8 @@ public class UserDao {
     // Đăng nhap bằng bên thứ 3
     public User loginByProvider(String provider, String providerId) {
         String sql = """
-                    SELECT id, username, first_name, last_name, avatar, email,
-                           role, status, provider, provider_id, created_at, updated_at
+                    SELECT id, username, first_name AS firstName, last_name AS lastName, avatar, email,
+                           roles_id AS rolesId, status, provider, provider_id AS providerId, created_at AS createdAt, updated_at AS updatedAt
                     FROM users
                     WHERE provider = :p AND provider_id = :pid AND status = 1
                     LIMIT 1
@@ -297,8 +297,8 @@ public class UserDao {
     // Thêm người dùng đăng nhập bằng bên thứ 3
     public void insertSocialUser(User u) {
         String sql = """
-                    INSERT INTO users (username, email, first_name, avatar, role, status, provider, provider_id)
-                    VALUES (:un, :em, :fn, :av, :role, :status, :pr, :pid)
+                    INSERT INTO users (username, email, first_name, avatar, roles_id, status, provider, provider_id)
+                    VALUES (:un, :em, :fn, :av, :rolesId, :status, :pr, :pid)
                 """;
 
         DBConnect.getJdbi().withHandle(h -> h.createUpdate(sql)
@@ -306,7 +306,7 @@ public class UserDao {
                 .bind("em", u.getEmail())
                 .bind("fn", u.getFirstName())
                 .bind("av", u.getAvatar())
-                .bind("role", u.getRole())
+                .bind("rolesId", u.getRolesId())
                 .bind("status", u.getStatus())
                 .bind("pr", u.getProvider())
                 .bind("pid", u.getProviderId())

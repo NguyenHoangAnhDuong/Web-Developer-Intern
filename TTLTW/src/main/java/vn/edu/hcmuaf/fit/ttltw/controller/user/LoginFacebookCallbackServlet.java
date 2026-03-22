@@ -1,16 +1,5 @@
 package vn.edu.hcmuaf.fit.ttltw.controller.user;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import vn.edu.hcmuaf.fit.ttltw.model.User;
-import vn.edu.hcmuaf.fit.ttltw.service.UserService;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,6 +8,18 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import vn.edu.hcmuaf.fit.ttltw.model.User;
+import vn.edu.hcmuaf.fit.ttltw.service.UserService;
 
 @WebServlet("/login-facebook-callback")
 public class LoginFacebookCallbackServlet extends HttpServlet {
@@ -86,7 +87,7 @@ public class LoginFacebookCallbackServlet extends HttpServlet {
             u.setEmail(fakeEmail);
             u.setFirstName(name);
             u.setAvatar(avatar);
-            u.setRole(1);        // Mặc định USER
+            u.setRolesId(2);     // Mặc định là khách hàng
             u.setStatus(1);      // Hoạt động
             u.setProvider("facebook");
             u.setProviderId(fbId);
@@ -100,17 +101,17 @@ public class LoginFacebookCallbackServlet extends HttpServlet {
 
             HttpSession session = request.getSession();
 
-            // Chỉ cho phép USER (role == 1)
-            if (user.getRole() != 1) {
+            // Chỉ cho phép khách hàng (role == 2)
+            if (user.getRolesId() != 2) {
                 session.invalidate();
                 response.sendRedirect(request.getContextPath()
                         + "/login?error=Only user accounts can login with Facebook");
                 return;
             }
             session.setAttribute("user", user);
-            session.setAttribute("role", user.getRole());
+            session.setAttribute("role", user.getRolesId());
 
-            int role = user.getRole();
+            int role = user.getRolesId();
             String contextPath = request.getContextPath();
             String redirectUrl = null;
 
@@ -168,7 +169,7 @@ public class LoginFacebookCallbackServlet extends HttpServlet {
             }
             // Mặc định
             if (redirectUrl == null) {
-                redirectUrl = "/home"; // vì role luôn là 1 rồi
+                redirectUrl = "/home"; // vì role luôn là 2 rồi
             }
             // Đảm bảo redirectUrl không chứa contextPath
             if (redirectUrl.startsWith(request.getContextPath())) {
