@@ -141,8 +141,7 @@ public interface ProductDao {
         // VariantColor mặc định (load trang)
         VariantColor getDefaultVariantColor(int productId);
 
-        // cart
-        Map<String, Object> getCartItemDetail(int variantColorId);
+
 
         List<Map<String, Object>> findRelatedBySameBrand(
                         int brandId,
