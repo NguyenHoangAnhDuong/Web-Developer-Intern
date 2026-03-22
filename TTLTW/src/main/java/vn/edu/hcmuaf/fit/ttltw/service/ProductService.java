@@ -67,4 +67,6 @@ public interface ProductService {
                         int brandId,
                         int excludeProductId,
                         int limit);
+
+    List<String> getSuggestions(String keyword);
 }

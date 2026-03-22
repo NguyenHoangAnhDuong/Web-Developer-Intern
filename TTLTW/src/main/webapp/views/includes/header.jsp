@@ -61,10 +61,14 @@
 
             <div class="box" id="icon-box">
                 <ul>
-                    <li class="search-item">
-                        <a href="#" id="btn-search"><i class="fa-solid fa-magnifying-glass"></i></a>
+                    <div class="search-item">
+                        <a href="#" id="btn-search">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </a>
                         <input id="header-search" class="search-input" type="text" placeholder="Tìm kiếm sản phẩm..." />
-                    </li>
+
+                        <div class="search-suggest" id="search-suggest"></div>
+                    </div>
 
                     <li class="cart-item">
                         <a href="${pageContext.request.contextPath}/cart" id="btn-cart">

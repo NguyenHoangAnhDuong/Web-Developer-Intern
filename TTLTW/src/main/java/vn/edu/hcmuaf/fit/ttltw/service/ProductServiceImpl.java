@@ -2,6 +2,8 @@ package vn.edu.hcmuaf.fit.ttltw.service;
 
 import vn.edu.hcmuaf.fit.ttltw.dao.ProductDao;
 import vn.edu.hcmuaf.fit.ttltw.dao.ProductDaoImpl;
+import vn.edu.hcmuaf.fit.ttltw.dao.ProductUserDao;
+import vn.edu.hcmuaf.fit.ttltw.dao.ProductUserDaoImpl;
 import vn.edu.hcmuaf.fit.ttltw.model.*;
 import vn.edu.hcmuaf.fit.ttltw.config.DBConnect.*;
 
@@ -14,9 +16,9 @@ import java.util.Map;
 import static vn.edu.hcmuaf.fit.ttltw.config.DBConnect.getJdbi;
 
 public class ProductServiceImpl implements ProductService {
-
     private final ProductDao productDao = new ProductDaoImpl();
 
+    private final ProductUserDao productUseDao = new ProductUserDaoImpl();
     @Override
     public List<Map<String, Object>> getForAdmin(
             String keyword,
@@ -337,6 +339,15 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return products;
+    }
+
+    @Override
+    public List<String> getSuggestions(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return List.of();
+        }
+        return productUseDao.getSuggestions(keyword);
+
     }
 
     @Override
