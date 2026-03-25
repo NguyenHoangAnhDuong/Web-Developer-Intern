@@ -56,5 +56,6 @@
 </div>
 <script src="${pageContext.request.contextPath}/asset/js/header.js"></script>
 <script src="${pageContext.request.contextPath}/asset/js/paymentForm.js?v=3"></script>
+<script src="${pageContext.request.contextPath}/asset/js/info-user.js"></script>
 </body>
 </html>

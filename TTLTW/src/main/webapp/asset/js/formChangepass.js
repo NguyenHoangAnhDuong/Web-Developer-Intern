@@ -39,32 +39,6 @@ document.getElementById('reset-form').addEventListener('submit', function (e) {
         return;
     }
 });
-function setFieldState(input, isValid) {
-    const wrapper = input.closest('.input-group');
-    let icon = wrapper.querySelector('.field-icon');
-
-    // Tạo icon nếu chưa có
-    if (!icon) {
-        icon = document.createElement('span');
-        icon.className = 'field-icon';
-        input.parentElement.appendChild(icon);
-    }
-
-    if (isValid) {
-        input.style.borderColor = '#2ecc71';
-        icon.innerHTML = '<i class="fa-solid fa-circle-check" style="color:#2ecc71"></i>';
-    } else {
-        input.style.borderColor = '#e74c3c';
-        icon.innerHTML = '<i class="fa-solid fa-circle-xmark" style="color:#e74c3c"></i>';
-    }
-}
-
-function clearFieldState(input) {
-    input.style.borderColor = '';
-    const wrapper = input.closest('.input-group');
-    const icon = wrapper.querySelector('.field-icon');
-    if (icon) icon.innerHTML = '';
-}
 // Ẩn / hiện mật khẩu (icon mắt)
 document.querySelectorAll('.toggle').forEach(toggle => {
     const eye = toggle.querySelector('.fa-eye');
@@ -86,6 +60,7 @@ document.querySelectorAll('.toggle').forEach(toggle => {
             if (eyeSlash) eyeSlash.style.display = 'none';
         }
     });
+});
     document.getElementById('confirm-pass').addEventListener('input', function () {
         const newPass     = document.getElementById('new-pass').value.trim();
         const confirmPass = this.value.trim();
@@ -96,4 +71,3 @@ document.querySelectorAll('.toggle').forEach(toggle => {
             this.style.borderColor = '';
         }
     });
-});

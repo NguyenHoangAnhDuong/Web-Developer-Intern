@@ -148,5 +148,6 @@
 <script src="${pageContext.request.contextPath}/asset/js/notification.js"></script>
 <script src="${pageContext.request.contextPath}/asset/js/header.js"></script>
 <script src="${pageContext.request.contextPath}/asset/js/addresses.js"></script>
+<script src="${pageContext.request.contextPath}/asset/js/info-user.js"></script>
 </body>
 </html>
