@@ -55,7 +55,7 @@ public class CartDAO {
                     VALUES (:cartId, :vId, :qty, :price, :qty * :price)
                     ON DUPLICATE KEY UPDATE 
                         quantity = quantity + :qty,
-                        subtotal = (quantity + :qty) * unit_price
+                        subtotal = (quantity + :qty) * :price
                 """)
                 .bind("cartId", cartId).bind("vId", variantId)
                 .bind("qty", qty).bind("price", price)
@@ -66,7 +66,7 @@ public class CartDAO {
     public List<Map<String, Object>> getCartDetails(int cartId) {
         return jdbi.withHandle(handle -> handle
                 .createQuery("""
-                    SELECT ci.*, p.name as product_name, p.img as product_img, 
+                    SELECT ci.*,ci.variant_id as vc_id, p.name as product_name, p.img as product_img, 
                            pv.name as variant_name, c.name as color_name
                     FROM cart_items ci
                     JOIN variant_colors vc ON ci.variant_id = vc.id

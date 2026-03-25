@@ -20,174 +20,105 @@ import java.util.Map;
 
 @WebServlet("/cart")
 public class CartServlet extends HttpServlet {
-    private final ProductService productService = new ProductServiceImpl();
-    private final OrderService orderService = new OrderService();
+    private final CartService cartService = new CartServiceImpl();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         HttpSession session = request.getSession();
-        Map<Integer, Integer> cart = (Map<Integer, Integer>) session.getAttribute("cart");
-        if (cart == null) {
-            cart = new LinkedHashMap<>();
-            session.setAttribute("cart", cart);
+        User user = (User) session.getAttribute("user");
+
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
         }
 
         String action = request.getParameter("action");
         if (action == null) action = "view";
 
         switch (action) {
-            case "add":
-                addToCart(request, response, cart, session);
+            case "view":
+                showCart(request, response, user.getId());
                 break;
-            case "remove":
-                removeFromCart(request, response, cart, session);
+            case "add":
+                addToCart(request, response, user.getId());
                 break;
             case "update":
-                updateQuantity(request, response, cart, session);
+                updateQuantity(request, response, user.getId());
                 break;
-            case "view":
-                showCartPage(request, response, cart);
+            case "remove":
+                removeItem(request, response, user.getId());
                 break;
-            case "checkout":
-                prepareCheckoutPage(request, response, cart, session);
+            case "clear":
+                clearCart(request, response, user.getId());
                 break;
             default:
                 response.sendRedirect("home");
                 break;
         }
     }
+    // Hiển thị trang giỏ hàng
+    private void showCart(HttpServletRequest request, HttpServletResponse response, int userId)
+            throws ServletException, IOException {
+        List<Map<String, Object>> items = cartService.getCartForDisplay(userId);
+        double total = cartService.calculateCartTotal(userId);
 
-    private void addToCart(HttpServletRequest request, HttpServletResponse response, Map<Integer, Integer> cart, HttpSession session) throws IOException {
-        User user = (User) session.getAttribute("user");
-        // NẾU CHƯA ĐĂNG NHẬP
-        if (user == null) {
-            response.reset(); // Xóa bỏ mọi thứ định gửi đi
-            response.setStatus(401); // Gửi mã 401 để JS biết là chưa login
-            response.setContentType("text/plain");
-            response.getWriter().print("LOGIN_REQUIRED");
-            return;
-        }
-        // NẾU ĐÃ ĐĂNG NHẬP THÌ MỚI CHẠY TIẾP
-        try {
-            String vcIdParam = request.getParameter("vcId");
-            int vcId = Integer.parseInt(vcIdParam);
-            cart.put(vcId, cart.getOrDefault(vcId, 0) + 1);
-            syncCartSession(session, cart);
-            response.setContentType("text/plain");
-            response.getWriter().print(session.getAttribute("cartItemCount"));
-        } catch (Exception e) {
-            response.setStatus(400);
-        }
-    }
-    private void removeFromCart(HttpServletRequest request, HttpServletResponse response, Map<Integer, Integer> cart, HttpSession session) throws IOException {
-        int vcId = Integer.parseInt(request.getParameter("vcId"));
-        cart.remove(vcId);
-        syncCartSession(session, cart);
-        response.sendRedirect("cart?action=view");
-    }
-    private void updateQuantity(HttpServletRequest request, HttpServletResponse response, Map<Integer, Integer> cart, HttpSession session) throws IOException {
-        int vcId = Integer.parseInt(request.getParameter("vcId"));
-        int delta = Integer.parseInt(request.getParameter("delta"));
-        int newQty = cart.getOrDefault(vcId, 0) + delta;
-
-        if (newQty > 0) cart.put(vcId, newQty);
-        else cart.remove(vcId);
-
-        syncCartSession(session, cart);
-        response.sendRedirect("cart?action=view");
-    }
-
-    private void showCartPage(HttpServletRequest request, HttpServletResponse response, Map<Integer, Integer> cart) throws ServletException, IOException {
-        List<Map<String, Object>> displayList = getCartDetails(cart);
-        double total = displayList.stream().mapToDouble(i -> (double) i.get("subTotal")).sum();
-
-        request.setAttribute("cartItems", displayList);
+        request.setAttribute("cartItems", items);
         request.setAttribute("totalCartPrice", total);
         request.getRequestDispatcher("/views/user/cart.jsp").forward(request, response);
     }
 
-    private void prepareCheckoutPage(HttpServletRequest request, HttpServletResponse response, Map<Integer, Integer> cart, HttpSession session) throws ServletException, IOException {
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
-            response.sendRedirect("/login");
-            return;
-        }
-        // Kiểm tra giỏ hàng tổng
-        if (cart == null || cart.isEmpty()) {
-            response.sendRedirect("cart?action=view&error=empty_cart");
-            return;
-        }
-        //  Lấy danh sách ID được chọn từ URL
-        String selectedIdsParam = request.getParameter("selectedIds");
-        if (selectedIdsParam == null || selectedIdsParam.isEmpty()) {
-            response.sendRedirect("cart?action=view&error=no_items");
-            return;
-        }
+    // Xử lý thêm vào giỏ
+    private void addToCart(HttpServletRequest request, HttpServletResponse response, int userId)
+            throws IOException {
+        int vId = Integer.parseInt(request.getParameter("vcId"));
+        int quantity = 1; // Mặc định mỗi lần click là 1
 
-        Map<Integer, Integer> checkoutCart = new LinkedHashMap<>();
-        String[] ids = selectedIdsParam.split(",");
-        for (String idStr : ids) {
-            try {
-                int id = Integer.parseInt(idStr.trim());
-                if (cart.containsKey(id)) {
-                    checkoutCart.put(id, cart.get(id));
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Lỗi định dạng ID: " + idStr);
-            }
-        }
-        if (checkoutCart.isEmpty()) {
-            response.sendRedirect("cart?action=view&error=invalid_selection");
-            return;
-        }
-try{
-    List<Map<String, Object>> displayList = getCartDetails(checkoutCart);
-        double subtotal = displayList.stream().mapToDouble(i -> (double) i.get("subTotal")).sum();
+        boolean success = cartService.addToCart(userId, vId, quantity);
 
-        Address defaultAddress = orderService.getDefaultAddress(user.getId());
-
-        List<Voucher> availableVouchers = orderService.getActiveVouchers();
-        request.setAttribute("availableVouchers", availableVouchers);
-        request.setAttribute("cartItems", displayList);
-        request.setAttribute("subtotal", subtotal);
-        request.setAttribute("defaultAddress", defaultAddress);
-        request.setAttribute("availableVouchers", availableVouchers);
-        request.setAttribute("shippingFee", 30000.0);
-        request.setAttribute("discountAmount", 0.0);
-
-        request.getRequestDispatcher("/views/user/checkout.jsp").forward(request, response);
-    } catch (Exception e) {
-        System.out.println("LỖI TẠI PREPARE CHECKOUT: " + e.getMessage());
-        e.printStackTrace();
-        response.sendRedirect("cart?action=view&error=system_error");
-    }}
-    private List<Map<String, Object>> getCartDetails(Map<Integer, Integer> cart) {
-        List<Map<String, Object>> list = new ArrayList<>();
-        for (Map.Entry<Integer, Integer> entry : cart.entrySet()) {
-            Map<String, Object> item = productService.getProductForCart(entry.getKey());
-            if (item != null) {
-                int qty = entry.getValue();
-                // Lấy giá bán thực tế (đã tính giảm giá)
-                double price = ((BigDecimal) item.get("price_final")).doubleValue();
-                item.put("quantity", qty);
-                item.put("subTotal", price * qty);
-                item.put("vc_id", entry.getKey());
-                list.add(item);
-            }
+        if (success) {
+            response.getWriter().print("SUCCESS");
+        } else {
+            response.setStatus(400);
+            response.getWriter().print("STOCK_EXCEEDED");
         }
-        return list;
     }
 
-    private void syncCartSession(HttpSession session, Map<Integer, Integer> cart) {
-        int totalQuantity = cart.values().stream().mapToInt(Integer::intValue).sum();
-        session.setAttribute("cart", cart);
-        session.setAttribute("cartItemCount", totalQuantity);
+    private void updateQuantity(HttpServletRequest request, HttpServletResponse response, int userId)
+            throws IOException {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        int vId = Integer.parseInt(request.getParameter("vcId"));
+        int delta = Integer.parseInt(request.getParameter("delta"));
+        boolean success = cartService.updateCartItem(userId, vId, delta);
+
+        if (success) {
+            double newTotal = cartService.calculateCartTotal(userId);
+            String json = "{\"status\": \"success\", \"newTotal\": " + newTotal + "}";
+            response.getWriter().print(json);
+        } else {
+            response.setStatus(400);
+            response.getWriter().print("{\"status\": \"error\", \"message\": \"Hết hàng!\"}");
+        }
+    }
+
+    // Xóa một món hàng
+    private void removeItem(HttpServletRequest request, HttpServletResponse response, int userId)
+            throws IOException {
+        int vId = Integer.parseInt(request.getParameter("vcId"));
+        cartService.removeCartItem(userId, vId);
+        response.sendRedirect("cart?action=view");
+    }
+
+    private void clearCart(HttpServletRequest request, HttpServletResponse response, int userId)
+            throws IOException {
+        cartService.clearCart(userId);
+        response.sendRedirect("cart?action=view");
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         doGet(request, response);
     }
 }
