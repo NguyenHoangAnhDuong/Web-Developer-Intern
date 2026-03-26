@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class Brand implements Serializable {
     private Integer id;
     private String name;        // Samsung, iPhone, Oppo
-    private String logo;
+    private String img;
 
     public Brand() {
     }
@@ -28,11 +28,11 @@ public class Brand implements Serializable {
         this.name = name;
     }
 
-    public String getLogo() {
-        return logo;
+    public String getImg() {
+        return img;
     }
 
-    public void setLogo(String logo) {
-        this.logo = logo;
+    public void setImg(String img) {
+        this.img = img;
     }
 }

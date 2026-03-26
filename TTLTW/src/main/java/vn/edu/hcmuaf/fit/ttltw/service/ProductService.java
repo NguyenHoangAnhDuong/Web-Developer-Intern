@@ -1,5 +1,6 @@
 package vn.edu.hcmuaf.fit.ttltw.service;
 
+import vn.edu.hcmuaf.fit.ttltw.model.Brand;
 import vn.edu.hcmuaf.fit.ttltw.model.Image;
 import vn.edu.hcmuaf.fit.ttltw.model.Product;
 
@@ -69,4 +70,5 @@ public interface ProductService {
                         int limit);
 
     List<String> getSuggestions(String keyword);
+    List<Brand> getAll();
 }

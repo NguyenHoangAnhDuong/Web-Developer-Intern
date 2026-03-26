@@ -51,12 +51,12 @@
                         <c:choose>
                             <c:when test="${not empty images}">
                                 <img class="img-feature"
-                                     src="${pageContext.request.contextPath}/assert/img/${imgFolder}/${images[0].imgPath}"
+                                     src="${images[0].imgPath}"
                                      alt="${product.name}">
                             </c:when>
                             <c:otherwise>
                                 <img class="img-feature"
-                                     src="${pageContext.request.contextPath}/assert/img/${imgFolder}/${product.mainImage}"
+                                     src="${product.mainImage}"
                                      alt="${product.name}">
                             </c:otherwise>
                         </c:choose>
@@ -71,14 +71,14 @@
                                 <c:set var="imgFolder" value="${product.category.id == 1 ? 'product' : 'accesory'}"/>
                                 <c:forEach items="${images}" var="img">
                                     <div><img
-                                            src="${pageContext.request.contextPath}/assert/img/${imgFolder}/${img.imgPath}"
+                                            src="${img.imgPath}"
                                             alt="${product.name}"></div>
                                 </c:forEach>
                             </c:when>
                             <c:otherwise>
                                 <c:set var="imgFolder" value="${product.category.id == 1 ? 'product' : 'accessory'}"/>
                                 <div><img
-                                        src="${pageContext.request.contextPath}/assert/img/${imgFolder}/${product.mainImage}"
+                                        src="${product.mainImage}"
                                         alt="${product.name}"></div>
                             </c:otherwise>
                         </c:choose>
@@ -490,8 +490,9 @@
     </c:forEach>
 </script>
 <script src="${pageContext.request.contextPath}/asset/js/header.js"></script>
-<script src="${pageContext.request.contextPath}/asset/js/asset/productDetail.js"></script>
-<script src="${pageContext.request.contextPath}/asset/js/asset/cartCount.js"></script>
+<script src="${pageContext.request.contextPath}/asset/js/productDetail.js"></script>
+<script src="${pageContext.request.contextPath}/asset/js/cartCount.js"></script>
+<script src="${pageContext.request.contextPath}/asset/js/listProduct.js"></script>
 
 </body>
 </html>
