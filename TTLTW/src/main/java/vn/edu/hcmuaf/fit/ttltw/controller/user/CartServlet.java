@@ -52,6 +52,9 @@ public class CartServlet extends HttpServlet {
             case "clear":
                 clearCart(request, response, user.getId());
                 break;
+            case "changeVariant":
+                changeVariant(request, response, user.getId());
+                break;
             default:
                 response.sendRedirect("home");
                 break;
@@ -83,7 +86,7 @@ public class CartServlet extends HttpServlet {
             response.getWriter().print("STOCK_EXCEEDED");
         }
     }
-
+// Cập nhật số lượng
     private void updateQuantity(HttpServletRequest request, HttpServletResponse response, int userId)
             throws IOException {
         response.setContentType("application/json");
@@ -109,11 +112,26 @@ public class CartServlet extends HttpServlet {
         cartService.removeCartItem(userId, vId);
         response.sendRedirect("cart?action=view");
     }
-
+// Xóa tất cả món hàng
     private void clearCart(HttpServletRequest request, HttpServletResponse response, int userId)
             throws IOException {
         cartService.clearCart(userId);
         response.sendRedirect("cart?action=view");
+    }
+    // Thay đổi biến thể màu/variant
+    private void changeVariant(HttpServletRequest request, HttpServletResponse response, int userId)
+            throws IOException {
+
+        int oldId = Integer.parseInt(request.getParameter("oldVcId"));
+        int newId = Integer.parseInt(request.getParameter("newVcId"));
+        boolean success = cartService.changeVariant(userId, oldId, newId);
+        response.setContentType("application/json");
+        if (success) {
+            response.getWriter().print("{\"status\":\"success\"}");
+        } else {
+            response.setStatus(400);
+            response.getWriter().print("{\"status\":\"error\",\"message\":\"Hết hàng\"}");
+        }
     }
 
     @Override

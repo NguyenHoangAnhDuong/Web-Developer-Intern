@@ -10,5 +10,7 @@ public interface CartService {
      void clearCart(int userId);
      double calculateCartTotal(int userId);
      List<Map<String, Object>> getCartForDisplay(int userId);
-
+     boolean changeVariant(int userId, int oldVcId, int newVcId);
+    List<Map<String, Object>> getColorsByVariant(int variantId);
+    Map<String, Object> getVariantInfo(int vcId);
 }

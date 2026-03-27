@@ -43,7 +43,29 @@
                                         <div class="product-detail">
                                             <span class="product-name">${item.product_name}</span>
                                                 <%-- Hiển thị phiên bản và màu sắc --%>
-                                            <small class="product-variant">${item.variant_name} | ${item.color_name}</small>
+                                            <div class="variant-box">
+<%--                                                dung lượng--%>
+                                                <select class="variant-select"
+                                                        onchange="onVariantLevel1Change(this, ${item.vc_id})">
+                                                    <c:forEach var="v" items="${item.variants}">
+                                                        <option value="${v.variant_id}"
+                                                            ${v.variant_id == item.variant_id ? 'selected' : ''}>
+                                                                ${v.variant_name}
+                                                        </option>
+                                                    </c:forEach>
+                                                </select>
+
+<%--                                                màu--%>
+                                                <select class="color-select"
+                                                        onchange="onColorChange(this, ${item.vc_id})">
+                                                    <c:forEach var="c" items="${item.colors}">
+                                                        <option value="${c.id}"
+                                                            ${c.id == item.vc_id ? 'selected' : ''}>
+                                                                ${c.color_name}
+                                                        </option>
+                                                    </c:forEach>
+                                                </select>
+                                            </div>
                                         </div>
                                     </td>
 

@@ -64,10 +64,17 @@ public class CartDAO {
 
     // Lấy chi tiết để hiển thị
     public List<Map<String, Object>> getCartDetails(int cartId) {
-        return jdbi.withHandle(handle -> handle
-                .createQuery("""
-                    SELECT ci.*,ci.variant_id as vc_id, p.name as product_name, p.img as product_img, 
-                           pv.name as variant_name, c.name as color_name
+        return jdbi.withHandle(handle -> {
+
+            List<Map<String, Object>> items = handle
+                    .createQuery("""
+                    SELECT ci.*,
+                           ci.variant_id as vc_id,
+                           p.id as product_id,
+                           p.name as product_name, 
+                           p.img as product_img, 
+                           pv.name as variant_name, 
+                           c.name as color_name
                     FROM cart_items ci
                     JOIN variant_colors vc ON ci.variant_id = vc.id
                     JOIN product_variants pv ON vc.variant_id = pv.id
@@ -75,9 +82,51 @@ public class CartDAO {
                     JOIN colors c ON vc.color_id = c.id
                     WHERE ci.cart_id = :cartId
                 """)
-                .bind("cartId", cartId)
-                .mapToMap()
-                .list());
+                    .bind("cartId", cartId)
+                    .mapToMap()
+                    .list();
+
+
+
+            for (Map<String, Object> item : items) {
+                int productId = Integer.parseInt(item.get("product_id").toString());
+
+                List<Map<String, Object>> variants = handle
+                        .createQuery("""
+                select distinct pv.id as variant_id, pv.name as variant_name
+                from product_variants pv
+                where pv.product_id = :pId
+            """)
+                        .bind("pId", productId)
+                        .mapToMap()
+                        .list();
+
+                int currentVariantId = handle
+                        .createQuery("""
+                SELECT variant_id FROM variant_colors WHERE id = :vcId
+            """)
+                        .bind("vcId", item.get("vc_id"))
+                        .mapTo(Integer.class)
+                        .one();
+
+                List<Map<String, Object>> colors = handle
+                        .createQuery("""
+                SELECT vc.id, c.name as color_name
+                FROM variant_colors vc
+                JOIN colors c ON vc.color_id = c.id
+                WHERE vc.variant_id = :variantId
+            """)
+                        .bind("variantId", currentVariantId)
+                        .mapToMap()
+                        .list();
+
+                item.put("variants", variants);
+                item.put("colors", colors);
+                item.put("variant_id", currentVariantId);
+            }
+
+            return items;
+        });
     }
     // kiểm tra xem item đã có trong giỏ chưa
     public int getItemQtyInCart(int cartId, int vId) {
@@ -120,4 +169,32 @@ public class CartDAO {
                 .execute());
     }
 
+    // Lấy danh sách màu theo variant
+    public List<Map<String, Object>> getColorsByVariant(int variantId) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("""
+                SELECT vc.id, c.name AS color_name
+                FROM variant_colors vc
+                JOIN colors c ON vc.color_id = c.id
+                WHERE vc.variant_id = :variantId
+            """)
+                        .bind("variantId", variantId)
+                        .mapToMap()
+                        .list()
+        );
+    }
+
+    // Lấy giá + tồn kho
+    public Map<String, Object> getVariantInfo(int vcId) {
+        return jdbi.withHandle(handle ->
+                handle.createQuery("""
+                SELECT price, quantity
+                FROM variant_colors
+                WHERE id = :id
+            """)
+                        .bind("id", vcId)
+                        .mapToMap()
+                        .one()
+        );
+    }
 }
