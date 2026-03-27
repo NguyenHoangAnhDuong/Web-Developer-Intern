@@ -77,8 +77,8 @@ function updateQty(id, delta) {
                     updateTotalPrice();
                 }
             } else {
-
                 showToast("Sản phẩm đã hết hàng!", "error");
+                return;
             }
         })
         .catch(err => console.error("Lỗi kết nối:", err));
@@ -104,7 +104,7 @@ function removeItem(id) {
 function updateTotalPrice() {
     let total = 0;
     let hasChecked = false;
-    const checkedItems = document.querySelectorAll(".select-item:checked");
+    const checkedItems = document.querySelectorAll(".select-item:checked:not(:disabled)");
     checkedItems.forEach(cb => {
         total += parseFloat(cb.dataset.price || 0);
         hasChecked = true;

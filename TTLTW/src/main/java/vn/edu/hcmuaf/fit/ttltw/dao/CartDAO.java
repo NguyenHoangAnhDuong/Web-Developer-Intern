@@ -74,7 +74,8 @@ public class CartDAO {
                            p.name as product_name, 
                            p.img as product_img, 
                            pv.name as variant_name, 
-                           c.name as color_name
+                           c.name as color_name,
+                           vc.quantity as stock
                     FROM cart_items ci
                     JOIN variant_colors vc ON ci.variant_id = vc.id
                     JOIN product_variants pv ON vc.variant_id = pv.id

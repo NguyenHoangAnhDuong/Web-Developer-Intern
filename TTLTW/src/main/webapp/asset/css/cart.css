@@ -219,3 +219,24 @@ body {
 .color-select option {
     font-size: 13px;
 }
+
+/* Hết hàng */
+.out-of-stock {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 2px 8px;
+    font-size: 12px;
+    color: #fff;
+    background-color: #e3b1b1;
+    border-radius: 6px;
+}
+
+.select-item:disabled {
+    cursor: not-allowed;
+    pointer-events: none;
+    opacity: 0.4;
+}
+
+tr:has(.select-item:disabled) {
+    opacity: 0.6;
+}

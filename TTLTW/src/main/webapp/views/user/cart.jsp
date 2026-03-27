@@ -36,13 +36,17 @@
                     <c:when test="${not empty cartItems}">
                         <c:forEach var="item" items="${cartItems}">
                             <tr>
-                                <td><input type="checkbox" class="select-item" data-id="${item.vc_id}" data-price="${item.subtotal}" data-unit-price="${item.unit_price}"></td>
+                                <td><input type="checkbox" class="select-item"
+                                           data-id="${item.vc_id}" data-price="${item.subtotal}" data-unit-price="${item.unit_price}" ${item.stock == 0 ? 'disabled' : ''}></td>
 
                                     <td class="product-info">
                                         <img src="${pageContext.request.contextPath}/assert/img/product/${item.product_img}" alt="${item.product_name}">
                                         <div class="product-detail">
                                             <span class="product-name">${item.product_name}</span>
                                                 <%-- Hiển thị phiên bản và màu sắc --%>
+                                            <c:if test="${item.stock == 0}">
+                                                <span class="out-of-stock">Hết hàng</span>
+                                            </c:if>
                                             <div class="variant-box">
 <%--                                                dung lượng--%>
                                                 <select class="variant-select"
@@ -71,7 +75,7 @@
 
                                 <td>
                                     <div class="qty-control">
-                                        <button class="minus" onclick="updateQty(${item.vc_id}, -1)">-</button>
+                                        <button class="minus"  ${item.stock == 0 ? 'disabled' : ''} onclick="updateQty(${item.vc_id}, -1)">-</button>
                                         <span class="quantity">${item.quantity}</span>
                                         <button class="plus" onclick="updateQty(${item.vc_id}, 1)">+</button>
                                     </div>
