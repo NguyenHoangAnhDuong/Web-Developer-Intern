@@ -326,18 +326,13 @@
     <!--    Section logo-->
     <section class="brand-section">
         <div class="brand-list">
-            <a href="${pageContext.request.contextPath}/listproduct?brandName=iPhone" class="brand-item">
-                <img src="${pageContext.request.contextPath}/assert/img/logoIphone.png" alt="iPhone">
-            </a>
-            <a href="${pageContext.request.contextPath}/listproduct?brandName=Oppo" class="brand-item">
-                <img src="${pageContext.request.contextPath}/assert/img/logoOppo.png" alt="Oppo">
-            </a>
-            <a href="${pageContext.request.contextPath}/listproduct?brandName=Vivo" class="brand-item">
-                <img src="${pageContext.request.contextPath}/assert/img/logoVivo.png" alt="Vivo">
-            </a>
-            <a href="${pageContext.request.contextPath}/listproduct?brandName=Samsung" class="brand-item">
-                <img src="${pageContext.request.contextPath}/assert/img/logoSamsung.png" alt="Samsung">
-            </a>
+            <c:forEach var="brand" items="${brands}">
+                <a href="${pageContext.request.contextPath}/listproduct?brandName=${brand.name}">
+                    <div class="brand" data-brand-id="${brand.id}" data-brand-name="${brand.name}">
+                        <img src="${brand.img}" alt="${brand.name}">
+                    </div>
+                </a>
+            </c:forEach>
         </div>
     </section>
     <!--   End Section logo-->

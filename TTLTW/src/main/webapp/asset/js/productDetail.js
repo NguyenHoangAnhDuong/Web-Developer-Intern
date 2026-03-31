@@ -88,7 +88,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const vcId = activeColor.dataset.variantColorId;
         if (!vcId) return alert("Lỗi sản phẩm");
-
+        const productImg = document.querySelector(".img-feature");
+        if (productImg) flyToCart(productImg);
         fetch(`${getContextPath()}/cart?action=add&vcId=${vcId}`)
             .then(r => r.text())
             .then(() => renderSuccess(btnCart));

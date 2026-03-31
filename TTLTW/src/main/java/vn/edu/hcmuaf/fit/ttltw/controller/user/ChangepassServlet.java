@@ -82,10 +82,11 @@ public class ChangepassServlet extends HttpServlet {
         if (result.equals("Đổi mật khẩu thành công")) {
             session.invalidate();
             HttpSession newSession = req.getSession(true);
-            newSession.setAttribute("success", "Đổi mật khẩu thành công! Vui lòng đăng nhập lại.");
+            newSession.setAttribute("toastMessage", "Đổi mật khẩu thành công! Vui lòng đăng nhập lại.");
             resp.sendRedirect(req.getContextPath() + "/login");
         } else {
-            req.setAttribute("error", result);
+            session.setAttribute("toastMessage", result);
+            session.setAttribute("toastType", "error");
             resp.sendRedirect(req.getContextPath() + "/user/change-password");
         }
     }

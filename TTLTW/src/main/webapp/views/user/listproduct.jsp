@@ -29,16 +29,12 @@
                     <i class="fa-solid fa-filter"></i>
                     <span>Bộ lọc</span>
                 </div>
-
                 <div class="brand-list">
-                    <div class="brand"><img src="assert/img/logoIphone.png" alt="iPhone"></div>
-                    <div class="brand"><img src="assert/img/logoSamsung.png" alt="Samsung"></div>
-                    <div class="brand"><img src="assert/img/logoOppo.png" alt="Oppo"></div>
-                    <div class="brand"><img src="assert/img/logoVivo.png" alt="Vivo"></div>
-                    <div class="brand"><img src="assert/img/logoRealme.png" alt="Realme"></div>
-                    <div class="brand"><img src="assert/img/logoXiaomi.jpg" alt="Xiaomi"></div>
-                    <div class="brand"><img src="assert/img/logoSony.png" alt="Sony"></div>
-                    <div class="brand"><img src="assert/img/logoHonor.png" alt="Honor"></div>
+                    <c:forEach var="brand" items="${brands}">
+                        <div class="brand" data-brand-id="${brand.id}" data-brand-name="${brand.name}">
+                            <img src="${brand.img}" alt="${brand.name}">
+                        </div>
+                    </c:forEach>
                 </div>
             </div>
 

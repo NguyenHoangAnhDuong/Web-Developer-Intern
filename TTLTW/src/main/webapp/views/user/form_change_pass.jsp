@@ -82,6 +82,5 @@
   </form>
 </div>
 </body>
-<jsp:include page="/views/includes/toast.jsp"/>
 <script src="${pageContext.request.contextPath}/asset/js/formChangepass.js"></script>
 </html>

@@ -147,6 +147,7 @@
 <script src="${pageContext.request.contextPath}/asset/js/order.js"></script>
 
 <script src="${pageContext.request.contextPath}/asset/js/header.js"></script>
+<script src="${pageContext.request.contextPath}/asset/js/info-user.js"></script>
 
 </body>
 </html>
