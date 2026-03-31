@@ -68,8 +68,6 @@ public interface ProductUserDao {
 
     VariantColor getDefaultVariantColor(int productId);
 
-    Map<String, Object> getCartItemDetail(int variantColorId);
-
     List<Map<String, Object>> findRelatedBySameBrand(
             int brandId,
             int excludeProductId,

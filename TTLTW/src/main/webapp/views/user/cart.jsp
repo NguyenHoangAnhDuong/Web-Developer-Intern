@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/asset/css/header.css">
 </head>
 <body>
-
+<%@ include file="/views/includes/toast.jsp" %>
 <jsp:include page="/views/includes/header.jsp" />
 <main class="cart-wrap">
     <div class="container">
@@ -36,26 +36,52 @@
                     <c:when test="${not empty cartItems}">
                         <c:forEach var="item" items="${cartItems}">
                             <tr>
-                                <td><input type="checkbox" class="select-item" data-id="${item.vc_id}" data-price="${item.subTotal}"></td>
+                                <td><input type="checkbox" class="select-item"
+                                           data-id="${item.vc_id}" data-price="${item.subtotal}" data-unit-price="${item.unit_price}" ${item.stock == 0 ? 'disabled' : ''}></td>
 
                                     <td class="product-info">
-                                        <img src="${pageContext.request.contextPath}/assert/img/product/${item.main_img}" alt="${item.product_name}">
+                                        <img src="${pageContext.request.contextPath}/assert/img/product/${item.product_img}" alt="${item.product_name}">
                                         <div class="product-detail">
                                             <span class="product-name">${item.product_name}</span>
                                                 <%-- Hiển thị phiên bản và màu sắc --%>
-                                            <small class="product-variant">${item.variant_name} | ${item.color_name}</small>
+                                            <c:if test="${item.stock == 0}">
+                                                <span class="out-of-stock">Hết hàng</span>
+                                            </c:if>
+                                            <div class="variant-box">
+<%--                                                dung lượng--%>
+                                                <select class="variant-select"
+                                                        onchange="onVariantLevel1Change(this, ${item.vc_id})">
+                                                    <c:forEach var="v" items="${item.variants}">
+                                                        <option value="${v.variant_id}"
+                                                            ${v.variant_id == item.variant_id ? 'selected' : ''}>
+                                                                ${v.variant_name}
+                                                        </option>
+                                                    </c:forEach>
+                                                </select>
+
+<%--                                                màu--%>
+                                                <select class="color-select"
+                                                        onchange="onColorChange(this, ${item.vc_id})">
+                                                    <c:forEach var="c" items="${item.colors}">
+                                                        <option value="${c.id}"
+                                                            ${c.id == item.vc_id ? 'selected' : ''}>
+                                                                ${c.color_name}
+                                                        </option>
+                                                    </c:forEach>
+                                                </select>
+                                            </div>
                                         </div>
                                     </td>
 
                                 <td>
                                     <div class="qty-control">
-                                        <button class="minus" onclick="updateQty(${item.vc_id}, -1)">-</button>
+                                        <button class="minus"  ${item.stock == 0 ? 'disabled' : ''} onclick="updateQty(${item.vc_id}, -1)">-</button>
                                         <span class="quantity">${item.quantity}</span>
                                         <button class="plus" onclick="updateQty(${item.vc_id}, 1)">+</button>
                                     </div>
                                 </td>
                                 <td class="price">
-                                    <fmt:formatNumber value="${item.subTotal}" pattern="#,###" />₫ </td>
+                                    <fmt:formatNumber value="${item.subtotal}" pattern="#,###" />₫ </td>
                                 <td>
                                         <%-- Gửi vc_id (ID biến thể màu) để xóa đúng sản phẩm --%>
                                     <button class="delete" onclick="removeItem(${item.vc_id})">Xóa</button>
