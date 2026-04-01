@@ -1,25 +1,44 @@
 // Cập nhật mật khẩu mới
-const updateBtn = document.getElementById('update-btn');
-updateBtn.addEventListener('click', function () {
-    const newPassInput = document.getElementById('new-pass');
-    const confirmPassInput = document.getElementById('confirm-pass');
-    const newPass = newPassInput ? newPassInput.value.trim() : '';
-    const confirmPass = confirmPassInput ? confirmPassInput.value.trim() : '';
-    if (!newPass || !confirmPass) {
-        alert('Vui lòng nhập đầy đủ thông tin!');
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_\-#^()])[A-Za-z\d@$!%*?&_\-#^()]{8,}$/;
+function validateNewPassword(password) {
+    if (!password || password.length === 0)
+        return 'Vui lòng nhập mật khẩu mới!';
+    if (password.length < 8)
+        return 'Mật khẩu phải có ít nhất 8 ký tự!';
+    if (!PASSWORD_REGEX.test(password))
+        return 'Mật khẩu phải có chữ hoa, chữ thường, số và ký tự đặc biệt!';
+    return null;
+}
+document.getElementById('reset-form').addEventListener('submit', function (e) {
+    const oldPass     = document.getElementById('old-pass').value.trim();
+    const newPass     = document.getElementById('new-pass').value.trim();
+    const confirmPass = document.getElementById('confirm-pass').value.trim();
+    // Kiểm tra rỗng
+    if (!oldPass) {
+        e.preventDefault();
+        showToast('Vui lòng nhập mật khẩu cũ!', 'error');
         return;
     }
-    if (newPass.length < 6) {
-        alert('Mật khẩu mới cần ít nhất 6 ký tự.');
+    // Kiểm tra định dạng mật khẩu mới
+    const passError = validateNewPassword(newPass);
+    if (passError) {
+        e.preventDefault();
+        showToast(passError, 'error');
         return;
     }
+    // Kiểm tra xác nhận khớp
     if (newPass !== confirmPass) {
-        alert('Mật khẩu xác nhận không khớp!');
+        e.preventDefault();
+        showToast('Mật khẩu xác nhận không khớp!', 'error');
         return;
     }
-    document.getElementById('reset-form').submit();
+    // Kiểm tra mật khẩu mới không trùng mật khẩu cũ
+    if (oldPass === newPass) {
+        e.preventDefault();
+        showToast('Mật khẩu mới không được trùng mật khẩu cũ!', 'error');
+        return;
+    }
 });
-
 // Ẩn / hiện mật khẩu (icon mắt)
 document.querySelectorAll('.toggle').forEach(toggle => {
     const eye = toggle.querySelector('.fa-eye');
@@ -42,3 +61,13 @@ document.querySelectorAll('.toggle').forEach(toggle => {
         }
     });
 });
+    document.getElementById('confirm-pass').addEventListener('input', function () {
+        const newPass     = document.getElementById('new-pass').value.trim();
+        const confirmPass = this.value.trim();
+
+        if (confirmPass && newPass !== confirmPass) {
+            this.style.borderColor = '#e74c3c';
+        } else {
+            this.style.borderColor = '';
+        }
+    });

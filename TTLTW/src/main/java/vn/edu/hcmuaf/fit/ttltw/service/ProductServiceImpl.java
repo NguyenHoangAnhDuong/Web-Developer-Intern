@@ -301,20 +301,7 @@ public class ProductServiceImpl implements ProductService {
                 priceMin, priceMax, brandName, types, condition, sortBy);
     }
 
-    @Override
-    public Map<String, Object> getProductForCart(int variantColorId) {
-        Map<String, Object> detail = productDao.getCartItemDetail(variantColorId);
-        if (detail != null) {
-            // Lấy giá gốc và % giảm giá từ DB
-            double unitPrice = Double.parseDouble(detail.get("unit_price").toString());
-            int discount = Integer.parseInt(detail.get("discount_percentage").toString());
 
-            // Tính giá bán thực tế (đã áp dụng giảm giá)
-            double finalPrice = unitPrice * (100 - discount) / 100;
-            detail.put("price_final", new BigDecimal(finalPrice));
-        }
-        return detail;
-    }
 
     @Override
     public List<Map<String, Object>> getRelatedProducts(
@@ -373,6 +360,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<Map<String, Object>> getAccessoryCategories() {
         return productDao.getAccessoryCategories();
+    }
+    public List<Brand> getAll() {
+        return productDao.getAll();
     }
 
 }

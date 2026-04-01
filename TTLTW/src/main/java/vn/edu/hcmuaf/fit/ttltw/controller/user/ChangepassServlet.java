@@ -11,12 +11,15 @@ import vn.edu.hcmuaf.fit.ttltw.service.UserService;
 import vn.edu.hcmuaf.fit.ttltw.utils.SidebarUtil;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 @WebServlet("/user/change-password")
 public class ChangepassServlet extends HttpServlet {
 
     private UserService userService = new UserService();
-
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile(
+            "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&_\\-#^()])[A-Za-z\\d@$!%*?&_\\-#^()]{8,}$"
+    );
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -53,11 +56,23 @@ public class ChangepassServlet extends HttpServlet {
             resp.sendRedirect("/login");
             return;
         }
-
         int userId = currentUser.getId();
         String password = req.getParameter("password");
         String newPass = req.getParameter("new_password");
         String confirm = req.getParameter("confirm_password");
+        if (isBlank(password) || isBlank(newPass) || isBlank(confirm)) {
+            session.setAttribute("toastMessage", "Vui lòng nhập đầy đủ thông tin!");
+            session.setAttribute("toastType", "error");
+            resp.sendRedirect(req.getContextPath() + "/user/change-password");
+            return;
+        }
+        if (!PASSWORD_PATTERN.matcher(newPass).matches()) {
+            session.setAttribute("toastMessage",
+                    "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!");
+            session.setAttribute("toastType", "error");
+            resp.sendRedirect(req.getContextPath() + "/user/change-password");
+            return;
+        }
         if (!newPass.equals(confirm)) {
             req.setAttribute("error", "Mật khẩu xác nhận không khớp!");
             req.getRequestDispatcher("/views/user/form_change_pass.jsp").forward(req, resp);
@@ -65,16 +80,17 @@ public class ChangepassServlet extends HttpServlet {
         }
         String result = userService.updatePassword(userId,password, newPass);
         if (result.equals("Đổi mật khẩu thành công")) {
-            req.setAttribute("message", result);
+            session.invalidate();
+            HttpSession newSession = req.getSession(true);
+            newSession.setAttribute("toastMessage", "Đổi mật khẩu thành công! Vui lòng đăng nhập lại.");
+            resp.sendRedirect(req.getContextPath() + "/login");
         } else {
-            req.setAttribute("error", result);
+            session.setAttribute("toastMessage", result);
+            session.setAttribute("toastType", "error");
+            resp.sendRedirect(req.getContextPath() + "/user/change-password");
         }
-        req.getRequestDispatcher("/views/user/form_change_pass.jsp").forward(req, resp);
-        // Set sidebar data
-        req.setAttribute("activeMenu", "password");
-        SidebarUtil.setSidebarData(req);
-
-        req.getRequestDispatcher("form_change_pass.jsp").forward(req, resp);
     }
-
+    private boolean isBlank(String s) {
+        return s == null || s.isBlank();
+    }
 }

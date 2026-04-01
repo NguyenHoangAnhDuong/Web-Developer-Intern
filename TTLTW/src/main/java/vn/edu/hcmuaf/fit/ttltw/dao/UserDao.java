@@ -319,7 +319,7 @@ public class UserDao {
         String hashed = DBConnect.getJdbi().withHandle(handle -> handle.createQuery(sql)
                 .bind(0, userId)
                 .mapTo(String.class)
-                .findFirst()
+                .findOne()
                 .orElse(null));
 
         if (hashed == null)

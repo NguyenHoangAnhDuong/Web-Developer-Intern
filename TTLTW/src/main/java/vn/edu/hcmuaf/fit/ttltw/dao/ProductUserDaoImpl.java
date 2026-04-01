@@ -579,10 +579,6 @@ public class ProductUserDaoImpl implements ProductUserDao {
         return null;
     }
 
-    @Override
-    public Map<String, Object> getCartItemDetail(int variantColorId) {
-        return Map.of();
-    }
 
     @Override
     public List<Map<String, Object>> findRelatedBySameBrand(int brandId, int excludeProductId, int limit) {

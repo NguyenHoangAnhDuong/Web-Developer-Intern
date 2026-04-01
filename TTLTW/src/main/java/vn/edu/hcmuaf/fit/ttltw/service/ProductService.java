@@ -1,5 +1,6 @@
 package vn.edu.hcmuaf.fit.ttltw.service;
 
+import vn.edu.hcmuaf.fit.ttltw.model.Brand;
 import vn.edu.hcmuaf.fit.ttltw.model.Image;
 import vn.edu.hcmuaf.fit.ttltw.model.Product;
 
@@ -59,8 +60,6 @@ public interface ProductService {
                         String[] variantIds, String[] colorIds, String[] skus,
                         String[] variantQuantities) throws Exception;
 
-        // Cart
-        Map<String, Object> getProductForCart(int variantColorId);
 
         // Lấy 4 sản phẩm liên quan
         List<Map<String, Object>> getRelatedProducts(
@@ -69,4 +68,5 @@ public interface ProductService {
                         int limit);
 
     List<String> getSuggestions(String keyword);
+    List<Brand> getAll();
 }

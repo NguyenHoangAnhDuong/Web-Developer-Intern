@@ -2,6 +2,7 @@ package vn.edu.hcmuaf.fit.ttltw.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -14,7 +15,9 @@ public class UserService {
     public UserService() {
         this.userDao = new UserDao();
     }
-
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile(
+            "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&_\\-#^()])[A-Za-z\\d@$!%*?&_\\-#^()]{8,}$"
+    );
     public Optional<User> getUserProfileById(int id) {
         return userDao.findById(id);
     }
@@ -27,16 +30,10 @@ public class UserService {
         return userDao.getAllUsers();
     }
 
-    /**
-     * Đếm tổng số user (có filter)
-     */
     public int countUsers(String searchTerm, String roleFilter, String statusFilter) {
         return userDao.countUsers(searchTerm, roleFilter, statusFilter);
     }
 
-    /**
-     * Lấy danh sách user có phân trang (có filter)
-     */
     public List<User> getUsersPaginated(String searchTerm, String roleFilter, String statusFilter, int offset,
             int limit) {
         return userDao.getUsersPaginated(searchTerm, roleFilter, statusFilter, offset, limit);
@@ -59,6 +56,10 @@ public class UserService {
     }
 
     public String updatePassword(int userId, String oldPass, String newPass) {
+        if (newPass == null || newPass.isBlank())
+            return "Mật khẩu mới không được để trống!";
+        if (!PASSWORD_PATTERN.matcher(newPass).matches())
+            return "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!";
         boolean checkPassword = userDao.checkPassword(userId, oldPass);
         if (!checkPassword)
             return "Sai mật khẩu";
