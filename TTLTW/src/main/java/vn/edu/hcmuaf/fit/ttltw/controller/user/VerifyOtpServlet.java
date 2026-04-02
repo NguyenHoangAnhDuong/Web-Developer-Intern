@@ -1,5 +1,8 @@
 package vn.edu.hcmuaf.fit.ttltw.controller.user;
 
+import java.io.IOException;
+import java.security.SecureRandom;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -10,9 +13,6 @@ import vn.edu.hcmuaf.fit.ttltw.dao.UserDao;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
 import vn.edu.hcmuaf.fit.ttltw.service.EmailService;
 import vn.edu.hcmuaf.fit.ttltw.service.RedisService;
-
-import java.io.IOException;
-import java.security.SecureRandom;
 
 @WebServlet(name = "VerifyOtpServlet", value = "/verify-otp")
 public class VerifyOtpServlet extends HttpServlet {
@@ -49,7 +49,7 @@ public class VerifyOtpServlet extends HttpServlet {
         String email  = (String) session.getAttribute("pending_email");
         String action = request.getParameter("action");
 
-        // ── Gửi lại OTP ─────────────────────────────────────────────────────────
+        // Gửi lại OTP 
         if ("resend".equals(action)) {
             User pendingUser = RedisService.getPendingUser(email);
             if (pendingUser == null) {
@@ -76,7 +76,7 @@ public class VerifyOtpServlet extends HttpServlet {
             return;
         }
 
-        // ── Xác thực OTP ────────────────────────────────────────────────────────
+        // Xác thực OTP
         String inputOtp  = request.getParameter("otp");
         String storedOtp = RedisService.getOtp(email);
 
@@ -104,7 +104,7 @@ public class VerifyOtpServlet extends HttpServlet {
             return;
         }
 
-        // Dọn dẹp Redis và session tạm
+        // Xóa Redis và session tạm
         RedisService.deleteOtp(email);
         RedisService.deletePendingUser(email);
         session.removeAttribute("pending_email");
@@ -122,8 +122,6 @@ public class VerifyOtpServlet extends HttpServlet {
         }
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────────────
-
     private void forwardWithError(HttpServletRequest request, HttpServletResponse response,
                                   String email, String message)
             throws ServletException, IOException {
@@ -136,10 +134,7 @@ public class VerifyOtpServlet extends HttpServlet {
         int code = 100000 + new SecureRandom().nextInt(900000);
         return String.valueOf(code);
     }
-
-    /**
-     * Che một phần email: "testuser@gmail.com" → "te******@gmail.com"
-     */
+    
     private String maskEmail(String email) {
         int atIndex = email.indexOf('@');
         if (atIndex <= 2) return email;

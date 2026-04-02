@@ -1,20 +1,21 @@
 package vn.edu.hcmuaf.fit.ttltw.service;
 
+import java.lang.reflect.Type;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
+
 import redis.clients.jedis.Jedis;
 import vn.edu.hcmuaf.fit.ttltw.config.RedisConnect;
 import vn.edu.hcmuaf.fit.ttltw.model.Product;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
-
-import java.lang.reflect.Type;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 public class RedisService {
 
@@ -28,55 +29,43 @@ public class RedisService {
                             LocalDateTime.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
             .create();
 
-    // ── Key builders ────────────────────────────────────────────────────────────
+    //  Key lưu trữ trong Redis
     private static String otpKey(String email)            { return "otp:" + email; }
     private static String pendingUserKey(String email)    { return "pending_user:" + email; }
     private static String productKey(int id)              { return "product:" + id; }
     private static String productListKey(String suffix)   { return "products:" + suffix; }
 
-    // ── OTP ─────────────────────────────────────────────────────────────────────
 
-    /**
-     * Lưu OTP cho email, tự hết hạn sau redis.ttl.otp giây (mặc định 5 phút).
-     */
+    //Lưu OTP cho email, tự hết hạn sau 5 phút.
+
     public static void saveOtp(String email, String otp) {
         try (Jedis jedis = RedisConnect.getConnection()) {
             jedis.setex(otpKey(email), RedisConnect.getTtlOtp(), otp);
         }
     }
 
-    /**
-     * Lấy OTP đang còn hiệu lực. Trả về null nếu đã hết hạn hoặc không tồn tại.
-     */
+    
     public static String getOtp(String email) {
         try (Jedis jedis = RedisConnect.getConnection()) {
             return jedis.get(otpKey(email));
         }
     }
 
-    /**
-     * Xoá OTP ngay sau khi xác thực thành công.
-     */
+    
     public static void deleteOtp(String email) {
         try (Jedis jedis = RedisConnect.getConnection()) {
             jedis.del(otpKey(email));
         }
     }
 
-    // ── Pending user (thông tin đăng ký chờ xác thực OTP) ───────────────────────
-
-    /**
-     * Lưu thông tin user chờ xác thực. TTL = redis.ttl.pending_user giây (mặc định 10 phút).
-     */
+    //Lưu thông tin user chờ xác thực vào Redis, tự hết hạn sau 10 phút.
     public static void savePendingUser(String email, User user) {
         try (Jedis jedis = RedisConnect.getConnection()) {
             jedis.setex(pendingUserKey(email), RedisConnect.getTtlPendingUser(), GSON.toJson(user));
         }
     }
 
-    /**
-     * Lấy thông tin user chờ xác thực. Trả về null nếu đã hết hạn.
-     */
+    
     public static User getPendingUser(String email) {
         try (Jedis jedis = RedisConnect.getConnection()) {
             String json = jedis.get(pendingUserKey(email));
@@ -84,20 +73,14 @@ public class RedisService {
         }
     }
 
-    /**
-     * Xoá thông tin user chờ xác thực sau khi tạo tài khoản thành công.
-     */
+    
     public static void deletePendingUser(String email) {
         try (Jedis jedis = RedisConnect.getConnection()) {
             jedis.del(pendingUserKey(email));
         }
     }
 
-    // ── Product cache ────────────────────────────────────────────────────────────
-
-    /**
-     * Cache một sản phẩm theo id. TTL = redis.ttl.product giây (mặc định 30 phút).
-     */
+    
     public static void cacheProduct(Product product) {
         try (Jedis jedis = RedisConnect.getConnection()) {
             jedis.setex(productKey(product.getId()),
@@ -106,9 +89,7 @@ public class RedisService {
         }
     }
 
-    /**
-     * Lấy sản phẩm từ cache. Trả về null nếu không có hoặc đã hết hạn (cache miss).
-     */
+    
     public static Product getCachedProduct(int id) {
         try (Jedis jedis = RedisConnect.getConnection()) {
             String json = jedis.get(productKey(id));
@@ -116,11 +97,7 @@ public class RedisService {
         }
     }
 
-    /**
-     * Cache danh sách sản phẩm với key tùy ý.
-     * Ví dụ: cacheProductList("all", list) → key = "products:all"
-     *         cacheProductList("category:1", list) → key = "products:category:1"
-     */
+    
     public static void cacheProductList(String suffix, List<Product> products) {
         Type listType = new TypeToken<List<Product>>() {}.getType();
         try (Jedis jedis = RedisConnect.getConnection()) {
@@ -130,9 +107,7 @@ public class RedisService {
         }
     }
 
-    /**
-     * Lấy danh sách sản phẩm từ cache. Trả về null nếu cache miss.
-     */
+    
     public static List<Product> getCachedProductList(String suffix) {
         Type listType = new TypeToken<List<Product>>() {}.getType();
         try (Jedis jedis = RedisConnect.getConnection()) {
@@ -141,18 +116,14 @@ public class RedisService {
         }
     }
 
-    /**
-     * Xoá cache một sản phẩm (gọi khi admin cập nhật / xoá sản phẩm đó).
-     */
+    
     public static void evictProduct(int id) {
         try (Jedis jedis = RedisConnect.getConnection()) {
             jedis.del(productKey(id));
         }
     }
 
-    /**
-     * Xoá cache danh sách sản phẩm (gọi khi admin thêm / sửa / xoá bất kỳ sản phẩm nào).
-     */
+    
     public static void evictProductList(String suffix) {
         try (Jedis jedis = RedisConnect.getConnection()) {
             jedis.del(productListKey(suffix));
