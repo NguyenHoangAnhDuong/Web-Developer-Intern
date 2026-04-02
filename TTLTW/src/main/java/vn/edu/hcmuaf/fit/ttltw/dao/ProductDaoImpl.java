@@ -1433,7 +1433,7 @@ public class ProductDaoImpl implements ProductDao {
     }
 
     @Override
-    public List<Map<String, Object>> findRelatedBySameBrand(
+    public List<Map<String, Object>>    findRelatedBySameBrand(
             int brandId,
             int excludeProductId,
             int limit) {
@@ -1928,5 +1928,11 @@ public class ProductDaoImpl implements ProductDao {
                     .list();
         });
     }
-
+    public List<Brand> getAll() {
+        return DBConnect.getJdbi().withHandle(h ->
+                h.createQuery("SELECT id, name, img FROM brands ORDER BY id")
+                        .mapToBean(Brand.class)
+                        .list()
+        );
+    }
 }

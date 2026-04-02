@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import vn.edu.hcmuaf.fit.ttltw.model.Brand;
 import vn.edu.hcmuaf.fit.ttltw.service.ProductService;
 import vn.edu.hcmuaf.fit.ttltw.service.ProductServiceImpl;
 
@@ -71,7 +72,8 @@ public class ProductListServlet extends HttpServlet {
             totalPages = 1;
         if (page > totalPages)
             page = totalPages;
-
+        List<Brand> brands = productService.getAll();
+        request.setAttribute("brands", brands);
         // Truyền dữ liệu vào JSP
         request.setAttribute("products", products);
         request.setAttribute("currentPage", page);

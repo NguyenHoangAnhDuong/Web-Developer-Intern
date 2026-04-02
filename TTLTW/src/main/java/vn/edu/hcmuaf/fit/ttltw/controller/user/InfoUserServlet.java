@@ -14,6 +14,7 @@ import vn.edu.hcmuaf.fit.ttltw.utils.SidebarUtil;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Set;
 
 @WebServlet(name = "UserProfileServlet", urlPatterns = { "/user/profile" })
 @MultipartConfig(fileSizeThreshold = 1024 * 1024, maxFileSize = 5 * 1024 * 1024, maxRequestSize = 10 * 1024 * 1024)
@@ -25,6 +26,9 @@ public class InfoUserServlet extends HttpServlet {
     public void init() throws ServletException {
         userService = new UserService();
     }
+    private static final Set<String> ALLOWED_TYPES = java.util.Set.of(
+            "image/png", "image/jpeg", "image/jpg", "image/gif"
+    );
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -120,9 +124,18 @@ public class InfoUserServlet extends HttpServlet {
             out.write("{\"success\": false, \"message\": \"Không có file\"}");
             return;
         }
+        String contentType = filePart.getContentType();
+        if (contentType == null || !ALLOWED_TYPES.contains(contentType.toLowerCase())) {
+            out.write("{\"success\": false, \"message\": \"Chỉ chấp nhận file ảnh (PNG, JPG, GIF)\"}");
+            return;
+        }
         try {
             Cloudinary cloudinary = CloudinaryUtil.getInstance();
             byte[] fileBytes = filePart.getInputStream().readAllBytes();
+            if (!isValidImageSignature(fileBytes)) {
+                out.write("{\"success\": false, \"message\": \"File không hợp lệ\"}");
+                return;
+            }
             var upload = cloudinary.uploader().upload(
                     fileBytes,
                     ObjectUtils.asMap(
@@ -145,8 +158,18 @@ public class InfoUserServlet extends HttpServlet {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            out.write("{\"success\": false, \"message\": \"" + e.getClass().getSimpleName() + ": " + e.getMessage() + "\"}");
+            out.write("{\"success\": false, \"message\": \"Upload thất bại, vui lòng thử lại\"}");
         }
+    }
+    private boolean isValidImageSignature(byte[] bytes) {
+        if (bytes.length < 4) return false;
+        if (bytes[0] == (byte)0x89 && bytes[1] == 0x50
+                && bytes[2] == 0x4E && bytes[3] == 0x47) return true;
+        if (bytes[0] == (byte)0xFF && bytes[1] == (byte)0xD8
+                && bytes[2] == (byte)0xFF) return true;
+        if (bytes[0] == 0x47 && bytes[1] == 0x49
+                && bytes[2] == 0x46 && bytes[3] == 0x38) return true;
+        return false;
     }
     private String safe(String s) {
         return s == null ? "" : s.trim();

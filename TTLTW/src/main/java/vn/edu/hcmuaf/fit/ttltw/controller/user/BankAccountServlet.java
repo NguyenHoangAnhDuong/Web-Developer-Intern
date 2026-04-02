@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpSession;
 import vn.edu.hcmuaf.fit.ttltw.model.BankAccount;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
 import vn.edu.hcmuaf.fit.ttltw.service.BankAccountService;
+import vn.edu.hcmuaf.fit.ttltw.service.UserService;
 import vn.edu.hcmuaf.fit.ttltw.utils.SidebarUtil;
 
 import java.io.IOException;
@@ -18,10 +19,11 @@ import java.util.Optional;
 public class BankAccountServlet extends HttpServlet {
 
     private BankAccountService bankService;
-
+    private UserService userService;
     @Override
     public void init() {
         this.bankService = new BankAccountService();
+        userService = new UserService();
     }
 
     @Override
@@ -40,10 +42,17 @@ public class BankAccountServlet extends HttpServlet {
             BankAccount ba = account.get();
             req.setAttribute("bankAccount", ba);
         }
-
+        User freshUser = userService.getUserProfileById(user.getId()).orElse(user);
+        session.setAttribute("user", freshUser);
+        String avatarPath = freshUser.getAvatar();
+        if (avatarPath == null || avatarPath.trim().isEmpty()) {
+            avatarPath = req.getContextPath() + "/asset/img/admin.jpg";
+        }
         // Set sidebar data
+        req.setAttribute("user", freshUser);
         req.setAttribute("activeMenu", "bank");
         SidebarUtil.setSidebarData(req);
+        req.setAttribute("avatarPath", avatarPath);
 
         req.getRequestDispatcher("/views/user/bankAccount.jsp").forward(req, resp);
     }

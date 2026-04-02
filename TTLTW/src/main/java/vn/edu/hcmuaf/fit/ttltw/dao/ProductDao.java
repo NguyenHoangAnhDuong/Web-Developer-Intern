@@ -155,4 +155,5 @@ public interface ProductDao {
                         int limit);
 
         List<Map<String, Object>> getAccessoryCategories();
+        List<Brand> getAll();
 }

@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import vn.edu.hcmuaf.fit.ttltw.model.*;
 import vn.edu.hcmuaf.fit.ttltw.service.AddressService;
+import vn.edu.hcmuaf.fit.ttltw.service.UserService;
 import vn.edu.hcmuaf.fit.ttltw.utils.SidebarUtil;
 
 import java.io.IOException;
@@ -15,10 +16,11 @@ import java.io.IOException;
 @WebServlet("/user/addresses")
 public class AddressServlet extends HttpServlet {
     private AddressService service;
-
+    private UserService userService;
     @Override
     public void init() {
         service = new AddressService();
+        userService = new UserService();
     }
 
     @Override
@@ -36,11 +38,19 @@ public class AddressServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
+        User freshUser = userService.getUserProfileById(user.getId()).orElse(user);
+        session.setAttribute("user", freshUser);
+        String avatarPath = freshUser.getAvatar();
+        if (avatarPath == null || avatarPath.trim().isEmpty()) {
+            avatarPath = req.getContextPath() + "/asset/img/admin.jpg";
+        }
         int userId = user.getId();
         req.setAttribute("addresses", service.getAll(userId));
         // Set sidebar data
+        req.setAttribute("user", freshUser);
         req.setAttribute("activeMenu", "address");
         SidebarUtil.setSidebarData(req);
+        req.setAttribute("avatarPath", avatarPath);
         req.getRequestDispatcher("/views/user/addresses.jsp").forward(req, resp);
     }
 

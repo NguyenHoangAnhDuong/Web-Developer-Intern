@@ -23,9 +23,7 @@
     <div id="userBox">
         <img src="<%= avatarPath %>"
              id="userAvatar"
-             alt="User Avatar"
-             onerror="this.src='${pageContext.request.contextPath}/assert/img/admin.jpg'">
-
+             alt="User Avatar"/>
         <div id="userInfo">
             <span id="usernameDisplay"><%= user != null ? user.getUsername() : "Người dùng" %></span>
             <a href="${pageContext.request.contextPath}/user/profile" id="editProfileBtn">

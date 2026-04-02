@@ -358,5 +358,8 @@ public class ProductServiceImpl implements ProductService {
     public List<Map<String, Object>> getAccessoryCategories() {
         return productDao.getAccessoryCategories();
     }
+    public List<Brand> getAll() {
+        return productDao.getAll();
+    }
 
 }

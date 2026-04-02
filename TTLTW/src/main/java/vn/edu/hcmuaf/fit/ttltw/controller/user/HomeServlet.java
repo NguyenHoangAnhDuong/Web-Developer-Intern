@@ -6,9 +6,12 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import vn.edu.hcmuaf.fit.ttltw.model.Brand;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
 import vn.edu.hcmuaf.fit.ttltw.service.HomeService;
 import vn.edu.hcmuaf.fit.ttltw.service.HomeServiceImpl;
+import vn.edu.hcmuaf.fit.ttltw.service.ProductService;
+import vn.edu.hcmuaf.fit.ttltw.service.ProductServiceImpl;
 
 import java.io.IOException;
 import java.util.List;
@@ -17,7 +20,7 @@ import java.util.Map;
 @WebServlet(name = "HomeServlet", urlPatterns = { "/home" })
 public class HomeServlet extends HttpServlet {
     private final HomeService homeService = new HomeServiceImpl();
-
+    private final ProductService productService = new ProductServiceImpl();
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -45,7 +48,8 @@ public class HomeServlet extends HttpServlet {
         // Load banner products
         List<Map<String, Object>> bannerProducts = homeService.getBannerProducts();
         request.setAttribute("bannerProducts", bannerProducts);
-
+        List<Brand> brands = productService.getAll();
+        request.setAttribute("brands", brands);
         // Disable cache
         response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
         response.setHeader("Pragma", "no-cache");

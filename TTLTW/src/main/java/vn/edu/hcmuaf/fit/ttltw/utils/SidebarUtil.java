@@ -31,7 +31,9 @@ public class SidebarUtil {
         }
 
         String avatar = user.getAvatar();
-
+        if (avatar.startsWith("http://") || avatar.startsWith("https://")) {
+            return avatar;
+        }
         if (avatar.startsWith("/")) {
             return request.getContextPath() + avatar;
         } else {
