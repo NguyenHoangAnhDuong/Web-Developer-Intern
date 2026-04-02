@@ -9,6 +9,7 @@ import com.google.gson.reflect.TypeToken;
 import redis.clients.jedis.Jedis;
 import vn.edu.hcmuaf.fit.ttltw.config.RedisConnect;
 import vn.edu.hcmuaf.fit.ttltw.model.Product;
+import vn.edu.hcmuaf.fit.ttltw.model.User;
 
 import java.lang.reflect.Type;
 import java.time.LocalDateTime;
@@ -29,6 +30,7 @@ public class RedisService {
 
     // ── Key builders ────────────────────────────────────────────────────────────
     private static String otpKey(String email)            { return "otp:" + email; }
+    private static String pendingUserKey(String email)    { return "pending_user:" + email; }
     private static String productKey(int id)              { return "product:" + id; }
     private static String productListKey(String suffix)   { return "products:" + suffix; }
 
@@ -58,6 +60,36 @@ public class RedisService {
     public static void deleteOtp(String email) {
         try (Jedis jedis = RedisConnect.getConnection()) {
             jedis.del(otpKey(email));
+        }
+    }
+
+    // ── Pending user (thông tin đăng ký chờ xác thực OTP) ───────────────────────
+
+    /**
+     * Lưu thông tin user chờ xác thực. TTL = redis.ttl.pending_user giây (mặc định 10 phút).
+     */
+    public static void savePendingUser(String email, User user) {
+        try (Jedis jedis = RedisConnect.getConnection()) {
+            jedis.setex(pendingUserKey(email), RedisConnect.getTtlPendingUser(), GSON.toJson(user));
+        }
+    }
+
+    /**
+     * Lấy thông tin user chờ xác thực. Trả về null nếu đã hết hạn.
+     */
+    public static User getPendingUser(String email) {
+        try (Jedis jedis = RedisConnect.getConnection()) {
+            String json = jedis.get(pendingUserKey(email));
+            return json != null ? GSON.fromJson(json, User.class) : null;
+        }
+    }
+
+    /**
+     * Xoá thông tin user chờ xác thực sau khi tạo tài khoản thành công.
+     */
+    public static void deletePendingUser(String email) {
+        try (Jedis jedis = RedisConnect.getConnection()) {
+            jedis.del(pendingUserKey(email));
         }
     }
 

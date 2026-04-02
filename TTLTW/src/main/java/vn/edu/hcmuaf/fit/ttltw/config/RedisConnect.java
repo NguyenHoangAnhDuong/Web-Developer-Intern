@@ -15,6 +15,7 @@ public class RedisConnect {
     private static JedisPool jedisPool;
     private static int ttlOtp;
     private static int ttlProduct;
+    private static int ttlPendingUser;
 
     static {
         try {
@@ -36,8 +37,9 @@ public class RedisConnect {
             String password = props.getProperty("redis.password", "");
             int    timeout  = Integer.parseInt(props.getProperty("redis.timeout", "2000"));
 
-            ttlOtp     = Integer.parseInt(props.getProperty("redis.ttl.otp",     "300"));
-            ttlProduct = Integer.parseInt(props.getProperty("redis.ttl.product", "1800"));
+            ttlOtp         = Integer.parseInt(props.getProperty("redis.ttl.otp",          "300"));
+            ttlProduct     = Integer.parseInt(props.getProperty("redis.ttl.product",      "1800"));
+            ttlPendingUser = Integer.parseInt(props.getProperty("redis.ttl.pending_user", "600"));
 
             GenericObjectPoolConfig<Jedis> poolConfig = new GenericObjectPoolConfig<>();
             poolConfig.setMaxTotal(Integer.parseInt(props.getProperty("redis.pool.maxTotal", "20")));
@@ -76,6 +78,10 @@ public class RedisConnect {
 
     public static int getTtlProduct() {
         return ttlProduct;
+    }
+
+    public static int getTtlPendingUser() {
+        return ttlPendingUser;
     }
 
     public static void shutdown() {
