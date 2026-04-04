@@ -13,23 +13,30 @@ document.addEventListener("DOMContentLoaded", () => {
             slide.classList.toggle("active", idx === slideIndex);
         });
     }
+    let autoTimer;
+
+    function startAutoSlide() {
+        stopAutoSlide();
+        autoTimer = setInterval(() => showSlide(slideIndex + 1), 4000);
+    }
+    function stopAutoSlide() {
+        if (autoTimer) clearInterval(autoTimer);
+    }
     if (slideEls.length > 0) {
-        let autoTimer = setInterval(() => showSlide(slideIndex + 1), 4000);
         if (nextBtn) {
             nextBtn.onclick = () => {
-                clearInterval(autoTimer);
                 showSlide(slideIndex + 1);
-                autoTimer = setInterval(() => showSlide(slideIndex + 1), 4000);
+                startAutoSlide();
             };
         }
         if (prevBtn) {
             prevBtn.onclick = () => {
-                clearInterval(autoTimer);
                 showSlide(slideIndex - 1);
-                autoTimer = setInterval(() => showSlide(slideIndex + 1), 4000);
+                startAutoSlide();
             };
         }
         showSlide(0);
+        startAutoSlide();
     }
     function updateCardVariantId(productCard) {
         const activeVariant = productCard.querySelector('.capacity button.active');

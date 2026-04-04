@@ -32,8 +32,8 @@
 }
 .promotions .payment-promo .promo-slider {
     position: relative;
-    overflow: hidden;
-    padding: 0 10px; /* Thêm padding ngang để nút không bị sát cạnh */
+    overflow: visible;
+    padding: 0 20px; /* Thêm padding ngang để nút không bị sát cạnh */
 }
 .promotions .payment-promo .promo-slider .promo-list {
     display: flex;
@@ -132,10 +132,10 @@
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: #fff;
+    background: rgba(255, 255, 255, 0.8);
     border: 1px solid #e0e0e0;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    color: #555;
+    color: #333;
     border-radius: 50%;
     width: 40px; /* Tăng kích thước */
     height: 40px;
@@ -147,16 +147,41 @@
     z-index: 10;
 }
 .promotions .payment-promo .promo-slider .promo-control:hover {
-    background: #007bff;
+    background: var(--color-button);
     color: #fff;
-    border-color: #007bff;
     box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
 
 .promotions .payment-promo .promo-slider .promo-control.prev {
-    left: -20px;
+    left: -10px;
 }
 
 .promotions .payment-promo .promo-slider .promo-control.next {
-    right: -20px;
+    right: -10px;
+}
+.promotions .payment-promo .promo-slider .promo-item {
+    background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
+    border-left: 5px solid #e60023;
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.promotions .payment-promo .promo-slider .promo-content .discount {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #e60023;
+    margin-bottom: 5px;
+}
+
+.promotions .payment-promo .promo-slider .promo-status.remain {
+    background: #ffebeb;
+    color: #e60023;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-weight: 600;
 }

@@ -88,12 +88,31 @@ public class VoucherAdminServlet extends HttpServlet {
                     }
                     Voucher v = buildVoucher(req);
                     v.setId(old.getId());
-                    v.setStatus(old.getStatus());
+                    // Tự động cập nhật status theo ngày
+                    LocalDateTime now = LocalDateTime.now();
+                    if (v.getEndDate() != null && v.getEndDate().isBefore(now)) {
+                        v.setStatus(0); // hết hạn
+                    } else if (v.getStartDate() != null && v.getStartDate().isAfter(now)) {
+                        v.setStatus(old.getStatus());
+                    } else {
+                        v.setStatus(1);
+                    }
                     service.updateVoucher(v);
                     session.setAttribute("toastMessage", "Cập nhật voucher thành công");
                     session.setAttribute("toastType", "success");
                 }
                 case "toggle" -> {
+                    int id = parseInt(req, "id");
+                    Voucher v = service.getById(id);
+                    if (v == null)
+                        throw new ValidationException("Không tìm thấy voucher với ID: " + id);
+                    // Nếu đang tắt và muốn bật nhưng đã hết hạn
+                    if (v.getStatus() == 0 && v.getEndDate() != null
+                            && v.getEndDate().isBefore(LocalDateTime.now())) {
+                        throw new ValidationException(
+                                "Voucher đã hết hạn, vui lòng cập nhật ngày kết thúc trước khi bật lại."
+                        );
+                    }
                     service.toggleStatus(parseInt(req, "id"));
                     session.setAttribute("toastMessage", "Cập nhật trạng thái voucher thành công");
                     session.setAttribute("toastType", "success");
@@ -114,17 +133,51 @@ public class VoucherAdminServlet extends HttpServlet {
     }
 
     private Voucher buildVoucher(HttpServletRequest req) {
+        String voucherCode = req.getParameter("voucherCode");
+        // Mã KM
+        if (voucherCode == null || voucherCode.isBlank())
+            throw new ValidationException("Mã khuyến mãi không được để trống.");
+        voucherCode = voucherCode.trim().toUpperCase();
+        if (!voucherCode.trim().matches("^[A-Z0-9_\\-]{3,20}$"))
+            throw new ValidationException("Mã KM chỉ gồm chữ, số, dấu _ hoặc - (3–20 ký tự).");
+        // Loại KM
+        int type = parseInt(req, "type");
+        if (type < 1 || type > 3)
+            throw new ValidationException("Loại khuyến mãi không hợp lệ.");
+        // Mức giảm
+        int discountAmount = parseInt(req, "discountAmount");
+        if (discountAmount <= 0)
+            throw new ValidationException("Mức giảm phải lớn hơn 0.");
+        if (type == 1 && discountAmount > 100)
+            throw new ValidationException("Giảm theo % không được vượt quá 100.");
+        // Giảm tối đa
+        int maxReduce = parseInt(req, "maxReduce");
+        if (maxReduce < 0)
+            throw new ValidationException("Giảm tối đa không được âm.");
+        // Đơn tối thiểu
+        int minOrderValue = parseInt(req, "minOrderValue");
+        if (minOrderValue < 0)
+            throw new ValidationException("Đơn tối thiểu không được âm.");
+        // Số lượng
+        int quantity = parseInt(req, "quantity");
+        if (quantity < 1)
+            throw new ValidationException("Số lượng phải >= 1.");
+        // Ngày
+        LocalDateTime startDate = parseDate(req, "startDate");
+        LocalDateTime endDate = parseDate(req, "endDate");
+        if (startDate == null) throw new ValidationException("Ngày bắt đầu không được để trống.");
+        if (endDate == null) throw new ValidationException("Ngày kết thúc không được để trống.");
+        if (endDate.isBefore(startDate))
+            throw new ValidationException("Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.");
         Voucher v = new Voucher();
-
-        v.setVoucherCode(req.getParameter("voucherCode"));
-        v.setDiscountAmount(parseInt(req, "discountAmount"));
-        v.setType(parseInt(req, "type"));
-        v.setQuantity(parseInt(req, "quantity"));
-        v.setMinOrderValue(parseInt(req, "minOrderValue"));
-        v.setMaxReduce(parseInt(req, "maxReduce"));
-        v.setStartDate(parseDate(req, "startDate"));
-        v.setEndDate(parseDate(req, "endDate"));
-
+        v.setVoucherCode(voucherCode);
+        v.setDiscountAmount(discountAmount);
+        v.setType(type);
+        v.setQuantity(quantity);
+        v.setMinOrderValue(minOrderValue);
+        v.setMaxReduce(maxReduce);
+        v.setStartDate(startDate);
+        v.setEndDate(endDate);
         return v;
     }
     private int parseInt(HttpServletRequest req, String name) {
