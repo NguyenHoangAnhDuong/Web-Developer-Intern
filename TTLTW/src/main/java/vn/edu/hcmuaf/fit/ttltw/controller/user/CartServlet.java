@@ -147,7 +147,8 @@ public class CartServlet extends HttpServlet {
         boolean success = cartService.addToCart(userId, vId, quantity);
 
         if (success) {
-            response.getWriter().print("SUCCESS");
+            int totalCount = cartService.getTotalQuantity(userId); // lấy tổng số lượng
+            response.getWriter().print(totalCount);
         } else {
             response.setStatus(400);
             response.getWriter().print("STOCK_EXCEEDED");
