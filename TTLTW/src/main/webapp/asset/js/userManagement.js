@@ -22,35 +22,28 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 3000);
     }
     function enterEditMode(elements) {
-        const { editBtn, saveBtn, cancelBtn, roleText, roleSelect, statusText, statusSelect } = elements;
+        const { editBtn, saveBtn, cancelBtn, statusText, statusSelect } = elements;
         editBtn.style.display = "none";
         saveBtn.style.display = "inline-block";
         cancelBtn.style.display = "inline-block";
-        roleText.style.display = "none";
-        roleSelect.style.display = "inline-block";
         statusText.style.display = "none";
         statusSelect.style.display = "inline-block";
     }
     function exitEditMode(elements, updateText = false) {
-        const { editBtn, saveBtn, cancelBtn, roleText, roleSelect, statusText, statusSelect } = elements;
-        roleText.style.display = "inline-block";
-        roleSelect.style.display = "none";
+        const { editBtn, saveBtn, cancelBtn, statusText, statusSelect } = elements;
         statusText.style.display = "inline-block";
         statusSelect.style.display = "none";
         saveBtn.style.display = "none";
         cancelBtn.style.display = "none";
         editBtn.style.display = "inline-block";
         if (updateText) {
-            roleText.textContent = roleSelect.value == "0" ? "Admin" : "User";
             statusText.textContent = statusSelect.value == "1" ? "Hoạt động" : "Tạm khóa";
         }
     }
     function resetToOldValues(elements, oldValues) {
-        elements.roleSelect.value = oldValues.role;
         elements.statusSelect.value = oldValues.status;
     }
     function updateOldValues(oldValues, newValues) {
-        oldValues.role = newValues.role;
         oldValues.status = newValues.status;
     }
     function setButtonLoading(btn, isLoading) {
@@ -58,7 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
         btn.style.pointerEvents = isLoading ? "none" : "auto";
     }
     const searchInput = document.getElementById("search-input");
-    const roleFilter = document.getElementById("role-filter");
     const statusFilter = document.getElementById("status-filter");
     const resetBtn = document.getElementById("reset-filter-btn");
 
@@ -71,22 +63,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     function applyFilter() {
         const searchTerm = searchInput.value.trim();
-        const roleValue = roleFilter.value;
         const statusValue = statusFilter.value;
 
         const params = new URLSearchParams();
 
         if (searchTerm) params.append('search', searchTerm);
-        if (roleValue) params.append('role', roleValue);
         if (statusValue) params.append('status', statusValue);
         const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
         window.location.href = newUrl;
     }
     if (searchInput) {
         searchInput.addEventListener("input", debounce(applyFilter, 500));
-    }
-    if (roleFilter) {
-        roleFilter.addEventListener("change", applyFilter);
     }
     if (statusFilter) {
         statusFilter.addEventListener("change", applyFilter);
@@ -104,14 +91,11 @@ document.addEventListener("DOMContentLoaded", () => {
             editBtn: row.querySelector(".edit-icon"),
             saveBtn: row.querySelector(".save-icon"),
             cancelBtn: row.querySelector(".cancel-icon"),
-            roleText: row.querySelector(".role-text"),
-            roleSelect: row.querySelector(".role-select"),
             statusText: row.querySelector(".status-text"),
             statusSelect: row.querySelector(".status-select")
         };
 
         const oldValues = {
-            role: elements.roleSelect.value,
             status: elements.statusSelect.value
         };
         elements.editBtn.addEventListener("click", () => {
@@ -124,7 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
         elements.saveBtn.addEventListener("click", async () => {
             const formData = new URLSearchParams();
             formData.append("id", id);
-            formData.append("role", elements.roleSelect.value);
+            formData.append("role", 2);
             formData.append("status", elements.statusSelect.value);
             setButtonLoading(elements.saveBtn, true);
             try {
@@ -142,15 +126,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
                 updateOldValues(oldValues, {
-                    role: elements.roleSelect.value,
                     status: elements.statusSelect.value
                 });
                 exitEditMode(elements, true);
-                showToast("Cập nhật người dùng thành công", "success");
+                showToast("Cập nhật khách hàng thành công", "success");
             } catch (error) {
                 console.error("Error:", error);
                 setButtonLoading(elements.saveBtn, false);
-                showToast("Lỗi kết nối khi cập nhật người dùng", "error");
+                showToast("Lỗi kết nối khi cập nhật khách hàng", "error");
             }
         });
     });
