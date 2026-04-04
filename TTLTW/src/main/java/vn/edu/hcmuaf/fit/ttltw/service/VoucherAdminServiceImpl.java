@@ -9,10 +9,14 @@ import java.util.List;
 
 public class VoucherAdminServiceImpl implements VoucherAdminService {
 
-    private final VoucherAdminDao dao;
+    private VoucherAdminDao dao;
 
     public VoucherAdminServiceImpl(VoucherAdminDaoImpl dao) {
         this.dao = dao;
+    }
+
+    public VoucherAdminServiceImpl() {
+        this.dao = new VoucherAdminDaoImpl();
     }
 
     @Override
@@ -51,6 +55,10 @@ public class VoucherAdminServiceImpl implements VoucherAdminService {
     @Override
     public void toggleStatus(int id) {
         dao.toggleStatus(id);
+    }
+    @Override
+    public List<Voucher> getActiveVouchers() {
+        return dao.getActiveVouchers();
     }
 
 }

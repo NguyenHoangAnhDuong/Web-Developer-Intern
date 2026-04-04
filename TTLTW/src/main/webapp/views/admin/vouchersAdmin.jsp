@@ -137,16 +137,17 @@
                                           style="display:inline;">
                                         <input type="hidden" name="action" value="toggle">
                                         <input type="hidden" name="id" value="${voucher.id}">
-                                        <button type="submit" class="btn-toggle">
-                                                ${voucher.status == 1 ? "Tắt" : "Bật"}
+                                        <button type="submit" class="btn-toggle" title="${voucher.status == 1 ? 'Tắt' : 'Bật'}">
+                                            <i class="fas ${voucher.status == 1 ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
                                         </button>
                                     </form>
 
                                     <button
                                             class="btn-edit"
                                             onclick="editRow(this)"
-                                            data-id="${voucher.id}">
-                                        Sửa
+                                            data-id="${voucher.id}"
+                                            title="Sửa">
+                                        <i class="fas fa-pen-to-square"></i>
                                     </button>
 
                                 </td>
@@ -221,16 +222,19 @@
 
                 <div class="pagination">
                     <c:if test="${page > 1}">
-                        <a href="${pageContext.request.contextPath}/admin/vouchers?page=${page-1}&keyword=${keyword}&status=${status}">‹</a>
+                        <a href="${pageContext.request.contextPath}/admin/vouchers?page=${page-1}&keyword=${keyword}&status=${status}" class="page-arrow" title="Trang trước">
+                            <i class="fas fa-chevron-left"></i></a>
                     </c:if>
-
+                    <c:if test="${page == 1}">
+                        <span class="page-arrow disabled"><i class="fas fa-chevron-left"></i></span>
+                    </c:if>
                     <c:forEach begin="1" end="${totalPage}" var="i">
                         <c:choose>
                             <c:when test="${i == page}">
                                 <span class="active">${i}</span>
                             </c:when>
                             <c:otherwise>
-                                <a href="${pageContext.request.contextPath}/admin/vouchers?page=${i}&keyword=${keyword}&status=${status}">
+                                <a href="${pageContext.request.contextPath}/admin/vouchers?page=${i}&keyword=${keyword}&status=${status}"class="page-num">
                                         ${i}
                                 </a>
                             </c:otherwise>
@@ -238,7 +242,9 @@
                     </c:forEach>
 
                     <c:if test="${page < totalPage}">
-                        <a href="${pageContext.request.contextPath}/admin/vouchers?page=${page+1}&keyword=${keyword}&status=${status}">›</a>
+                        <a href="${pageContext.request.contextPath}/admin/vouchers?page=${page+1}&keyword=${keyword}&status=${status}"class="page-arrow" title="Trang sau">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
                     </c:if>
                 </div>
             </div>

@@ -17,13 +17,15 @@
 <body>
 <jsp:include page="../includes/header.jsp"/>
 
-<div class="voucher-container page-wrapper">
+<div class="voucher-container page-wrapper" style="max-width: 1100px; margin: 24px auto 0;">
     <jsp:include page="../includes/sidebarUser.jsp"/>
 
     <div class="voucher-list">
         <c:forEach var="voucher" items="${listVoucher}">
-            <div class="voucher ${voucher.status == 0 ? 'expired' : ''}">
+            <div class="voucher ${voucher.quantity <= 0 || voucher.status == 0 ? 'expired' : ''}">
                 <div class="voucher-left">
+                    <div class="voucher-circle top"></div>
+                    <div class="voucher-circle bottom"></div>
                     <div class="icon">
                         <img src="${pageContext.request.contextPath}/asset/img/logo.png" alt="logo">
                     </div>
@@ -35,7 +37,7 @@
                                 <h3>
                                     Giảm ${voucher.discountAmount}%
                                     <span style="font-size:14px; font-weight:400;">
-                        (Tối đa <fmt:formatNumber value="${voucher.maxReduce}" type="number"/> ₫)
+                        (Tối đa <fmt:formatNumber value="${voucher.maxReduce}" type="number" groupingUsed="true"/> ₫)
                     </span>
                                 </h3>
                             </c:when>
@@ -45,13 +47,22 @@
                             </c:otherwise>
                         </c:choose>
 
-                        <p>Đơn tối thiểu <fmt:formatNumber value="${voucher.minOrderValue}" type="number"/> ₫</p>
+                        <p class="min-order">Đơn tối thiểu <fmt:formatNumber value="${voucher.minOrderValue}" type="number"/> ₫</p>
+                    </div>
+                    <div class="voucher-footer">
+                        <div class="voucher-expiry">
+                            <i class="fa-regular fa-clock"></i>
+                            HSD: ${voucher.endDate.dayOfMonth}/${voucher.endDate.monthValue}/${voucher.endDate.year}
+                        </div>
+                        <div class="voucher-code-wrapper">
+                            Code: <span class="code-text">${voucher.voucherCode}</span>
+                        </div>
                     </div>
                 </div>
 
-                <c:if test="${voucher.status != 0}">
-                    <div class="badge">x${voucher.quantity}</div>
-                </c:if>
+                <div class="voucher-action">
+                    <div class="quantity-badge">Còn ${voucher.quantity} suất</div>
+                </div>
             </div>
         </c:forEach>
     </div>

@@ -17,5 +17,6 @@ public interface VoucherAdminService {
     void deleteVoucher(int id);
 
     void toggleStatus(int id);
+    List<Voucher> getActiveVouchers();
 
 }
