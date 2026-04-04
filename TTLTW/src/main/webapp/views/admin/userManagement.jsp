@@ -115,7 +115,7 @@
 
                             <!-- STATUS -->
                             <td class="status-cell">
-                                <span class="status-text">
+                                <span class="status-text ${u.status == 1 ? 'status-active' : 'status-locked'}">
                                     <c:choose>
                                         <c:when test="${u.status == 1}">Hoạt động</c:when>
                                         <c:otherwise>Tạm khóa</c:otherwise>

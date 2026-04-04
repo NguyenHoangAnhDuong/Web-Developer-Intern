@@ -160,6 +160,26 @@
     pointer-events: none;
 }
 
+/* Status Badge */
+.status-active,
+.status-locked {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.status-active {
+    background-color: #dcfce7;
+    color: #16a34a;
+}
+
+.status-locked {
+    background-color: #fee2e2;
+    color: #dc2626;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .footer {

@@ -37,7 +37,10 @@ document.addEventListener("DOMContentLoaded", () => {
         cancelBtn.style.display = "none";
         editBtn.style.display = "inline-block";
         if (updateText) {
-            statusText.textContent = statusSelect.value == "1" ? "Hoạt động" : "Tạm khóa";
+            const isActive = statusSelect.value == "1";
+            statusText.textContent = isActive ? "Hoạt động" : "Tạm khóa";
+            statusText.classList.toggle("status-active", isActive);
+            statusText.classList.toggle("status-locked", !isActive);
         }
     }
     function resetToOldValues(elements, oldValues) {
