@@ -12,19 +12,20 @@ body {
 
 .voucher-container .voucher-list {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
     gap: 20px;
     width: 100%;
     max-width: 1200px;
     padding: 20px;
-    background: #fff;
+    background:#fff;
 }
 
 .voucher-container .voucher {
     background: #fff;
+    height: 140px;
     border-radius: 10px;
     display: flex;
-    overflow: hidden;
+    overflow: visible;
     position: relative;
     box-shadow: 0 3px 6px rgba(0,0,0,0.1);
 }
@@ -40,6 +41,20 @@ body {
     align-items: center;
     font-weight: bold;
     font-size: 14px;
+}
+.voucher-circle {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background: #EFEFEF; /* Khớp với màu background body */
+    border-radius: 50%;
+    right: -9px;
+}
+.voucher-circle.top {
+    top: -8px;
+}
+.voucher-circle.bottom {
+    bottom: -8px;
 }
 
 .voucher-container .voucher-left img {
@@ -117,7 +132,62 @@ body {
     border-radius: 6px;
     pointer-events: none;
 }
+.min-order {
+    font-size: 13px;
+    color: #757575;
+}
 
+.voucher-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.voucher-expiry {
+    font-size: 12px;
+    color: #ff4d4d;
+}
+
+.voucher-code-wrapper {
+    font-size: 13px;
+    font-weight: 600;
+    color: #2f7a87;
+}
+
+.voucher-action {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-left: 10px;
+}
+
+.quantity-badge {
+    font-size: 11px;
+    background: #eafff0;
+    color: #27ae60;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+.is-expired {
+    filter: grayscale(1);
+    opacity: 0.7;
+}
+
+.is-expired::after {
+    content: "HẾT LƯỢT";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    border: 3px solid #999;
+    color: #999;
+    padding: 5px 15px;
+    font-weight: bold;
+    font-size: 20px;
+    border-radius: 8px;
+    z-index: 10;
+}
 
 /* Responsive */
 @media (max-width: 992px) {

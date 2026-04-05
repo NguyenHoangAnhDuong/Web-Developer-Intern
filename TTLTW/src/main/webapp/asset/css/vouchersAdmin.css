@@ -138,18 +138,23 @@
 #promoTable .btn-edit,
 #promoTable .btn-delete,
 #promoTable .btn-toggle {
-    padding: 6px 10px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     margin: 0 2px;
     font-weight: 500;
     transition: 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #promoTable .btn-edit {
     background-color: #ffc107;
     color: #000;
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
 }
 
 #promoTable .btn-delete {
@@ -158,11 +163,23 @@
 }
 
 #promoTable .btn-toggle {
-    background-color: #6c757d;
     color: white;
-    min-width: 56px;
+    min-width: 40px;
+    height: 34px;
+    font-size: 16px;
+}
+#promoTable .btn-toggle:has(.fa-toggle-on) {
+    background-color: #28a745;
 }
 
+#promoTable .btn-toggle:has(.fa-toggle-off) {
+    background-color: #6c757d;
+}
+#promoTable .btn-toggle .fa-toggle-on,
+#promoTable .btn-toggle .fa-toggle-off {
+    color: #ffffff;
+    font-size: 18px;
+}
 #promoTable .btn-edit:hover {
     background-color: #e0a800;
 }
@@ -211,7 +228,7 @@
 .modal .modal-content {
     background: white;
     padding: 20px;
-    width: 400px;
+    width: 500px;
     border-radius: 10px;
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
     animation: fadeIn 0.3s ease;
@@ -310,10 +327,44 @@
 }
 
 .container .pagination {
-    background: var(--color-button);
-    color: white;
-    padding: 4px 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.container .pagination .page-num,
+.container .pagination .page-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 34px;
     border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: 0.2s;
+    border: 1px solid #dee2e6;
+    color: var(--color-button);
+    background: white;
+}
+.container .pagination .page-num.active {
+    background-color: var(--color-button);
+    color: white;
+    border-color: var(--color-button);
+    cursor: default;
+}
+
+.container .pagination .page-num:not(.active):hover,
+.container .pagination .page-arrow:not(.disabled):hover {
+    background-color: #f0f4ff;
+    border-color: var(--color-button);
+}
+.container .pagination .page-arrow.disabled {
+    color: #ccc;
+    border-color: #eee;
+    cursor: not-allowed;
+    background: #fafafa;
 }
 .muted.hidden{
     font-size: 22px;
