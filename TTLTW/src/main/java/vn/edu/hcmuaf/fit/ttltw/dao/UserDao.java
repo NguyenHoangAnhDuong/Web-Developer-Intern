@@ -51,8 +51,8 @@ public class UserDao {
     public boolean register(User u) {
         int result = DBConnect.getJdbi()
                 .withHandle(h -> h
-                        .createUpdate("INSERT INTO users (first_name, last_name, username, password, email) " +
-                                "VALUES (:fn, :ln, :un, :pw, :em)")
+                        .createUpdate("INSERT INTO users (first_name, last_name, username, password, email, roles_id) " +
+                                "VALUES (:fn, :ln, :un, :pw, :em, 2)")
                         .bind("fn", u.getFirstName())
                         .bind("ln", u.getLastName())
                         .bind("un", u.getUsername())
