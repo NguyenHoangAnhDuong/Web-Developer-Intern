@@ -299,11 +299,11 @@
                             <div class="promo-content">
                                 <p class="discount">
                                     <c:choose>
-                                        <c:when test="${voucher.discount_type == 1}">
-                                            Giảm ${voucher.discount_value}₫
-                                        </c:when>
                                         <c:when test="${voucher.discount_type == 2}">
-                                            Giảm ${voucher.discount_value}%
+                                            Giảm <span class="amount"><fmt:formatNumber value="${voucher.discount_value}" type="number" groupingUsed="true"/>₫</span>
+                                        </c:when>
+                                        <c:when test="${voucher.discount_type == 1}">
+                                            Giảm <span class="percent"><fmt:formatNumber value="${voucher.discount_value}" maxFractionDigits="0"/>%</span>
                                         </c:when>
                                         <c:otherwise>
                                             ${voucher.name}
