@@ -4,14 +4,17 @@
     border-radius: 12px;
     box-shadow: var(--box-shadow);
 }
+
 /* Đẩy nội dung theo kích thước sidebar */
 .app .container {
     margin-left: 250px !important;
     width: calc(100% - 250px);
-    max-width: none; /* override base.css */
+    max-width: none;
+    /* override base.css */
     transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
 }
-.sidebar.collapsed ~ .container {
+
+.sidebar.collapsed~.container {
     margin-left: 60px !important;
     width: calc(100% - 60px);
 }
@@ -50,7 +53,8 @@
     text-align: left;
 }
 
-.container th, td {
+.container th,
+td {
     padding: 10px 12px;
     border-bottom: 1px solid #eee;
     font-size: 15px;
@@ -64,7 +68,7 @@
 .container td {
     color: #333;
 }
-/* Filter Bar */
+
 #filter-bar {
     display: flex;
     gap: 12px;
@@ -93,7 +97,7 @@
 #filter-bar .btn-reset i {
     font-size: 16px;
 }
-/* Footer Pagination */
+
 .footer-user {
     display: flex;
     justify-content: space-between;
@@ -160,7 +164,7 @@
     pointer-events: none;
 }
 
-/* Status Badge */
+
 .status-active,
 .status-locked {
     display: inline-block;
@@ -171,13 +175,52 @@
 }
 
 .status-active {
-    background-color: #dcfce7;
     color: #16a34a;
+    border: 1px solid #16a34a;
 }
 
 .status-locked {
-    background-color: #fee2e2;
     color: #dc2626;
+    border: 1px solid #dc2626;
+}
+
+/* Action Cell */
+.action-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.action-icon-link {
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-button);
+    text-decoration: none;
+    font-size: 15px;
+    transition: opacity 0.2s;
+}
+
+.action-icon-link:hover {
+    opacity: 0.7;
+}
+
+.lock-icon {
+    font-size: 15px;
+    cursor: pointer;
+    color: #dc2626;
+    transition: opacity 0.2s;
+}
+
+.unlock-icon {
+    font-size: 15px;
+    cursor: pointer;
+    color: #16a34a;
+    transition: opacity 0.2s;
+}
+
+.lock-icon:hover,
+.unlock-icon:hover {
+    opacity: 0.7;
 }
 
 /* Responsive */
@@ -207,5 +250,3 @@
         display: none;
     }
 }
-
-

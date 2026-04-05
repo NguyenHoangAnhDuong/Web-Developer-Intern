@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return "/" + window.location.pathname.split("/")[1];
     }
     const apiUrl = getContextPath() + "/admin/users";
-    const allRows = Array.from(document.querySelectorAll("#user-table-body tr"));
+
     function showToast(message, type = 'success') {
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
@@ -15,68 +15,32 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         document.body.appendChild(toast);
         setTimeout(() => toast.classList.add('show'), 100);
-
         setTimeout(() => {
             toast.classList.remove('show');
             setTimeout(() => toast.remove(), 300);
         }, 3000);
     }
-    function enterEditMode(elements) {
-        const { editBtn, saveBtn, cancelBtn, statusText, statusSelect } = elements;
-        editBtn.style.display = "none";
-        saveBtn.style.display = "inline-block";
-        cancelBtn.style.display = "inline-block";
-        statusText.style.display = "none";
-        statusSelect.style.display = "inline-block";
-    }
-    function exitEditMode(elements, updateText = false) {
-        const { editBtn, saveBtn, cancelBtn, statusText, statusSelect } = elements;
-        statusText.style.display = "inline-block";
-        statusSelect.style.display = "none";
-        saveBtn.style.display = "none";
-        cancelBtn.style.display = "none";
-        editBtn.style.display = "inline-block";
-        if (updateText) {
-            const isActive = statusSelect.value == "1";
-            statusText.textContent = isActive ? "Hoạt động" : "Tạm khóa";
-            statusText.classList.toggle("status-active", isActive);
-            statusText.classList.toggle("status-locked", !isActive);
-        }
-    }
-    function resetToOldValues(elements, oldValues) {
-        elements.statusSelect.value = oldValues.status;
-    }
-    function updateOldValues(oldValues, newValues) {
-        oldValues.status = newValues.status;
-    }
-    function setButtonLoading(btn, isLoading) {
-        btn.style.opacity = isLoading ? "0.5" : "1";
-        btn.style.pointerEvents = isLoading ? "none" : "auto";
-    }
+
+    // ===== Filter / Search =====
     const searchInput = document.getElementById("search-input");
     const statusFilter = document.getElementById("status-filter");
     const resetBtn = document.getElementById("reset-filter-btn");
 
     let debounceTimer;
-    function debounce(func, delay) {
-        return function() {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(func, delay);
-        };
-    }
     function applyFilter() {
+        const params = new URLSearchParams();
         const searchTerm = searchInput.value.trim();
         const statusValue = statusFilter.value;
-
-        const params = new URLSearchParams();
-
         if (searchTerm) params.append('search', searchTerm);
         if (statusValue) params.append('status', statusValue);
-        const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
-        window.location.href = newUrl;
+        window.location.href = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
     }
+
     if (searchInput) {
-        searchInput.addEventListener("input", debounce(applyFilter, 500));
+        searchInput.addEventListener("input", () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(applyFilter, 500);
+        });
     }
     if (statusFilter) {
         statusFilter.addEventListener("change", applyFilter);
@@ -86,56 +50,60 @@ document.addEventListener("DOMContentLoaded", () => {
             window.location.href = window.location.pathname;
         });
     }
-    allRows.forEach(row => {
-        // Bỏ qua row "no results"
-        if (row.id === 'no-results-row') return;
-        const id = row.dataset.id;
-        const elements = {
-            editBtn: row.querySelector(".edit-icon"),
-            saveBtn: row.querySelector(".save-icon"),
-            cancelBtn: row.querySelector(".cancel-icon"),
-            statusText: row.querySelector(".status-text"),
-            statusSelect: row.querySelector(".status-select")
-        };
 
-        const oldValues = {
-            status: elements.statusSelect.value
-        };
-        elements.editBtn.addEventListener("click", () => {
-            enterEditMode(elements);
-        });
-        elements.cancelBtn.addEventListener("click", () => {
-            resetToOldValues(elements, oldValues);
-            exitEditMode(elements);
-        });
-        elements.saveBtn.addEventListener("click", async () => {
+    // ===== Lock / Unlock =====
+    document.querySelectorAll(".toggle-status-icon").forEach(icon => {
+        icon.addEventListener("click", async () => {
+            const id = icon.dataset.id;
+            const newStatus = icon.dataset.status;
+
             const formData = new URLSearchParams();
             formData.append("id", id);
             formData.append("role", 2);
-            formData.append("status", elements.statusSelect.value);
-            setButtonLoading(elements.saveBtn, true);
+            formData.append("status", newStatus);
+
+            icon.style.opacity = "0.5";
+            icon.style.pointerEvents = "none";
+
             try {
                 const response = await fetch(apiUrl, {
                     method: "POST",
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                     body: formData
                 });
                 const result = await response.json();
-                setButtonLoading(elements.saveBtn, false);
+
+                icon.style.opacity = "1";
+                icon.style.pointerEvents = "auto";
+
                 if (!result.success) {
                     showToast("Cập nhật thất bại", "error");
                     return;
                 }
-                updateOldValues(oldValues, {
-                    status: elements.statusSelect.value
-                });
-                exitEditMode(elements, true);
-                showToast("Cập nhật khách hàng thành công", "success");
+
+                const row = icon.closest("tr");
+                const statusSpan = row.querySelector(".status-text");
+                const isActive = newStatus == "1";
+
+                // Cập nhật badge trạng thái
+                statusSpan.textContent = isActive ? "Hoạt động" : "Tạm khóa";
+                statusSpan.className = "status-text " + (isActive ? "status-active" : "status-locked");
+
+                // Đổi icon lock/unlock
+                if (isActive) {
+                    icon.className = "fa-solid fa-lock toggle-status-icon lock-icon";
+                    icon.dataset.status = "0";
+                    icon.title = "Khóa tài khoản";
+                } else {
+                    icon.className = "fa-solid fa-unlock toggle-status-icon unlock-icon";
+                    icon.dataset.status = "1";
+                    icon.title = "Mở khóa tài khoản";
+                }
+
+                showToast(isActive ? "Mở khóa tài khoản thành công" : "Khóa tài khoản thành công");
             } catch (error) {
-                console.error("Error:", error);
-                setButtonLoading(elements.saveBtn, false);
+                icon.style.opacity = "1";
+                icon.style.pointerEvents = "auto";
                 showToast("Lỗi kết nối khi cập nhật khách hàng", "error");
             }
         });

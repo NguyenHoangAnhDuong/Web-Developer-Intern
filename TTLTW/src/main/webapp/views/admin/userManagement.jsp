@@ -121,18 +121,26 @@
                                         <c:otherwise>Tạm khóa</c:otherwise>
                                     </c:choose>
                                 </span>
-
-                                <select class="status-select" style="display:none;">
-                                    <option value="1" ${u.status == 1 ? "selected" : ""}>Hoạt động</option>
-                                    <option value="0" ${u.status == 0 ? "selected" : ""}>Tạm khóa</option>
-                                </select>
                             </td>
 
                             <!-- ACTION ICONS -->
                             <td class="action-cell">
-                                <i class="fa-solid fa-pen edit-icon" title="Chỉnh sửa"></i>
-                                <i class="fa-solid fa-floppy-disk save-icon" style="display:none;" title="Lưu"></i>
-                                <i class="fa-solid fa-xmark cancel-icon" style="display:none;" title="Hủy"></i>
+                                <a href="${pageContext.request.contextPath}/admin/customers/detail?id=${u.id}"
+                                   class="action-icon-link" title="Xem chi tiết">
+                                    <i class="fa-solid fa-pen edit-icon"></i>
+                                </a>
+                                <c:choose>
+                                    <c:when test="${u.status == 1}">
+                                        <i class="fa-solid fa-lock toggle-status-icon lock-icon"
+                                           data-id="${u.id}" data-status="0"
+                                           title="Khóa tài khoản"></i>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <i class="fa-solid fa-unlock toggle-status-icon unlock-icon"
+                                           data-id="${u.id}" data-status="1"
+                                           title="Mở khóa tài khoản"></i>
+                                    </c:otherwise>
+                                </c:choose>
                             </td>
 
                         </tr>
