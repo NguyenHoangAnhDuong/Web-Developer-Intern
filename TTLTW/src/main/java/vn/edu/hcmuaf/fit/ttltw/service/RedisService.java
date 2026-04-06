@@ -34,6 +34,40 @@ public class RedisService {
     private static String pendingUserKey(String email)    { return "pending_user:" + email; }
     private static String productKey(int id)              { return "product:" + id; }
     private static String productListKey(String suffix)   { return "products:" + suffix; }
+    private static String loginAttemptsKey(String input)  { return "login_attempts:" + input.toLowerCase(); }
+
+    // ===================== Login attempt tracking =====================
+
+    /**
+     * Tăng số lần đăng nhập sai cho input (username/email).
+     * TTL 15 phút tính từ lần đăng nhập sai đầu tiên trong chuỗi.
+     * @return số lần sai sau khi tăng
+     */
+    public static int incrementLoginAttempts(String input) {
+        try (Jedis jedis = RedisConnect.getConnection()) {
+            String key = loginAttemptsKey(input);
+            long count = jedis.incr(key);
+            if (count == 1) {
+                jedis.expire(key, 15 * 60); // 15 phút
+            }
+            return (int) count;
+        }
+    }
+
+    /** Lấy số lần đăng nhập sai hiện tại. */
+    public static int getLoginAttempts(String input) {
+        try (Jedis jedis = RedisConnect.getConnection()) {
+            String val = jedis.get(loginAttemptsKey(input));
+            return val != null ? Integer.parseInt(val) : 0;
+        }
+    }
+
+    /** Xóa bộ đếm sau khi đăng nhập thành công hoặc sau khi khóa tài khoản. */
+    public static void resetLoginAttempts(String input) {
+        try (Jedis jedis = RedisConnect.getConnection()) {
+            jedis.del(loginAttemptsKey(input));
+        }
+    }
 
 
     //Lưu OTP cho email, tự hết hạn sau 5 phút.

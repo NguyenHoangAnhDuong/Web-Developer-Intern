@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 import org.mindrot.jbcrypt.BCrypt;
 
 import vn.edu.hcmuaf.fit.ttltw.dao.UserDao;
+import vn.edu.hcmuaf.fit.ttltw.model.LoginResult;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
 
 public class UserService {
@@ -75,51 +76,80 @@ public class UserService {
     }
 
     // Đăng nhập (check BCrypt, hỗ trợ migrate password cũ chưa hash)
-    public User login(String input, String password) {
+    // Trả về LoginResult với các trạng thái: SUCCESS, WRONG_CREDENTIALS, ACCOUNT_LOCKED, JUST_LOCKED
+    public LoginResult login(String input, String password) {
         User user = userDao.findByInput(input);
+
         if (user == null)
-            return null;
+            return LoginResult.wrongCredentials();
+
+        // Tài khoản đã bị khóa từ trước
+        if (user.getStatus() == 0)
+            return LoginResult.accountLocked(user);
 
         String storedPassword = user.getPassword();
         if (storedPassword == null)
-            return null;
+            return LoginResult.wrongCredentials();
 
-        // Trim whitespace từ stored password
         storedPassword = storedPassword.trim();
 
+        boolean passwordOk;
         if (storedPassword.startsWith("$2a$") || storedPassword.startsWith("$2b$") || storedPassword.startsWith("$2y$")) {
-            // Kiểm tra độ dài hợp lệ của BCrypt hash (phải 60 ký tự)
             if (storedPassword.length() < 59) {
                 System.err.println("Invalid hash length: " + storedPassword.length() + " for user " + input);
-                return null;
-            }
-
-            // jBCrypt chỉ hỗ trợ $2a$, nên chuyển $2y$ (PHP) và $2b$ sang $2a$
-            String hashForCheck = storedPassword;
-            if (storedPassword.startsWith("$2y$") || storedPassword.startsWith("$2b$")) {
-                hashForCheck = "$2a$" + storedPassword.substring(4);
-            }
-
-            try {
-                if (!BCrypt.checkpw(password, hashForCheck)) {
-                    return null;
+                passwordOk = false;
+            } else {
+                // jBCrypt chỉ hỗ trợ $2a$, nên chuyển $2y$ (PHP) và $2b$ sang $2a$
+                String hashForCheck = storedPassword;
+                if (storedPassword.startsWith("$2y$") || storedPassword.startsWith("$2b$")) {
+                    hashForCheck = "$2a$" + storedPassword.substring(4);
                 }
-            } catch (IllegalArgumentException e) {
-                System.err.println("BCrypt error for user " + input + ": " + e.getMessage());
-                e.printStackTrace();
-                return null;
+                try {
+                    passwordOk = BCrypt.checkpw(password, hashForCheck);
+                } catch (IllegalArgumentException e) {
+                    System.err.println("BCrypt error for user " + input + ": " + e.getMessage());
+                    e.printStackTrace();
+                    passwordOk = false;
+                }
             }
         } else {
             // Password cũ chưa hash (plain text) — so sánh trực tiếp rồi migrate sang BCrypt
-            if (!password.equals(storedPassword)) {
-                return null;
+            if (password.equals(storedPassword)) {
+                passwordOk = true;
+                String hashed = BCrypt.hashpw(password, BCrypt.gensalt());
+                userDao.updatePassword(user.getId(), hashed);
+                user.setPassword(hashed);
+            } else {
+                passwordOk = false;
             }
-            // Migrate: hash lại password và lưu vào DB
-            String hashed = BCrypt.hashpw(password, BCrypt.gensalt());
-            userDao.updatePassword(user.getId(), hashed);
-            user.setPassword(hashed);
         }
-        return user;
+
+        if (!passwordOk) {
+            // Tăng bộ đếm đăng nhập sai
+            int attempts = RedisService.incrementLoginAttempts(input);
+            if (attempts >= 5) {
+                // Khóa tài khoản, xóa counter, gửi email thông báo
+                userDao.updateUser(user.getId(), user.getRolesId(), 0);
+                user.setStatus(0);
+                RedisService.resetLoginAttempts(input);
+                String toEmail = user.getEmail();
+                String name = ((user.getFirstName() != null ? user.getFirstName() : "")
+                        + " " + (user.getLastName() != null ? user.getLastName() : "")).trim();
+                new Thread(() -> {
+                    try {
+                        EmailService.sendAccountLocked(toEmail, name.isEmpty() ? user.getUsername() : name);
+                    } catch (Exception e) {
+                        System.err.println("Gửi email khóa tài khoản thất bại: " + e.getMessage());
+                    }
+                }).start();
+                return LoginResult.justLocked(user);
+            }
+            return LoginResult.wrongCredentials();
+        }
+
+        // Đăng nhập thành công — reset bộ đếm
+        RedisService.resetLoginAttempts(input);
+        return LoginResult.success(user);
     }
 
     public User loginByProvider(String provider, String providerId) {

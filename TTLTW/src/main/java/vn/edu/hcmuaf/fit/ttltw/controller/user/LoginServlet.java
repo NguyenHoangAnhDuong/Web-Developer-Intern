@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import vn.edu.hcmuaf.fit.ttltw.model.LoginResult;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
 import vn.edu.hcmuaf.fit.ttltw.service.UserService;
 
@@ -54,14 +55,21 @@ public class LoginServlet extends HttpServlet {
         String input = request.getParameter("input");
         String password = request.getParameter("password");
 
-        User user = userService.login(input, password);
+        LoginResult result = userService.login(input, password);
 
-        if (user == null) {
-            request.setAttribute("error", "Sai tài khoản hoặc mật khẩu!");
+        if (result.getStatus() != LoginResult.Status.SUCCESS) {
+            String errorMsg = switch (result.getStatus()) {
+                case ACCOUNT_LOCKED -> "Tài khoản đã bị khóa. Vui lòng liên hệ bộ phận vận hành để được mở khóa.";
+                case JUST_LOCKED   -> "Tài khoản bị khóa do đăng nhập sai quá 5 lần. Vui lòng kiểm tra email để biết thêm chi tiết.";
+                default            -> "Sai tài khoản hoặc mật khẩu!";
+            };
+            request.setAttribute("error", errorMsg);
             request.setAttribute("inputValue", input);
             request.getRequestDispatcher("/views/user/login.jsp").forward(request, response);
             return;
         }
+
+        User user = result.getUser();
         HttpSession session = request.getSession();
         session.setAttribute("user", user);
         session.setAttribute("role", user.getRolesId());
