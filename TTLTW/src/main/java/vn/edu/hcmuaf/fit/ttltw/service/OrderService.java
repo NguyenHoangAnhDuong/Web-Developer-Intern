@@ -155,7 +155,7 @@ public class OrderService {
     }
 
     public int processOrder(int userId, int addressId, String paymentMethod, String voucherCode,
-            Map<Integer, Integer> cart, int paymentStatus) {
+            Map<Integer, Integer> cart, int paymentStatus,String buyerNote, double shippingFee) {
         double subtotal = 0;
         for (Map.Entry<Integer, Integer> entry : cart.entrySet()) {
             Map<String, Object> product = orderDao.getProductForCart(entry.getKey());
@@ -205,10 +205,11 @@ public class OrderService {
         order.setStatus(1);
         int paymentTypeId = "bank".equalsIgnoreCase(paymentMethod) ? 2 : 1;
         order.setPaymentTypeId(paymentTypeId);// Trạng thái Chờ xác nhận
-        order.setFeeShipping(30000.0);
+        order.setFeeShipping(shippingFee);
         order.setVoucherId(appliedVoucherId);
         order.setDiscountAmount(discount);
-        order.setTotalAmount(subtotal + 30000.0 - discount);
+        order.setTotalAmount(subtotal + shippingFee - discount);
+        order.setNote(buyerNote);
         return orderDao.insertOrderWithDetails(order, cart);
     }
 

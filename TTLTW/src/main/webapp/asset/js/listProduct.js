@@ -570,7 +570,6 @@ function updatePrice(card, newPrice, oldPrice) {
 
 function initCartSystem() {
     const cartButtons = document.querySelectorAll('.cart-btn');
-    const cartBadge = document.getElementById('cart-badge');
 
     cartButtons.forEach(btn => {
         btn.onclick = function(e) {
@@ -595,16 +594,13 @@ function initCartSystem() {
                 }
             }
 
-            // LẤY vcId TỪNG CÁCH: đầu tiên từ variant_color_id, nếu không có thì từ data-id
             let vcId = null;
             
-            // Cách 1: Lấy từ màu được chọn (nếu có màu)
             if (hasColors) {
                 const activeColor = productCard.querySelector('.colors .color.active');
                 vcId = activeColor.getAttribute('data-variant-color-id');
             }
             
-            // Cách 2: Nếu không có màu hoặc không lấy được, lấy từ variant_color_id nếu có
             if (!vcId) {
                 const variantId = activeVariant.getAttribute('data-id');
                 const variantColorsData = productCard.querySelector('.variant-colors-data');
@@ -635,7 +631,6 @@ function initCartSystem() {
 
             fetch(`${contextPath}/cart?action=add&vcId=${vcId}`)
                 .then(response => {
-                    // Nếu Server trả về 401 hoặc nội dung chứa HTML (do Filter ép)
                     if (response.status === 401 || response.redirected) {
                         alert("Vui lòng đăng nhập để tiếp tục!");
                         window.location.href = contextPath + "/login";
@@ -644,7 +639,6 @@ function initCartSystem() {
                     return response.text();
                 })
                 .then(totalCount => {
-                    // KIỂM TRA CHẶN LỖI VỠ FORM CUỐI CÙNG
                     if (totalCount.includes("<!DOCTYPE html>")) {
                         console.error("Vẫn bị trả về HTML thay vì số lượng!");
                         window.location.href = contextPath + "/login";
@@ -660,13 +654,11 @@ function initCartSystem() {
                     if (err.message !== "REDIRECT_TO_LOGIN") console.error(err);
                 });
 
-            // Hiệu ứng nút
             renderSuccessState(btn);
         }
     });
 }
 
-// HÀM QUAN TRỌNG: Hiệu ứng nút khi thêm thành công
 function renderSuccessState(btn) {
     const originalHTML = btn.innerHTML;
     btn.innerHTML = '<i class="fa-solid fa-check"></i>';
@@ -702,7 +694,7 @@ function flyToCart(productImg) {
 
     document.body.appendChild(imgClone);
 
-    // 3. Tìm đích đến là badge số lượng (chính xác nhất)
+    //  tìm đích đến là badge số lượng (chính xác nhất)
     const cartBadge = document.getElementById('cart-badge');
 
     if (!cartBadge) {
@@ -716,7 +708,7 @@ function flyToCart(productImg) {
     const targetX = badgeRect.left + (badgeRect.width / 2) - 15;
     const targetY = badgeRect.top + (badgeRect.height / 2) - 15;
 
-    // 4. Thực hiện bay
+    //   Thực hiện bay
     setTimeout(() => {
         imgClone.style.left = targetX + 'px';
         imgClone.style.top = targetY + 'px';
@@ -725,7 +717,7 @@ function flyToCart(productImg) {
         imgClone.style.opacity = '0.3';
     }, 20);
 
-    // 5. Kết thúc và dọn dẹp
+    //   Kết thúc và dọn dẹp
     setTimeout(() => {
         if (document.body.contains(imgClone)) {
             document.body.removeChild(imgClone);

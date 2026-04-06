@@ -26,7 +26,7 @@ public class OrderAdminServlet extends HttpServlet {
 
         String keyword = req.getParameter("keyword");
         String statusFilterRaw = req.getParameter("statusFilter");
-        String ajax = req.getParameter("ajax");
+        // String ajax = req.getParameter("ajax");
 
         Integer statusFilter = null;
         if (statusFilterRaw != null && !statusFilterRaw.isEmpty()) {

@@ -13,4 +13,6 @@ public interface CartService {
      boolean changeVariant(int userId, int oldVcId, int newVcId);
     List<Map<String, Object>> getColorsByVariant(int variantId);
     Map<String, Object> getVariantInfo(int vcId);
+    // lấy tổng số lượng trong giỏ hàng
+    int getTotalQuantity(int userId);
 }

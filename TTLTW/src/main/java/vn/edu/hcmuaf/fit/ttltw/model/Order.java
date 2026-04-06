@@ -13,14 +13,41 @@ public class Order implements Serializable{
     private double discountAmount;
     private int userId;
     private int addressId;
+    private String note;
+    private String trackingNumber;
+    private String partnerName;
     private Timestamp createdAt;
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    public String getTrackingNumber() {
+        return trackingNumber;
+    }
+
+    public void setTrackingNumber(String trackingNumber) {
+        this.trackingNumber = trackingNumber;
+    }
+
+    public String getPartnerName() {
+        return partnerName;
+    }
+
+    public void setPartnerName(String partnerName) {
+        this.partnerName = partnerName;
+    }
+
     private Timestamp updatedAt;
 
     public Order() {
     }
 
-    public Order(int id, int status, Integer voucherId, int paymentTypeId, double feeShipping, double totalAmount,
-            double discountAmount, int userId, int addressId, Timestamp createdAt, Timestamp updatedAt) {
+    public Order(int id, int status, Integer voucherId, int paymentTypeId, double feeShipping, double totalAmount, double discountAmount, int userId, int addressId, String note, String trackingNumber, String partnerName, Timestamp createdAt, Timestamp updatedAt) {
         this.id = id;
         this.status = status;
         this.voucherId = voucherId;
@@ -30,6 +57,9 @@ public class Order implements Serializable{
         this.discountAmount = discountAmount;
         this.userId = userId;
         this.addressId = addressId;
+        this.note = note;
+        this.trackingNumber = trackingNumber;
+        this.partnerName = partnerName;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }

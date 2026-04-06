@@ -40,7 +40,7 @@
                                            data-id="${item.vc_id}" data-price="${item.subtotal}" data-unit-price="${item.unit_price}" ${item.stock == 0 ? 'disabled' : ''}></td>
 
                                     <td class="product-info">
-                                        <img src="${pageContext.request.contextPath}/assert/img/product/${item.product_img}" alt="${item.product_name}">
+                                        <img src="${item.product_img}" alt="${item.product_name}">
                                         <div class="product-detail">
                                             <span class="product-name">${item.product_name}</span>
                                                 <%-- Hiển thị phiên bản và màu sắc --%>
