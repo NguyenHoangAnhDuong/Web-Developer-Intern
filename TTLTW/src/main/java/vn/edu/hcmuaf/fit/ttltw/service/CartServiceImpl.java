@@ -124,4 +124,18 @@ public class CartServiceImpl implements CartService {
     public Map<String, Object> getVariantInfo(int vcId) {
         return cartDao.getVariantInfo(vcId);
     }
+
+    @Override
+    public int getTotalQuantity(int userId) {
+        Optional<Integer> cartIdOptional = cartDao.getActiveCartId(userId);
+        if (cartIdOptional.isPresent()) {
+            List<Map<String, Object>> items = cartDao.getCartDetails(cartIdOptional.get());
+            int total = 0;
+            for (Map<String, Object> item : items) {
+                total += Integer.parseInt(item.get("quantity").toString());
+            }
+            return total;
+        }
+        return 0;
+    }
 }
