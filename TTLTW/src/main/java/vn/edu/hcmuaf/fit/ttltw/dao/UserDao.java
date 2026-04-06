@@ -82,6 +82,15 @@ public class UserDao {
                 .orElse(null));
     }
 
+    // Lấy thông tin đầy đủ khách hàng theo id (chỉ lấy role = 2)
+    public Optional<User> findCustomerDetailById(int id) {
+        return DBConnect.getJdbi().withHandle(handle -> handle
+                .createQuery("SELECT id, username, first_name AS firstName, last_name AS lastName, email, avatar, roles_id AS rolesId, status FROM users WHERE id = :id AND roles_id = 2")
+                .bind("id", id)
+                .mapToBean(User.class)
+                .findOne());
+    }
+
     // lây thông tin qua tìm id người dùng
     public Optional<User> findById(int id) {
         return DBConnect.getJdbi().withHandle(handle -> handle
