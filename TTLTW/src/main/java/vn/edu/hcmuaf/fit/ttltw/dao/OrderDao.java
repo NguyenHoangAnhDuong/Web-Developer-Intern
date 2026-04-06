@@ -204,9 +204,9 @@ public class OrderDao {
         return jdbi.withHandle(handle -> handle.inTransaction(h -> {
             String sqlOrder = """
                         INSERT INTO orders (user_id, address_id, payment_type_id, voucher_id,
-                                           status, fee_shipping, discount_amount, total_amount, created_at)
+                                           status, fee_shipping, discount_amount, total_amount, note, created_at)
                         VALUES (:userId, :addressId, :paymentTypeId, :voucherId,
-                               :status, :feeShipping, :discountAmount, :totalAmount, NOW())
+                               :status, :feeShipping, :discountAmount, :totalAmount,:note, NOW())
                     """;
             int orderId = h.createUpdate(sqlOrder)
                     .bindBean(order)

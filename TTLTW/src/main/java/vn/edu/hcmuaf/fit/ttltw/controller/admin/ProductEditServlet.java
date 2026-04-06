@@ -12,7 +12,6 @@ import vn.edu.hcmuaf.fit.ttltw.service.ProductService;
 import vn.edu.hcmuaf.fit.ttltw.service.ProductServiceImpl;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Map;
 
 @WebServlet("/admin/products/edit")

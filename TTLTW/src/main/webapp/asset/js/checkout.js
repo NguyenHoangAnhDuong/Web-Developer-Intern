@@ -7,6 +7,54 @@ if (changeBtn && addressList) {
         addressList.classList.toggle("hidden");
     });
 }
+function formatVND(amount) {
+    return new Intl.NumberFormat("vi-VN").format(amount) + "₫";
+}
+function updateFinalTotal() {
+    const subtotalEl = document.getElementById("subtotal-val");
+    const shippingEl = document.getElementById("shipping-val");
+    const discountEl = document.getElementById("discount-display");
+    const finalTotalEl = document.getElementById("final-total-display");
+    const finalTotalInput = document.getElementById("finalTotalInput");
+    const shippingFeeInput = document.getElementById("shippingFeeInput");
+
+    if (!subtotalEl || !shippingEl || !discountEl || !finalTotalEl) return;
+
+    const subtotal = parseFloat(subtotalEl.dataset.value || 0);
+    const shipping = parseFloat(shippingEl.dataset.value || 0);
+    const discount = parseFloat(
+        discountEl.innerText.replace(/\./g, "").replace(/,/g, "") || 0
+    );
+
+    const finalTotal = subtotal + shipping - discount;
+
+    finalTotalEl.innerText = formatVND(finalTotal);
+    if (finalTotalInput) finalTotalInput.value = finalTotal;
+    if (shippingFeeInput) shippingFeeInput.value = shipping;
+}
+
+function updateShipping(fee) {
+    const shippingEl = document.getElementById("shipping-val");
+    if (!shippingEl) return;
+
+    const shipping = parseFloat(fee || 0);
+    shippingEl.dataset.value = shipping;
+    shippingEl.innerText = formatVND(shipping);
+    updateFinalTotal();
+}
+
+function applyVoucherFromBtn(btn) {
+    if (!btn) return;
+
+    const code = btn.dataset.code || "";
+    const discountAmount = parseFloat(btn.dataset.discount || 0);
+    const minOrder = parseFloat(btn.dataset.minOrder || 0);
+    const maxReduce = parseFloat(btn.dataset.maxReduce || 0);
+    const type = btn.dataset.type || "";
+
+    applyVoucher(code, discountAmount, minOrder, maxReduce, type, btn);
+}
+
 
 function updateAddress(name, phone, address, id) {
     const nameEl = document.querySelector(".address strong");
@@ -33,54 +81,42 @@ if (scrollContainer) {
     });
 }
 
-function applyVoucher(code, discountAmount, minOrder, maxReduce, type) {
-    try {
-        const subtotalEl = document.getElementById('subtotal-val');
-        const shippingEl = document.getElementById('shipping-val');
+function applyVoucher(code, discountAmount, minOrder, maxReduce, type, btnEl) {
+    const subtotalEl = document.getElementById("subtotal-val");
+    if (!subtotalEl) return;
 
-        if (!subtotalEl || !shippingEl) {
-            console.error("Không tìm thấy phần tử hiển thị giá tiền.");
-            return;
+    const subtotal = parseFloat(subtotalEl.dataset.value || 0);
+
+    let discount = 0;
+
+    if (subtotal < minOrder) {
+        showToast("Đơn hàng chưa đủ điều kiện áp dụng", "error");
+        return;
+    }
+
+    if (type === "percentage" || type === "1") {
+        discount = subtotal * (discountAmount / 100);
+
+        if (maxReduce > 0 && discount > maxReduce) {
+            discount = maxReduce;
         }
+    } else {
+        discount = discountAmount;
+    }
 
-        const subtotal = parseFloat(subtotalEl.getAttribute('data-value'));
-        const shipping = parseFloat(shippingEl.getAttribute('data-value'));
+    document.getElementById("discount-display").innerText =
+        discount.toLocaleString("vi-VN");
 
-        let discount = 0;
-        if (type === 'percentage' || type === '1') {
-            discount = subtotal * (discountAmount / 100);
-            if (maxReduce > 0 && discount > maxReduce) {
-                discount = maxReduce;
-            }
-        } else {
-            discount = discountAmount;
-        }
+    document.getElementById("appliedVoucherInput").value = code;
 
-        const discountDisplay = document.getElementById('discount-display');
-        const finalTotalDisplay = document.getElementById('final-total-display');
+    updateFinalTotal();
 
-        if (discountDisplay) {
-            discountDisplay.innerText = discount.toLocaleString("vi-VN");
-        }
+    document.querySelectorAll(".voucher")
+        .forEach(v => v.classList.remove("active"));
 
-        if (finalTotalDisplay) {
-            const finalTotal = subtotal + shipping - discount;
-            finalTotalDisplay.innerText = finalTotal.toLocaleString("vi-VN") + "₫";
-        }
-
-        const voucherInput = document.getElementById('appliedVoucherInput');
-        if (voucherInput) {
-            voucherInput.value = code;
-        }
-
-        document.querySelectorAll('.voucher').forEach(v => v.classList.remove('active'));
-        // Tìm element cha để highlight (sửa lỗi 'event is not defined' trong một số trình duyệt)
-        const btn = window.event ? window.event.target : null;
-        if (btn) {
-            btn.closest('.voucher').classList.add('active');
-        }
-    } catch (error) {
-        console.error("Lỗi khi áp dụng voucher:", error);
+    const btn = btnEl;
+    if (btn) {
+        btn.closest(".voucher")?.classList.add("active");
     }
 }
 document.addEventListener("DOMContentLoaded", function () {
@@ -95,5 +131,18 @@ document.addEventListener("DOMContentLoaded", function () {
                 orderForm.submit();
 
         });
+    }
+
+    document.querySelectorAll("input.shipping-option").forEach((radio) => {
+        radio.addEventListener("change", function () {
+            updateShipping(this.dataset.fee);
+        });
+    });
+
+    const checkedShipping = document.querySelector("input.shipping-option:checked");
+    if (checkedShipping) {
+        updateShipping(checkedShipping.dataset.fee);
+    } else {
+        updateFinalTotal();
     }
 });

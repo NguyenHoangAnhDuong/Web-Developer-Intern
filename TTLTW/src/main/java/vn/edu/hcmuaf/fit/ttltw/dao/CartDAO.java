@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class CartDAO {
-    private final Jdbi jdbi = DBConnect.getJdbi();;
+    private final Jdbi jdbi = DBConnect.getJdbi();
 
     //   Tìm giỏ hàng của user
     public Optional<Integer> getActiveCartId(int userId) {
