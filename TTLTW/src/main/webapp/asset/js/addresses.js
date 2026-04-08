@@ -7,22 +7,57 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const inputName = document.getElementById("name");
     const inputPhone = document.getElementById("phoneNumber");
-    const inputAddress = document.getElementById("fullAddress");
+    const inputAddress = document.getElementById("detailAddress");
     const inputStatus = document.getElementById("status");
 
     let editingId = null;
+    // địa chỉ
+    const provinceInput = document.getElementById("provinceInput");
+    const districtInput = document.getElementById("districtInput");
+    const wardInput = document.getElementById("wardInput");
 
-    function openModal() {
-        modal.classList.add("active");
+    const provinceList = document.getElementById("provinceList");
+    const districtList = document.getElementById("districtList");
+    const wardList = document.getElementById("wardList");
+    let provinces = [];
+    let districts = [];
+    let wards = [];
+    let selectedProvince = null;
+    let selectedDistrict = null;
+    let selectedWard = null;
+
+    function resetLocationFields() {
+        provinceInput.value = "";
+        districtInput.value = "";
+        wardInput.value = "";
+        provinceList.innerHTML = "";
+        districtList.innerHTML = "";
+        wardList.innerHTML = "";
+        selectedProvince = null;
+        selectedDistrict = null;
+        selectedWard = null;
+        districts = [];
+        wards = [];
+
+        districtInput.disabled = true;
+        wardInput.disabled = true;
     }
-
+    function openModal(isEdit = false) {
+        document.getElementById("modalTitleText").textContent = isEdit ? "Cập nhật địa chỉ" : "Địa chỉ mới";
+        modal.classList.add("active");
+        if (!isEdit) {
+            resetLocationFields();
+        }
+        loadProvinces();
+    }
     function closeModal() {
         modal.classList.remove("active");
         form.reset();
         editingId = null;
+       resetLocationFields();
     }
 
-    btnAdd?.addEventListener("click", openModal);
+    btnAdd?.addEventListener("click",() => openModal(false));
     btnBack?.addEventListener("click", closeModal);
     modal?.addEventListener("click", e => {
         if (e.target === modal) closeModal();
@@ -42,6 +77,23 @@ document.addEventListener("DOMContentLoaded", () => {
         inputPhone.value = item.querySelector(".address-phone").innerText.trim();
         inputAddress.value = item.querySelector(".address-details").innerText.trim();
         inputStatus.checked = item.classList.contains("default");
+
+        const fullAddr = item.querySelector(".address-details")?.innerText.trim() ?? "";
+        // Tách phần địa chỉ chi tiết (trước dấu phẩy đầu tiên)
+        const parts = fullAddr.split(",");
+        inputAddress.value = parts[0]?.trim() ?? fullAddr;
+
+        // Điền lại tỉnh/huyện/xã từ text đã lưu (chỉ hiển thị, không cần gọi API lại)
+        if (parts.length >= 4) {
+            wardInput.value = parts[1]?.trim() ?? "";
+            districtInput.value = parts[2]?.trim() ?? "";
+            provinceInput.value = parts[3]?.trim() ?? "";
+
+            // Gán giả để pass validation khi update
+            selectedProvince = { name: provinceInput.value };
+            selectedDistrict = { name: districtInput.value };
+            selectedWard = { name: wardInput.value };
+        }
     }
 
     form?.addEventListener("submit", async e => {
@@ -51,11 +103,15 @@ document.addEventListener("DOMContentLoaded", () => {
             showToast('Số điện thoại phải có 10 chữ số', 'error');
             return;
         }
-
+        if (!selectedProvince || !selectedDistrict || !selectedWard) {
+            showToast("Vui lòng chọn đầy đủ Tỉnh / Huyện / Xã", "error");
+            return;
+        }
+        const fullAddress = `${inputAddress.value}, ${selectedWard?.name}, ${selectedDistrict?.name}, ${selectedProvince?.name}`;
         const payload = {
             name: inputName.value.trim(),
             phoneNumber: inputPhone.value.trim(),
-            fullAddress: inputAddress.value.trim(),
+            fullAddress: fullAddress,
             status: inputStatus.checked ? 1 : 0
         };
 
@@ -149,7 +205,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
     });
-
     if (menuAccountMain && accountSubmenu) {
         accountSubmenu.classList.add("open");
         menuAccountMain.addEventListener("click", (e) => {
@@ -157,4 +212,99 @@ document.addEventListener("DOMContentLoaded", () => {
             accountSubmenu.classList.toggle("open");
         });
     }
+    async function loadProvinces() {
+        if (provinces.length > 0) return; // cache, không gọi lại
+        try {
+            const res = await fetch("https://provinces.open-api.vn/api/p/");
+            provinces = await res.json();
+        } catch {
+            showToast("Không thể tải danh sách tỉnh/thành", "error");
+        }
+    }
+    provinceInput.addEventListener("input", () => {
+        const keyword = provinceInput.value.toLowerCase().trim();
+        if (!keyword) { provinceList.innerHTML = ""; return; }
+        const filtered = provinces.filter(p => p.name.toLowerCase().includes(keyword));
+        renderList(filtered, provinceList, (item) => {
+            provinceInput.value = item.name;
+            selectedProvince = item;
+            provinceList.innerHTML = "";
+            // Reset huyện/xã khi đổi tỉnh
+            districtInput.value = "";
+            wardInput.value = "";
+            districtList.innerHTML = "";
+            wardList.innerHTML = "";
+            selectedDistrict = null;
+            selectedWard = null;
+            districts = [];
+            wards = [];
+            districtInput.disabled = false; // Mở khoá huyện
+            loadDistricts(item.code);
+        });
+    });
+    async function loadDistricts(provinceCode) {
+        try {
+            const res = await fetch(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`);
+            const data = await res.json();
+            districts = data.districts ?? [];
+        } catch {
+            showToast("Không thể tải danh sách huyện", "error");
+        }
+    }
+    districtInput.addEventListener("input", () => {
+        const keyword = districtInput.value.toLowerCase().trim();
+        if (!keyword) { districtList.innerHTML = ""; return; }
+        const filtered = districts.filter(d => d.name.toLowerCase().includes(keyword));
+        renderList(filtered, districtList, (item) => {
+            districtInput.value = item.name;
+            selectedDistrict = item;
+            districtList.innerHTML = "";
+            // Reset xã khi đổi huyện
+            wardInput.value = "";
+            wardList.innerHTML = "";
+            selectedWard = null;
+            wards = [];
+            wardInput.disabled = false; //  Mở khoá xã
+            loadWards(item.code);
+        });
+    });
+    async function loadWards(districtCode) {
+        try {
+            const res = await fetch(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
+            const data = await res.json();
+            wards = data.wards ?? [];
+        } catch {
+            showToast("Không thể tải danh sách xã", "error");
+        }
+    }
+    wardInput.addEventListener("input", () => {
+        const keyword = wardInput.value.toLowerCase().trim();
+        if (!keyword) { wardList.innerHTML = ""; return; }
+        const filtered = wards.filter(w => w.name.toLowerCase().includes(keyword));
+        renderList(filtered, wardList, (item) => {
+            wardInput.value = item.name;
+            selectedWard = item;
+            wardList.innerHTML = "";
+        });
+    });
+    function renderList(data, container, onClick) {
+        container.innerHTML = "";
+        data.slice(0, 10).forEach(item => {
+            const div = document.createElement("div");
+            div.className = "suggest-item";
+            div.textContent = item.name;
+            div.addEventListener("mousedown", (e) => {
+                e.preventDefault(); //Tránh blur input trước khi click được xử lý
+                onClick(item);
+            });
+            container.appendChild(div);
+        });
+    }
+    document.addEventListener("click", (e) => {
+        if (!provinceInput.contains(e.target)) provinceList.innerHTML = "";
+        if (!districtInput.contains(e.target)) districtList.innerHTML = "";
+        if (!wardInput.contains(e.target)) wardList.innerHTML = "";
+    });
+    districtInput.disabled = true;
+    wardInput.disabled = true;
 });

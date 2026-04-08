@@ -1,11 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="vn.edu.hcmuaf.fit.ttltw.model.User" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%
-    // Dữ liệu được set bởi AddressServlet
-//    User user = (User) request.getAttribute("user");
-%>
-
 <html>
 <head>
     <title>Địa chỉ của tôi</title>
@@ -42,18 +37,17 @@
                 <c:if test="${not empty addresses}">
                     <c:forEach var="a" items="${addresses}">
                         <div class="address-item ${a.status == 1 ? 'default' : ''}" data-id="${a.id}">
-                            <div class="address-row">
-                                <span class="address-name">${a.name}</span> |
-                                <span class="address-phone">${a.phoneNumber}</span>
-                            </div>
-
-                            <div class="address-details">${a.address}</div>
-
-                            <div class="address-actions">
+                            <div class="address-info">
+                                <div class="address-row">
+                                    <span class="address-name">${a.name}</span> |
+                                    <span class="address-phone">${a.phoneNumber}</span>
+                                </div>
+                                <div class="address-details">${a.address}</div>
                                 <c:if test="${a.status == 1}">
                                     <span class="address-default-badge">Mặc định</span>
                                 </c:if>
-
+                            </div>
+                            <div class="address-actions">
                                 <a href="javascript:void(0)" data-action="update" data-id="${a.id}">
                                     <i class="fa-solid fa-pen-to-square"></i> Sửa
                                 </a>
@@ -115,15 +109,30 @@
             </div>
 
             <div class="form-row">
-                <label class="form-label">
-                    <i class="fa-solid fa-location-dot"></i> Địa chỉ
-                </label>
-                <textarea id="fullAddress" class="form-textarea" rows="3"
-                          placeholder="Nhập địa chỉ chi tiết (số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố)"
-                          required></textarea>
+                <label>Tỉnh / Thành phố</label>
+                <input type="text" id="provinceInput" class="form-input" autocomplete="off">
+                <div id="provinceList" class="suggest-list"></div>
             </div>
 
             <div class="form-row">
+                <label>Quận / Huyện</label>
+                <input type="text" id="districtInput" class="form-input" autocomplete="off">
+                <div id="districtList" class="suggest-list"></div>
+            </div>
+
+            <div class="form-row">
+                <label>Phường / Xã</label>
+                <input type="text" id="wardInput" class="form-input" autocomplete="off">
+                <div id="wardList" class="suggest-list"></div>
+            </div>
+
+            <div class="form-row form-row--full">
+                <label class="form-label">Địa chỉ chi tiết</label>
+                <input type="text" id="detailAddress" class="form-input address-details"
+                       placeholder="Số nhà, tên đường">
+            </div>
+
+            <div class="form-row form-row--full">
                 <label class="checkbox-label">
                     <input type="checkbox" id="status">
                     <span>Đặt làm địa chỉ mặc định</span>

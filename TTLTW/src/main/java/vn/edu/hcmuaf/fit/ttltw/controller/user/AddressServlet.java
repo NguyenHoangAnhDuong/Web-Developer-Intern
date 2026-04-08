@@ -44,7 +44,7 @@ public class AddressServlet extends HttpServlet {
         if (avatarPath == null || avatarPath.trim().isEmpty()) {
             avatarPath = req.getContextPath() + "/asset/img/admin.jpg";
         }
-        int userId = user.getId();
+        int userId = freshUser.getId();
         req.setAttribute("addresses", service.getAll(userId));
         // Set sidebar data
         req.setAttribute("user", freshUser);
