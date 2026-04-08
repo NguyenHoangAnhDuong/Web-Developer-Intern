@@ -25,7 +25,64 @@ document.addEventListener("DOMContentLoaded", () => {
     let selectedProvince = null;
     let selectedDistrict = null;
     let selectedWard = null;
-
+    // Đầu số hợp lệ các nhà mạng Việt Nam
+    const VN_PHONE_PREFIXES = [
+        // Viettel
+        "032","033","034","035","036","037","038","039",
+        "086","096","097","098",
+        // Mobifone
+        "070","076","077","078","079",
+        "089","090","093",
+        // Vinaphone
+        "081","082","083","084","085",
+        "088","091","094",
+        // Vietnamobile
+        "052","056","058","092",
+        // Gmobile
+        "059","099",
+        // Reddi
+        "055"
+    ];
+    function validateName(name) {
+        if (!name || name.length < 2)
+            return { ok: false, msg: "Họ tên phải có ít nhất 2 ký tự." };
+        if (name.length > 100)
+            return { ok: false, msg: "Họ tên không được vượt quá 100 ký tự." };
+        return { ok: true };
+    }
+    function validatePhone(phone) {
+        if (!/^[0-9]{10}$/.test(phone))
+            return { ok: false, msg: "Số điện thoại phải có đúng 10 chữ số." };
+        const prefix = phone.substring(0, 3);
+        if (!VN_PHONE_PREFIXES.includes(prefix))
+            return { ok: false, msg: `Đầu số "${prefix}" không hợp lệ. Vui lòng nhập số điện thoại Việt Nam.` };
+        return { ok: true };
+    }
+    function validateAddress(addr) {
+        if (!addr || addr.length < 3)
+            return { ok: false, msg: "Địa chỉ chi tiết phải có ít nhất 3 ký tự." };
+        if (addr.length > 255)
+            return { ok: false, msg: "Địa chỉ chi tiết không được vượt quá 255 ký tự." };
+        return { ok: true };
+    }
+    // Hiển thị / xóa lỗi inline dưới input
+    function setFieldError(inputEl, msg) {
+        clearFieldError(inputEl);
+        inputEl.classList.add("input-error");
+        const err = document.createElement("span");
+        err.className = "field-error";
+        err.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${msg}`;
+        inputEl.parentNode.appendChild(err);
+    }
+    function clearFieldError(inputEl) {
+        inputEl.classList.remove("input-error");
+        const existing = inputEl.parentNode.querySelector(".field-error");
+        if (existing) existing.remove();
+    }
+    function clearAllErrors() {
+        form.querySelectorAll(".field-error").forEach(el => el.remove());
+        form.querySelectorAll(".input-error").forEach(el => el.classList.remove("input-error"));
+    }
     function resetLocationFields() {
         provinceInput.value = "";
         districtInput.value = "";
@@ -42,6 +99,22 @@ document.addEventListener("DOMContentLoaded", () => {
         districtInput.disabled = true;
         wardInput.disabled = true;
     }
+    [inputName, inputPhone, inputAddress].forEach(el => {
+        el.addEventListener("input", () => clearFieldError(el));
+    });
+    // Validate khi blur
+    inputName.addEventListener("blur", () => {
+        const r = validateName(inputName.value.trim());
+        if (!r.ok) setFieldError(inputName, r.msg); else clearFieldError(inputName);
+    });
+    inputPhone.addEventListener("blur", () => {
+        const r = validatePhone(inputPhone.value.trim());
+        if (!r.ok) setFieldError(inputPhone, r.msg); else clearFieldError(inputPhone);
+    });
+    inputAddress.addEventListener("blur", () => {
+        const r = validateAddress(inputAddress.value.trim());
+        if (!r.ok) setFieldError(inputAddress, r.msg); else clearFieldError(inputAddress);
+    });
     function openModal(isEdit = false) {
         document.getElementById("modalTitleText").textContent = isEdit ? "Cập nhật địa chỉ" : "Địa chỉ mới";
         modal.classList.add("active");

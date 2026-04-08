@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/asset/css/addresses.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/asset/css/header.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/asset/css/notification.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/asset/css/validation.css">
 </head>
 
 <body>

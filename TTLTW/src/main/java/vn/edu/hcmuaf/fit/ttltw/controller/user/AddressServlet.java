@@ -7,6 +7,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import vn.edu.hcmuaf.fit.ttltw.model.*;
+import vn.edu.hcmuaf.fit.ttltw.validation.AddressValidator;
+import vn.edu.hcmuaf.fit.ttltw.validation.AddressValidator.ValidationResult;
 import vn.edu.hcmuaf.fit.ttltw.service.AddressService;
 import vn.edu.hcmuaf.fit.ttltw.service.UserService;
 import vn.edu.hcmuaf.fit.ttltw.utils.SidebarUtil;
@@ -73,7 +75,13 @@ public class AddressServlet extends HttpServlet {
         int userId = user.getId();
 
         String action = req.getParameter("action");
-
+        if ("add".equals(action) || "update".equals(action)) {
+            String errorJson = validateRequest(req);
+            if (errorJson != null) {
+                resp.getWriter().print(errorJson);
+                return;
+            }
+        }
         boolean ok = false;
 
         if ("add".equals(action)) {
@@ -81,22 +89,48 @@ public class AddressServlet extends HttpServlet {
             ok = service.add(a) > 0;
         }
         if ("update".equals(action)) {
+            String idParam = req.getParameter("id");
+            if (idParam == null || !idParam.matches("^[0-9]+$")) {
+                resp.getWriter().print("{\"success\":false,\"message\":\"ID không hợp lệ.\"}");
+                return;
+            }
             Address a = buildAddress(req, userId);
-            a.setId(Integer.parseInt(req.getParameter("id")));
+            a.setId(Integer.parseInt(idParam));
             ok = service.update(a);
         }
         if ("delete".equals(action)) {
-            ok = service.delete(
-                    Integer.parseInt(req.getParameter("id")), userId);
+            String idParam = req.getParameter("id");
+            if (idParam == null || !idParam.matches("^[0-9]+$")) {
+                resp.getWriter().print("{\"success\":false,\"message\":\"ID không hợp lệ.\"}");
+                return;
+            }
+            ok = service.delete(Integer.parseInt(idParam), userId);
         }
         if ("set-default".equals(action)) {
-            ok = service.setDefault(
-                    Integer.parseInt(req.getParameter("id")), userId);
+            String idParam = req.getParameter("id");
+            if (idParam == null || !idParam.matches("^[0-9]+$")) {
+                resp.getWriter().print("{\"success\":false,\"message\":\"ID không hợp lệ.\"}");
+                return;
+            }
+            ok = service.setDefault(Integer.parseInt(idParam), userId);
         }
 
         resp.getWriter().print("{\"success\":" + ok + "}");
     }
-
+    private String validateRequest(HttpServletRequest req) {
+        ValidationResult nameResult = AddressValidator.validateName(req.getParameter("name"));
+        if (!nameResult.ok) return errorJson(nameResult.message);
+        ValidationResult phoneResult = AddressValidator.validatePhone(req.getParameter("phoneNumber"));
+        if (!phoneResult.ok) return errorJson(phoneResult.message);
+        ValidationResult addrResult = AddressValidator.validateAddress(req.getParameter("fullAddress"));
+        if (!addrResult.ok) return errorJson(addrResult.message);
+        return null;
+    }
+    private String errorJson(String message) {
+        // Escape dấu nháy kép trong message để JSON hợp lệ
+        String safe = message.replace("\"", "\\\"");
+        return "{\"success\":false,\"message\":\"" + safe + "\"}";
+    }
     private Address buildAddress(HttpServletRequest r, int userId) {
         Address a = new Address();
         a.setUserId(userId);
