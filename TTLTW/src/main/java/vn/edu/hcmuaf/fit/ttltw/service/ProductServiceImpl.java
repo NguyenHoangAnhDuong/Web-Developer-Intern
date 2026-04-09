@@ -5,9 +5,6 @@ import vn.edu.hcmuaf.fit.ttltw.dao.ProductDaoImpl;
 import vn.edu.hcmuaf.fit.ttltw.dao.ProductUserDao;
 import vn.edu.hcmuaf.fit.ttltw.dao.ProductUserDaoImpl;
 import vn.edu.hcmuaf.fit.ttltw.model.*;
-import vn.edu.hcmuaf.fit.ttltw.config.DBConnect.*;
-
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
