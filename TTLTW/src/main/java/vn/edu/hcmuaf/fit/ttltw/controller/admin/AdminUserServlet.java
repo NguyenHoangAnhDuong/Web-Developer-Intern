@@ -29,7 +29,6 @@ public class AdminUserServlet extends HttpServlet {
 
         // Lấy các tham số filter từ URL
         String searchTerm = req.getParameter("search");
-        String roleFilter = req.getParameter("role");
         String statusFilter = req.getParameter("status");
         String pageParam = req.getParameter("page");
 
@@ -46,7 +45,7 @@ public class AdminUserServlet extends HttpServlet {
         // Số dòng mỗi trang
         int pageSize = 10;
         // Lấy tổng số user (sau khi filter)
-        int totalUsers = userService.countUsers(searchTerm, roleFilter, statusFilter);
+        int totalUsers = userService.countUsers(searchTerm, statusFilter);
 
         // Tính tổng số trang
         int totalPage = (int) Math.ceil((double) totalUsers / pageSize);
@@ -61,7 +60,7 @@ public class AdminUserServlet extends HttpServlet {
         int offset = (page - 1) * pageSize;
 
         // Lấy danh sách user theo trang
-        List<User> usersPage = userService.getUsersPaginated(searchTerm, roleFilter, statusFilter, offset, pageSize);
+        List<User> usersPage = userService.getUsersPaginated(searchTerm, statusFilter, offset, pageSize);
 
         // Nếu gọi từ AJAX
         String ajax = req.getParameter("ajax");
@@ -95,7 +94,6 @@ public class AdminUserServlet extends HttpServlet {
         req.setAttribute("totalPage", totalPage);
         req.setAttribute("page", page);
         req.setAttribute("currentSearch", searchTerm != null ? searchTerm : "");
-        req.setAttribute("currentRole", roleFilter != null ? roleFilter : "");
         req.setAttribute("currentStatus", statusFilter != null ? statusFilter : "");
 
         RequestDispatcher rd = req.getRequestDispatcher("/views/admin/userManagement.jsp");

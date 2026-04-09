@@ -30,13 +30,12 @@ public class UserService {
         return userDao.getAllUsers();
     }
 
-    public int countUsers(String searchTerm, String roleFilter, String statusFilter) {
-        return userDao.countUsers(searchTerm, roleFilter, statusFilter);
+    public int countUsers(String searchTerm, String statusFilter) {
+        return userDao.countUsers(searchTerm, statusFilter);
     }
 
-    public List<User> getUsersPaginated(String searchTerm, String roleFilter, String statusFilter, int offset,
-            int limit) {
-        return userDao.getUsersPaginated(searchTerm, roleFilter, statusFilter, offset, limit);
+    public List<User> getUsersPaginated(String searchTerm, String statusFilter, int offset, int limit) {
+        return userDao.getUsersPaginated(searchTerm, statusFilter, offset, limit);
     }
 
     public boolean updateUser(int id, int role, int status) {

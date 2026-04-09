@@ -100,23 +100,17 @@ public class UserDao {
                 .findOne());
     }
 
-    public int countUsers(String searchTerm, String roleFilter, String statusFilter) {
-        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM users WHERE 1=1");
+    public int countUsers(String searchTerm, String statusFilter) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM users WHERE roles_id = 2");
 
         // Filter theo search
         if (searchTerm != null && !searchTerm.trim().isEmpty()) {
             sql.append(
                     " AND (CAST(id AS CHAR) LIKE :search OR username LIKE :search OR email LIKE :search OR first_name LIKE :search OR last_name LIKE :search)");
         }
-        // Filter theo role
-        if (roleFilter != null && !roleFilter.trim().isEmpty()) {
-            int role = "Admin".equalsIgnoreCase(roleFilter) ? 0 : 1;
-            sql.append(" AND roles_id = :rolesId");
-        }
 
         // Filter theo status
         if (statusFilter != null && !statusFilter.trim().isEmpty()) {
-            int status = "Hoạt động".equalsIgnoreCase(statusFilter) ? 1 : 0;
             sql.append(" AND status = :status");
         }
 
@@ -124,10 +118,6 @@ public class UserDao {
             var query = handle.createQuery(sql.toString());
             if (searchTerm != null && !searchTerm.trim().isEmpty()) {
                 query.bind("search", "%" + searchTerm.trim() + "%");
-            }
-            if (roleFilter != null && !roleFilter.trim().isEmpty()) {
-                int role = "Admin".equalsIgnoreCase(roleFilter) ? 0 : 1;
-                query.bind("rolesId", role);
             }
             if (statusFilter != null && !statusFilter.trim().isEmpty()) {
                 int status = "Hoạt động".equalsIgnoreCase(statusFilter) ? 1 : 0;
@@ -137,21 +127,16 @@ public class UserDao {
         });
     }
 
-    public List<User> getUsersPaginated(String searchTerm, String roleFilter, String statusFilter, int offset,
-            int limit) {
+    public List<User> getUsersPaginated(String searchTerm, String statusFilter, int offset, int limit) {
         StringBuilder sql = new StringBuilder("""
                     SELECT id, username, first_name AS firstName, last_name AS lastName, avatar, email, roles_id AS rolesId, status
                     FROM users
-                    WHERE 1=1
+                    WHERE roles_id = 2
                 """);
         // Filter theo search
         if (searchTerm != null && !searchTerm.trim().isEmpty()) {
             sql.append(
                     " AND (CAST(id AS CHAR) LIKE :search OR username LIKE :search OR email LIKE :search OR first_name LIKE :search OR last_name LIKE :search)");
-        }
-        // Filter theo role
-        if (roleFilter != null && !roleFilter.trim().isEmpty()) {
-            sql.append(" AND roles_id = :rolesId");
         }
         // Filter theo status
         if (statusFilter != null && !statusFilter.trim().isEmpty()) {
@@ -165,10 +150,6 @@ public class UserDao {
                     .bind("offset", offset);
             if (searchTerm != null && !searchTerm.trim().isEmpty()) {
                 query.bind("search", "%" + searchTerm.trim() + "%");
-            }
-            if (roleFilter != null && !roleFilter.trim().isEmpty()) {
-                int role = "Admin".equalsIgnoreCase(roleFilter) ? 0 : 1;
-                query.bind("rolesId", role);
             }
             if (statusFilter != null && !statusFilter.trim().isEmpty()) {
                 int status = "Hoạt động".equalsIgnoreCase(statusFilter) ? 1 : 0;
