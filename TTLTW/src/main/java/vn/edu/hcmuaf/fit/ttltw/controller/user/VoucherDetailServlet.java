@@ -1,18 +1,17 @@
 package vn.edu.hcmuaf.fit.ttltw.controller.user;
 
+import java.io.IOException;
+import java.util.List;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import vn.edu.hcmuaf.fit.ttltw.dao.VoucherAdminDaoImpl;
 import vn.edu.hcmuaf.fit.ttltw.model.Voucher;
 import vn.edu.hcmuaf.fit.ttltw.service.VoucherAdminService;
 import vn.edu.hcmuaf.fit.ttltw.service.VoucherAdminServiceImpl;
 import vn.edu.hcmuaf.fit.ttltw.utils.SidebarUtil;
-
-import java.io.IOException;
-import java.util.List;
 
 @WebServlet("/user/voucher-detail")
 public class VoucherDetailServlet extends HttpServlet {
