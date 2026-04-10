@@ -47,4 +47,18 @@ public class FeedbackDao {
                 .one());
     }
 
+    public boolean insertFeedback(Feedback feedback) {
+        String sql = """
+                    INSERT INTO feedbacks (product_id, user_id, rating, comment, status, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, 1, NOW(), NOW())
+                """;
+
+        return DBConnect.getJdbi().withHandle(handle -> handle.createUpdate(sql)
+                .bind(0, feedback.getProductId())
+                .bind(1, feedback.getUserId())
+                .bind(2, feedback.getRating())
+                .bind(3, feedback.getComment())
+                .execute()) > 0;
+    }
+
 }
