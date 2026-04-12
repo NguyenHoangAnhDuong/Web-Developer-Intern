@@ -14,7 +14,8 @@ public class OrderService {
     private final AddressDao addressDao;
     private final PaymentTypesDao paymentTypesDao;
     private final VoucherAdminDao voucherDao = new VoucherAdminDaoImpl();
-
+    private final SuperAIService superAIService = new SuperAIService();
+    private final ShippingService shippingService = new ShippingService();
     public OrderService() {
         this.orderDao = new OrderDao();
         this.addressDao = new AddressDao();
@@ -68,8 +69,10 @@ public class OrderService {
                 return "Đã giao";
             case 4:
                 return "Đã hủy";
+            case 14:
+                return "Chờ xác nhận";
             default:
-                return "Không xác định";
+                return "Không xác định (status: " + status + ")";
         }
     }
 
@@ -83,6 +86,8 @@ public class OrderService {
                 return "delivered";
             case 4:
                 return "cancelled";
+            case 14:
+                return "pending";
             default:
                 return "";
         }
@@ -98,6 +103,8 @@ public class OrderService {
                 return "fa-solid fa-box";
             case 4:
                 return "fa-solid fa-xmark";
+            case 14:
+                return "fa-solid fa-hourglass-start";
             default:
                 return "fa-solid fa-question";
         }
@@ -113,44 +120,101 @@ public class OrderService {
 
     public Map<String, Object> updateStatus(int orderId, int newStatus) {
         Map<String, Object> result = new HashMap<>();
-
         Optional<Order> opt = orderDao.getOrderById(orderId);
+
         if (opt.isEmpty()) {
             result.put("success", false);
             result.put("message", "Đơn hàng không tồn tại");
+            System.err.println(" OrderService  Order " + orderId + " not found");
             return result;
         }
 
-        int current = opt.get().getStatus();
+        Order order = opt.get();
+        int current = order.getStatus();
+        System.out.println(" OrderService Order " + orderId + ": " + getStatusName(current) + " -> " + getStatusName(newStatus));
 
-        // Không cho cập nhật nếu đã giao hoặc đã hủy
-        if (current == 3) {
+        //   Kiểm tra logic chuyển đổi trạng thái
+        if (current == 3 || current == 4) {
             result.put("success", false);
-            result.put("message", "Đơn hàng đã giao, không thể thay đổi trạng thái");
+            result.put("message", "Đơn hàng đã kết thúc (giao/hủy) , không thể thay đổi");
+            System.err.println(" OrderService  Order " + orderId + " sẵn sàng ");
             return result;
         }
-        if (current == 4) {
-            result.put("success", false);
-            result.put("message", "Đơn hàng đã bị hủy");
-            return result;
-        }
+
         boolean isValidTransition = (current == 1 && (newStatus == 2 || newStatus == 4)) ||
-                (current == 2 && (newStatus == 3 || newStatus == 4));
+                (current == 2 && (newStatus == 3 || newStatus == 4)) ||
+                (current == 14 && (newStatus == 1 || newStatus == 2 || newStatus == 4));
         if (!isValidTransition) {
             result.put("success", false);
-            result.put("message",
-                    "Không thể chuyển trạng thái từ "
-                            + getStatusName(current) + " sang "
-                            + getStatusName(newStatus));
+            result.put("message", "Không thể chuyển từ " + getStatusName(current) + " sang " + getStatusName(newStatus));
+            System.err.println(" OrderService Invalid transition: " + current + " -> " + newStatus);
             return result;
         }
+
+        // nếu chuyển sang trạng thái 2 thì gọi superAI trước
+        String tracking = null;
+        boolean apiCalled = false;
+        if (newStatus == 2 && (current == 1)) {
+            try {
+                System.out.println(" OrderService  Calling SuperAI API for order " + orderId);
+                Address address = getOrderAddress(order.getAddressId());
+                if (address == null) {
+                    result.put("success", false);
+                    result.put("message", "Lỗi: Đơn hàng không có địa chỉ giao hàng.");
+                    System.err.println(" OrderService  Order " + orderId + " has no address");
+                    return result;
+                }
+
+                double codAmount = (order.getPaymentTypeId() == 1) ? order.getTotalAmount() : 0;
+                System.out.println(" OrderService  Address: " + address.getAddress());
+                System.out.println(" OrderService  COD Amount: " + codAmount);
+
+                // Gọi API
+                tracking = superAIService.createRealOrder(
+                        orderId, address.getName(), address.getPhoneNumber(),
+                        address.getAddress(), codAmount
+                );
+
+                if (tracking == null || tracking.trim().isEmpty()) {
+                    // debug ra lỗi
+                    System.err.println(" OrderService  SuperAI returned null - Continuing without tracking code");
+                    // KHÔNG fail ở đây, tiếp tục cập nhật status
+                } else {
+                    System.out.println(" OrderService  SuperAI returned tracking: " + tracking);
+
+                    // lưu tracking vào DB trước khi đổi trạng thái đơn hàng
+                    boolean trackingSaved = shippingService.updateTrackingInfo(orderId, tracking, "SuperAI");
+                    if (!trackingSaved) {
+                        System.err.println("OrderService  Failed to save tracking info, but continuing status update");
+                    } else {
+                        System.out.println(" OrderService  Tracking saved to DB successfully");
+                        apiCalled = true;
+                    }
+                }
+
+            } catch (Exception e) {
+                System.err.println(" OrderService   Exception calling SuperAI (network issue?): " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
+        // mới cập nhật trạng thái đơn hàng trong DB
         if (!orderDao.updateStatus(orderId, newStatus)) {
             result.put("success", false);
-            result.put("message", "Lỗi hệ thống, vui lòng thử lại");
+            result.put("message", "Lỗi DB: Không thể cập nhật trạng thái đơn hàng.");
+            System.err.println(" OrderService  DB update failed for order " + orderId);
             return result;
         }
+
+        System.out.println(" OrderService  Order " + orderId + " status updated to " + getStatusName(newStatus));
         result.put("success", true);
-        result.put("message", "Cập nhật trạng thái đơn hàng thành công");
+        result.put("tracking", tracking); // Trả về tracking để Admin thấy nếu cần
+        
+        if (newStatus == 2 && !apiCalled) {
+            result.put("message", "Cập nhật thành công.  Lỗi gọi API vận chuyển, cần cập nhật mã vận đơn sau.");
+        } else {
+            result.put("message", "Cập nhật thành công. Mã vận đơn: " + (tracking != null ? tracking : "N/A"));
+        }
         return result;
     }
 
@@ -201,7 +265,6 @@ public class OrderService {
         Order order = new Order();
         order.setUserId(userId);
         order.setAddressId(addressId);
-        order.setPaymentTypeId("bank".equals(paymentMethod) ? 2 : 1);
         order.setStatus(1);
         int paymentTypeId = "bank".equalsIgnoreCase(paymentMethod) ? 2 : 1;
         order.setPaymentTypeId(paymentTypeId);// Trạng thái Chờ xác nhận
