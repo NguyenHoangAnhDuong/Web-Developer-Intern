@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
 import vn.edu.hcmuaf.fit.ttltw.service.UserService;
+import vn.edu.hcmuaf.fit.ttltw.utils.PermissionUtil;
 
 
 @WebServlet(name = "LoginServlet", value = "/login")
@@ -65,14 +66,16 @@ public class LoginServlet extends HttpServlet {
         HttpSession session = request.getSession();
         session.setAttribute("user", user);
         session.setAttribute("role", user.getRolesId());
+        // Nạp quyền vào session để dùng cho toàn bộ phiên làm việc
+        PermissionUtil.loadAndCache(session, user);
 
-        int role = user.getRolesId();
         String contextPath = request.getContextPath();
 
         // Nếu vừa đăng xuất trước đó, buộc quay về trang home (chỉ áp dụng user)
         boolean justLoggedOut = consumeJustLoggedOutCookie(request, response);
 
-        if (role == 1) {
+        // Tất cả user không phải customer đều vào trang admin
+        if (!PermissionUtil.isCustomer(session)) {
             response.sendRedirect(contextPath + "/admin/dashboard");
             return;
         }
