@@ -124,7 +124,10 @@
                         <div class="actions">
                             <% if (status == 1) { %>
                             <button class="btn repurchase" onclick="cancelOrder(<%= orderId %>)">Hủy</button>
-                            <% } else if (status == 3 || status == 4) { %>
+                            <% } else if (status == 3) { %>
+                            <button class="btn review" onclick="location.href='<%= request.getContextPath() %>/review?productId=<%= !items.isEmpty() ? items.get(0).get("productId") : 0 %>'">Đánh giá</button>
+                            <button class="btn repurchase" onclick="repurchaseOrder(<%= orderId %>)">Mua lại</button>
+                            <% } else if (status == 4) { %>
                             <button class="btn repurchase" onclick="repurchaseOrder(<%= orderId %>)">Mua lại</button>
                             <% } %>
                         </div>
