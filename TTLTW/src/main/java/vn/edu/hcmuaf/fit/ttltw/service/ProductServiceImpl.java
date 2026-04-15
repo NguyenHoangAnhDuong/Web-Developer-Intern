@@ -4,6 +4,7 @@ import vn.edu.hcmuaf.fit.ttltw.dao.ProductDao;
 import vn.edu.hcmuaf.fit.ttltw.dao.ProductDaoImpl;
 import vn.edu.hcmuaf.fit.ttltw.dao.ProductUserDao;
 import vn.edu.hcmuaf.fit.ttltw.dao.ProductUserDaoImpl;
+import vn.edu.hcmuaf.fit.ttltw.dao.VariantDao;
 import vn.edu.hcmuaf.fit.ttltw.model.*;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -16,6 +17,8 @@ public class ProductServiceImpl implements ProductService {
     private final ProductDao productDao = new ProductDaoImpl();
 
     private final ProductUserDao productUseDao = new ProductUserDaoImpl();
+
+    private final VariantDao variantDao = VariantDao.getInstance();
     @Override
     public List<Map<String, Object>> getForAdmin(
             String keyword,
@@ -215,6 +218,41 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<Map<String, Object>> getProductsForList() {
         return ((ProductDaoImpl) productDao).getProductsForListDisplay();
+    }
+
+    @Override
+    public Product findProductDetailById(int productId) {
+        return productDao.findProductDetailById(productId);
+    }
+
+    @Override
+    public List<ProductVariant> getVariantsByProduct(int productId) {
+        return productDao.getVariantsByProduct(productId);
+    }
+
+    @Override
+    public List<TechSpecs> getTechSpecsByProduct(int productId) {
+        return productDao.getTechSpecsByProduct(productId);
+    }
+
+    @Override
+    public VariantColor getDefaultVariantColor(int productId) {
+        return productDao.getDefaultVariantColor(productId);
+    }
+
+    @Override
+    public List<VariantColor> getColorsByVariant(int variantId) {
+        return variantDao.getColorsByVariant(variantId);
+    }
+
+    @Override
+    public List<Image> getImagesByVariantColor(int variantColorId) {
+        return variantDao.getImagesByVariantColor(variantColorId);
+    }
+
+    @Override
+    public List<Map<String, Object>> getAllVariantColorsForProduct(int productId) {
+        return productDao.getAllVariantColorsForProduct(productId);
     }
 
     @Override

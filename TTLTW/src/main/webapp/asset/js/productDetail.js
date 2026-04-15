@@ -84,26 +84,57 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
 
         const activeColor = document.querySelector(".color-item.active");
-        if (!activeColor) return alert("Vui lòng chọn phiên bản và màu");
+        if (!activeColor) return showToast("Vui lòng chọn phiên bản và màu","error");
 
         const vcId = activeColor.dataset.variantColorId;
-        if (!vcId) return alert("Lỗi sản phẩm");
+        if (!vcId) return showToast("Lỗi sản phẩm", "error");
         const productImg = document.querySelector(".img-feature");
-        if (productImg) flyToCart(productImg);
         fetch(`${getContextPath()}/cart?action=add&vcId=${vcId}`)
-            .then(r => r.text())
-            .then(() => renderSuccess(btnCart));
+            .then(r => {
+                if (r.redirected && r.url.includes("/login")) {
+                    window.location.href = r.url;
+                    return null;
+                }
+                return r.text();
+            })
+            .then(result => {
+                if (!result) return;
+                if (result === "STOCK_EXCEEDED") {
+                    showToast("Sản phẩm đã hết hàng!", "error");
+                    return;
+                }
+                if (productImg) flyToCart(productImg);
+                showToast("Đã thêm vào giỏ hàng!", "success");
+                renderSuccess(btnCart);
+            })
+            .catch(() => showToast("Có lỗi xảy ra, vui lòng thử lại", "error"));
     });
 
     btnBuy?.addEventListener("click", e => {
         e.preventDefault();
 
         const activeColor = document.querySelector(".color-item.active");
-        if (!activeColor) return alert("Vui lòng chọn phiên bản và màu");
+        if (!activeColor) return showToast("Vui lòng chọn phiên bản và màu", "error");
 
         const vcId = activeColor.dataset.variantColorId;
-        window.location.href =
-            `${getContextPath()}/checkout?vcId=${vcId}&quantity=1&buyNow=true`;
+        fetch(`${getContextPath()}/cart?action=add&vcId=${vcId}`)
+            .then(r => {
+                if (r.redirected && r.url.includes("/login")) {
+                    window.location.href = r.url;
+                    return null;
+                }
+                return r.text();
+            })
+            .then(result => {
+                if (!result) return;
+                if (result === "STOCK_EXCEEDED") {
+                    showToast("Sản phẩm đã hết hàng!", "error");
+                    return;
+                }
+                window.location.href =
+                    `${getContextPath()}/cart?action=checkout&selectedIds=${vcId}`;
+            })
+            .catch(() => showToast("Có lỗi xảy ra, vui lòng thử lại", "error"));
     });
 
     function renderSuccess(btn) {
