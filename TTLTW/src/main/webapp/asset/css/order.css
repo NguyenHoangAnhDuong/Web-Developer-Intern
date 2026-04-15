@@ -113,6 +113,20 @@ body {
     font-weight: 600;
     transition: all 0.3s;
 }
+.actions .btn.review {
+    background: #27ae60;
+    color: #fff;
+}
+.actions .btn.review:hover {
+    background: #1f8f50;
+}
+.actions .btn.repurchase {
+    background: #007bff;
+    color: #fff;
+}
+.actions .btn.repurchase:hover {
+    background: #0069d9;
+}
 .order-footer {
   display: flex;
   justify-content: space-between;

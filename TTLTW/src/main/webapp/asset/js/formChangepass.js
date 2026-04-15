@@ -71,3 +71,15 @@ document.querySelectorAll('.toggle').forEach(toggle => {
             this.style.borderColor = '';
         }
     });
+// Xử lý overlay đổi mật khẩu thành công
+(function () {
+    const form = document.getElementById('reset-form');
+    const isSuccess = form.dataset.success === 'true';
+    if (!isSuccess) return;
+    const contextPath = form.dataset.context || '';
+    showToast('Đổi mật khẩu thành công! Đang chuyển đến trang đăng nhập...', 'success');
+    document.getElementById('update-btn').disabled = true;
+    setTimeout(() => {
+        window.location.href = contextPath + '/login';
+    }, 3000);
+})();

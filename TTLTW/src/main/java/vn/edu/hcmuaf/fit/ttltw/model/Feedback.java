@@ -8,6 +8,7 @@ public class Feedback implements Serializable {
     private int id;
     private int productId;
     private int userId;
+    private int orderId;
     private int rating;
     private String comment;
     private int status;
@@ -21,12 +22,13 @@ public class Feedback implements Serializable {
     }
 
     // ===== Constructor đầy đủ =====
-    public Feedback(int id, int productId, int userId, int rating,
+    public Feedback(int id, int productId, int userId, int orderId,int rating,
                     String comment, int status,
                     LocalDateTime createdAt, LocalDateTime updatedAt, String username) {
         this.id = id;
         this.productId = productId;
         this.userId = userId;
+        this.orderId = orderId;
         this.rating = rating;
         this.comment = comment;
         this.status = status;
@@ -58,6 +60,14 @@ public class Feedback implements Serializable {
 
     public void setUserId(int userId) {
         this.userId = userId;
+    }
+
+    public int getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(int orderId) {
+        this.orderId = orderId;
     }
 
     public int getRating() {

@@ -36,7 +36,7 @@ public class LoginServlet extends HttpServlet {
 
             // Chỉ lưu nếu URL hợp lệ (không phải trang login, logout, register)
             if (currentUrl != null && !currentUrl.contains("/login")
-                    && !currentUrl.contains("/logout") && !currentUrl.contains("/register")) {
+                    && !currentUrl.contains("/logout") && !currentUrl.contains("/register") && !currentUrl.contains("/change-password")) {
                 String contextPath = request.getContextPath();
                 String relativeUrl = extractRelativePath(currentUrl, contextPath);
                 if (relativeUrl != null && !relativeUrl.isEmpty() && !relativeUrl.equals("/login")) {

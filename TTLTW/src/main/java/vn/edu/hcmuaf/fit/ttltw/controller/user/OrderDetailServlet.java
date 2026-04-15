@@ -93,6 +93,7 @@ public class OrderDetailServlet extends HttpServlet {
                     itemMap.put("variantName", productInfo != null ? productInfo.get("variantName") : "");
                     itemMap.put("colorName", productInfo != null ? productInfo.get("colorName") : "");
                     itemMap.put("colorCode", productInfo != null ? productInfo.get("colorCode") : "");
+                    itemMap.put("productId", productInfo != null ? Integer.parseInt(productInfo.getOrDefault("productId", "0")) : 0);
                     itemMap.put("variantId", detail.getVariantId());
                     itemMap.put("imagePath",
                             productInfo != null && productInfo.get("imagePath") != null ? productInfo.get("imagePath")

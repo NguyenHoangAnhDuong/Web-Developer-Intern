@@ -28,7 +28,7 @@ public class OrderDetailDao {
     }
 
     public Map<String, String> getProductInfoByVariantId(int variantId) {
-        String sql = "SELECT p.name as product_name, pv.name as variant_name, " +
+        String sql = "SELECT p.id AS product_id, p.name as product_name, pv.name as variant_name, " +
                 "c.name as color_name, c.color_code, " +
                 "COALESCE(i.img_path, p.img) as image_path " +
                 "FROM variant_colors vc " +
@@ -43,6 +43,7 @@ public class OrderDetailDao {
                 .bind(0, variantId)
                 .map((rs, ctx) -> {
                     Map<String, String> info = new HashMap<>();
+                    info.put("productId", String.valueOf(rs.getInt("product_id")));
                     info.put("productName", rs.getString("product_name"));
                     info.put("variantName", rs.getString("variant_name"));
                     info.put("colorName", rs.getString("color_name"));
@@ -52,6 +53,25 @@ public class OrderDetailDao {
                 })
                 .findFirst()
                 .orElse(new HashMap<>()));
+    }
+
+    public boolean hasUserPurchasedProduct(int userId, int productId) {
+        String sql = "SELECT 1 " +
+                "FROM orders o " +
+                "JOIN order_details od ON o.id = od.order_id " +
+                "JOIN variant_colors vc ON od.variant_id = vc.id " +
+                "JOIN product_variants pv ON vc.variant_id = pv.id " +
+                "WHERE o.user_id = ? " +
+                "AND pv.product_id = ? " +
+                "AND o.status <> 4 " +
+                "LIMIT 1";
+
+        return jdbi.withHandle(handle -> handle.createQuery(sql)
+                .bind(0, userId)
+                .bind(1, productId)
+                .mapTo(Integer.class)
+                .findOne()
+                .isPresent());
     }
 
     public boolean addOrderDetail(OrderDetail orderDetail) {
