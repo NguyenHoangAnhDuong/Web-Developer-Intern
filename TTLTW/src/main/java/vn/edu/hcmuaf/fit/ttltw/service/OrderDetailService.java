@@ -25,6 +25,10 @@ public class OrderDetailService {
         return orderDetailDao.getProductInfoByVariantId(variantId);
     }
 
+    public boolean hasUserPurchasedProduct(int userId, int productId) {
+        return orderDetailDao.hasUserPurchasedProduct(userId, productId);
+    }
+
     public boolean addOrderDetail(OrderDetail orderDetail) {
         return orderDetailDao.addOrderDetail(orderDetail);
     }

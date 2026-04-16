@@ -62,6 +62,11 @@
                     <div class="price" id="item<%= item.get("id") %>-price"><%= item.get("formattedPrice") %>₫</div>
                     <div class="qty">x<%= item.get("quantity") %></div>
                 </div>
+                <% int status = (Integer) orderData.get("status"); if (status == 3) { %>
+                <div class="item-action">
+                    <a class="btn-review" href="${pageContext.request.contextPath}/review?productId=<%= item.get("productId") %>">Đánh giá</a>
+                </div>
+                <% } %>
             </article>
             <% } %>
         </div>

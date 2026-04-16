@@ -28,8 +28,14 @@ public class ChangepassServlet extends HttpServlet {
         req.setAttribute("activeMenu", "password");
         SidebarUtil.setSidebarData(req);
 
-        req.getRequestDispatcher("form_change_pass.jsp");
         HttpSession session = req.getSession();
+        if ("true".equals(req.getParameter("success"))) {
+            if (session != null) session.invalidate();
+            req.setAttribute("passwordChangedSuccess", true);
+            req.setAttribute("contextPath", req.getContextPath());
+            req.getRequestDispatcher("/views/user/form_change_pass.jsp").forward(req, resp);
+            return;
+        }
         User currentUser = (User) session.getAttribute("user");
 
         // Kiểm tra nếu người dùng đăng nhập bằng Facebook
@@ -74,16 +80,15 @@ public class ChangepassServlet extends HttpServlet {
             return;
         }
         if (!newPass.equals(confirm)) {
-            req.setAttribute("error", "Mật khẩu xác nhận không khớp!");
-            req.getRequestDispatcher("/views/user/form_change_pass.jsp").forward(req, resp);
+            session.setAttribute("toastMessage", "Mật khẩu xác nhận không khớp!");
+            session.setAttribute("toastType", "error");
+            resp.sendRedirect(req.getContextPath() + "/user/change-password");
             return;
         }
         String result = userService.updatePassword(userId,password, newPass);
         if (result.equals("Đổi mật khẩu thành công")) {
-            session.invalidate();
-            HttpSession newSession = req.getSession(true);
-            newSession.setAttribute("toastMessage", "Đổi mật khẩu thành công! Vui lòng đăng nhập lại.");
-            resp.sendRedirect(req.getContextPath() + "/login");
+//            session.invalidate();
+            resp.sendRedirect(req.getContextPath() + "/user/change-password?success=true");
         } else {
             session.setAttribute("toastMessage", result);
             session.setAttribute("toastType", "error");

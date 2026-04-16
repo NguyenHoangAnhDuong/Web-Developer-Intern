@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý người dùng</title>
+    <title>Quản lý khách hàng</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/asset/css/reset.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/asset/css/base.css">
@@ -21,7 +21,7 @@
         <div class="topbar">
             <div class="topbar-left">
                 <div>
-                    <h2 class="page-title" id="title-user-management">Quản lý người dùng</h2>
+                    <h2 class="page-title" id="title-user-management">Quản lý khách hàng</h2>
                 </div>
             </div>
         </div>
@@ -32,12 +32,6 @@
                    placeholder="Tìm kiếm theo ID, username, email..."
                    id="search-input"
                    value="${currentSearch}">
-
-            <select id="role-filter">
-                <option value="">Vai trò</option>
-                <option value="Admin" ${currentRole == 'Admin' ? 'selected' : ''}>Admin</option>
-                <option value="User" ${currentRole == 'User' ? 'selected' : ''}>User</option>
-            </select>
 
             <select id="status-filter">
                 <option value="">Trạng thái</option>
@@ -58,7 +52,6 @@
                 <th>Ảnh đại diện</th>
                 <th>Tên đăng nhập</th>
                 <th>Email</th>
-                <th>Vai trò</th>
                 <th>Trạng thái</th>
                 <th>Hành động</th>
             </tr>
@@ -68,9 +61,9 @@
             <c:choose>
                 <c:when test="${empty users}">
                     <tr id="no-results-row">
-                        <td colspan="7" style="text-align: center; padding: 40px; color: #666;">
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #666;">
                             <i class="fa-solid fa-search" style="font-size: 48px; color: #ddd; margin-bottom: 16px;"></i>
-                            <p style="margin: 0; font-size: 16px;">Không tìm thấy người dùng nào</p>
+                            <p style="margin: 0; font-size: 16px;">Không tìm thấy khách hàng nào</p>
                         </td>
                     </tr>
                 </c:when>
@@ -120,41 +113,34 @@
                                 </c:choose>
                             </td>
 
-                            <!-- ROLE -->
-                            <td class="role-cell">
-                                <span class="role-text">
-                                    <c:choose>
-                                        <c:when test="${u.role == 0}">Admin</c:when>
-                                        <c:otherwise>User</c:otherwise>
-                                    </c:choose>
-                                </span>
-
-                                <select class="role-select" style="display:none;">
-                                    <option value="0" ${u.role == 0 ? "selected" : ""}>Admin</option>
-                                    <option value="1" ${u.role == 1 ? "selected" : ""}>User</option
-                                </select>
-                            </td>
-
                             <!-- STATUS -->
                             <td class="status-cell">
-                                <span class="status-text">
+                                <span class="status-text ${u.status == 1 ? 'status-active' : 'status-locked'}">
                                     <c:choose>
                                         <c:when test="${u.status == 1}">Hoạt động</c:when>
                                         <c:otherwise>Tạm khóa</c:otherwise>
                                     </c:choose>
                                 </span>
-
-                                <select class="status-select" style="display:none;">
-                                    <option value="1" ${u.status == 1 ? "selected" : ""}>Hoạt động</option>
-                                    <option value="0" ${u.status == 0 ? "selected" : ""}>Tạm khóa</option>
-                                </select>
                             </td>
 
                             <!-- ACTION ICONS -->
                             <td class="action-cell">
-                                <i class="fa-solid fa-pen edit-icon" title="Chỉnh sửa"></i>
-                                <i class="fa-solid fa-floppy-disk save-icon" style="display:none;" title="Lưu"></i>
-                                <i class="fa-solid fa-xmark cancel-icon" style="display:none;" title="Hủy"></i>
+                                <a href="${pageContext.request.contextPath}/admin/customers/detail?id=${u.id}"
+                                   class="action-icon-link" title="Xem chi tiết">
+                                    <i class="fa-solid fa-pen edit-icon"></i>
+                                </a>
+                                <c:choose>
+                                    <c:when test="${u.status == 1}">
+                                        <i class="fa-solid fa-lock toggle-status-icon lock-icon"
+                                           data-id="${u.id}" data-status="0"
+                                           title="Khóa tài khoản"></i>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <i class="fa-solid fa-unlock toggle-status-icon unlock-icon"
+                                           data-id="${u.id}" data-status="1"
+                                           title="Mở khóa tài khoản"></i>
+                                    </c:otherwise>
+                                </c:choose>
                             </td>
 
                         </tr>
@@ -171,7 +157,7 @@
                     <strong>${empty users ? 0 : users.size()}</strong>
                     trên tổng số
                     <strong>${totalUsers}</strong>
-                    người dùng
+                    khách hàng
                     <c:if test="${totalPage > 0}">
                         (Trang ${page}/${totalPage})
                     </c:if>
@@ -182,7 +168,7 @@
                 <div class="pagination">
                     <!-- First Page -->
                     <c:if test="${page > 1}">
-                        <a href="${pageContext.request.contextPath}/admin/users?page=1&search=${currentSearch}&role=${currentRole}&status=${currentStatus}"
+                        <a href="${pageContext.request.contextPath}/admin/users?page=1&search=${currentSearch}&status=${currentStatus}"
                            class="page-link"
                            title="Trang đầu">
                             «
@@ -191,7 +177,7 @@
 
                     <!-- Previous Page -->
                     <c:if test="${page > 1}">
-                        <a href="${pageContext.request.contextPath}/admin/users?page=${page-1}&search=${currentSearch}&role=${currentRole}&status=${currentStatus}"
+                        <a href="${pageContext.request.contextPath}/admin/users?page=${page-1}&search=${currentSearch}&status=${currentStatus}"
                            class="page-link"
                            title="Trang trước">
                             ‹
@@ -207,7 +193,7 @@
                                         <span class="page-link active">${i}</span>
                                     </c:when>
                                     <c:otherwise>
-                                        <a href="${pageContext.request.contextPath}/admin/users?page=${i}&search=${currentSearch}&role=${currentRole}&status=${currentStatus}"
+                                        <a href="${pageContext.request.contextPath}/admin/users?page=${i}&search=${currentSearch}&status=${currentStatus}"
                                            class="page-link">
                                                 ${i}
                                         </a>
@@ -225,18 +211,18 @@
                                                 <span class="page-link active">${i}</span>
                                             </c:when>
                                             <c:otherwise>
-                                                <a href="${pageContext.request.contextPath}/admin/users?page=${i}&search=${currentSearch}&role=${currentRole}&status=${currentStatus}"
+                                                <a href="${pageContext.request.contextPath}/admin/users?page=${i}&search=${currentSearch}&status=${currentStatus}"
                                                    class="page-link">${i}</a>
                                             </c:otherwise>
                                         </c:choose>
                                     </c:forEach>
                                     <span class="page-link dots">...</span>
-                                    <a href="${pageContext.request.contextPath}/admin/users?page=${totalPage}&search=${currentSearch}&role=${currentRole}&status=${currentStatus}"
+                                    <a href="${pageContext.request.contextPath}/admin/users?page=${totalPage}&search=${currentSearch}&status=${currentStatus}"
                                        class="page-link">${totalPage}</a>
                                 </c:when>
 
                                 <c:when test="${page >= totalPage - 3}">
-                                    <a href="${pageContext.request.contextPath}/admin/users?page=1&search=${currentSearch}&role=${currentRole}&status=${currentStatus}"
+                                    <a href="${pageContext.request.contextPath}/admin/users?page=1&search=${currentSearch}&status=${currentStatus}"
                                        class="page-link">1</a>
                                     <span class="page-link dots">...</span>
                                     <c:forEach begin="${totalPage - 4}" end="${totalPage}" var="i">
@@ -245,7 +231,7 @@
                                                 <span class="page-link active">${i}</span>
                                             </c:when>
                                             <c:otherwise>
-                                                <a href="${pageContext.request.contextPath}/admin/users?page=${i}&search=${currentSearch}&role=${currentRole}&status=${currentStatus}"
+                                                <a href="${pageContext.request.contextPath}/admin/users?page=${i}&search=${currentSearch}&status=${currentStatus}"
                                                    class="page-link">${i}</a>
                                             </c:otherwise>
                                         </c:choose>
@@ -253,7 +239,7 @@
                                 </c:when>
 
                                 <c:otherwise>
-                                    <a href="${pageContext.request.contextPath}/admin/users?page=1&search=${currentSearch}&role=${currentRole}&status=${currentStatus}"
+                                    <a href="${pageContext.request.contextPath}/admin/users?page=1&search=${currentSearch}&status=${currentStatus}"
                                        class="page-link">1</a>
                                     <span class="page-link dots">...</span>
 
@@ -263,14 +249,14 @@
                                                 <span class="page-link active">${i}</span>
                                             </c:when>
                                             <c:otherwise>
-                                                <a href="${pageContext.request.contextPath}/admin/users?page=${i}&search=${currentSearch}&role=${currentRole}&status=${currentStatus}"
+                                                <a href="${pageContext.request.contextPath}/admin/users?page=${i}&search=${currentSearch}&status=${currentStatus}"
                                                    class="page-link">${i}</a>
                                             </c:otherwise>
                                         </c:choose>
                                     </c:forEach>
 
                                     <span class="page-link dots">...</span>
-                                    <a href="${pageContext.request.contextPath}/admin/users?page=${totalPage}&search=${currentSearch}&role=${currentRole}&status=${currentStatus}"
+                                    <a href="${pageContext.request.contextPath}/admin/users?page=${totalPage}&search=${currentSearch}&status=${currentStatus}"
                                        class="page-link">${totalPage}</a>
                                 </c:otherwise>
                             </c:choose>
@@ -279,7 +265,7 @@
 
                     <!-- Next Page -->
                     <c:if test="${page < totalPage}">
-                        <a href="${pageContext.request.contextPath}/admin/users?page=${page+1}&search=${currentSearch}&role=${currentRole}&status=${currentStatus}"
+                        <a href="${pageContext.request.contextPath}/admin/users?page=${page+1}&search=${currentSearch}&status=${currentStatus}"
                            class="page-link"
                            title="Trang sau">
                             ›
@@ -288,7 +274,7 @@
 
                     <!-- Last Page -->
                     <c:if test="${page < totalPage}">
-                        <a href="${pageContext.request.contextPath}/admin/users?page=${totalPage}&search=${currentSearch}&role=${currentRole}&status=${currentStatus}"
+                        <a href="${pageContext.request.contextPath}/admin/users?page=${totalPage}&search=${currentSearch}&status=${currentStatus}"
                            class="page-link"
                            title="Trang cuối">
                             »

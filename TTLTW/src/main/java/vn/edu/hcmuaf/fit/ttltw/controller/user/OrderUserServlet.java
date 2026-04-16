@@ -135,6 +135,7 @@ public class OrderUserServlet extends HttpServlet {
                         itemMap.put("formattedPrice", currencyFormat.format(detail.getPrice()));
                         itemMap.put("productName", productInfo != null ? productInfo.get("productName") : "N/A");
                         itemMap.put("variantName", productInfo != null ? productInfo.get("variantName") : "");
+                        itemMap.put("productId", productInfo != null ? Integer.parseInt(productInfo.getOrDefault("productId", "0")) : 0);
                         itemMap.put("imagePath",
                                 productInfo != null ? productInfo.get("imagePath") : "asset/img/product/default.jpg");
                         itemsList.add(itemMap);

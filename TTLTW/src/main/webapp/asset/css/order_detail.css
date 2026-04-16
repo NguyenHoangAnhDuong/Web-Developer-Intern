@@ -135,6 +135,26 @@ body {
     gap: 12px;
     margin-top: 16px;
 }
+.btn-review {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: #27ae60;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.3s ease;
+}
+.btn-review:hover {
+    background: #1f8f50;
+}
+.item-action {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
 .action .btn-ghost {
     background: #fff !important;
     border: 1px solid #ccc !important;
