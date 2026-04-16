@@ -223,12 +223,21 @@
                     <div class="shipping-destination">
                         <c:choose>
                             <c:when test="${not empty userAddress}">
-                                <span><i class="fa fa-map-marker-alt"></i> Giao đến:
-                                    <strong>${userAddress.address}</strong></span>
+                                 <span><i class="fa fa-map-marker-alt"></i> Giao đến:<strong>${userAddress.address}</strong>
+                                 </span>
                             </c:when>
+                            <c:when test="${not empty sessionScope.user}">
+                                <span><i class="fa fa-map-marker-alt"></i> Giao đến:<strong>
+                                    <a href="${pageContext.request.contextPath}/user/addresses">
+                                        Thêm địa chỉ giao hàng
+                                    </a></strong>
+                                 </span>
+                            </c:when>
+                            <%-- Chưa đăng nhập --%>
                             <c:otherwise>
-                                <span><i class="fa fa-map-marker-alt"></i> Giao đến:
-                                    <strong>Vui lòng <a href="${pageContext.request.contextPath}/user/addresses">thêm địa chỉ</a> để xem phí và thời gian vận chuyển</strong></span>
+                                <span><i class="fa fa-map-marker-alt"></i> Giao đến:<strong>
+                                    <a href="${pageContext.request.contextPath}/login">Đăng nhập</a>để xem địa chỉ giao <hàng></hàng></strong>
+                                </span>
                             </c:otherwise>
                         </c:choose>
                     </div>

@@ -5,8 +5,10 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import vn.edu.hcmuaf.fit.ttltw.model.*;
 import vn.edu.hcmuaf.fit.ttltw.service.FeedBackService;
+import vn.edu.hcmuaf.fit.ttltw.service.OrderService;
 import vn.edu.hcmuaf.fit.ttltw.service.ProductService;
 import vn.edu.hcmuaf.fit.ttltw.service.ProductServiceImpl;
 
@@ -19,11 +21,13 @@ public class ProductDetailServlet extends HttpServlet {
 
     private FeedBackService feedbackService;
     private ProductService productService;
+    private OrderService orderService;
 
     @Override
     public void init() {
         feedbackService = new FeedBackService();
         productService = new ProductServiceImpl();
+        orderService = new OrderService();
     }
 
     @Override
@@ -58,7 +62,14 @@ public class ProductDetailServlet extends HttpServlet {
 
         List<Map<String, Object>> relatedProducts =
                 productService.getRelatedProducts(product.getBrand().getId(), productId, 4);
-
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            User user = (User) session.getAttribute("user");
+            if (user != null) {
+                Address userAddress = orderService.getDefaultAddress(user.getId());
+                request.setAttribute("userAddress", userAddress);
+            }
+        }
         request.setAttribute("relatedProducts", relatedProducts);
 //        request.getRequestDispatcher("/productDetail.jsp").forward(request, response);
         request.setAttribute("product", product);
