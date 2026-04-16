@@ -51,6 +51,54 @@
     text-decoration: underline;
 }
 
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-weight: 600;
+    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn-primary {
+    background: #d0021b;
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(208, 2, 27, 0.15);
+}
+
+.btn-primary:hover {
+    background: #a00116;
+}
+
+.btn-secondary {
+    background: #2d85f3;
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(45, 133, 243, 0.15);
+}
+
+.btn-secondary:hover {
+    background: #005ecb;
+}
+
+.btn-accent {
+    background: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+.btn-accent:hover {
+    background: #f3f6fb;
+}
+
 /*main*/
 .box-main {
     max-width: 1320px;
@@ -58,27 +106,30 @@
     justify-content: space-between;
     align-items: flex-start;
     margin: auto;
-    gap: 30px;
+    gap: 28px;
+    flex-wrap: wrap;
 }
 .box-main .product-info-left {
     display: flex;
     flex-direction: column;
-    flex: 1;
+    flex: 1 1 640px;
+    min-width: 300px;
     background: #f6f6f6;
-    border-radius: 10px;
-    padding: 20px 20px 100px 20px;
-    gap: 25px; /* khoảng cách giữa ảnh và thông số */
+    border-radius: 16px;
+    padding: 24px;
+    gap: 24px;
 }
-.box-main .product-info-left .product-gallery{
+.box-main .product-info-left .product-gallery {
     display: flex;
     flex-direction: column;
+    gap: 18px;
 }
-.box-main  .product-info-left  .product-gallery .main {
+.box-main .product-info-left .product-gallery .main {
     position: relative;
 }
-.box-main  .product-info-left .product-gallery {
+.box-main .product-info-left .product-gallery {
     flex: 1;
-    min-width: 750px;
+    min-width: 0;
     position: relative;
     text-align: center;
 }
@@ -223,28 +274,28 @@
 
 /* --- CỘT PHẢI: THÔNG TIN & MÀU --- */
 .box-main .product-info-right {
-    flex: 1;
-    min-width: 500px;
+    flex: 1 1 420px;
+    min-width: 300px;
     background: #f6f6f6;
-    border-radius: 10px;
-    padding: 25px 40px;
+    border-radius: 16px;
+    padding: 28px;
 }
 .box-main .product-info-right .product-info h2 {
     font-size: 18px;
     justify-content: flex-start;
-    margin: 15px 0 10px;
-    font-weight: bold;
+    margin: 18px 0 12px;
+    font-weight: 700;
     color: #333;
     display: flex;
 }
 .box-main .product-info-right .product-info .price-box {
-    margin-top: 25px;
+    margin-top: 20px;
     font-size: 20px;
     display: flex;
     align-items: center;
     gap: 10px;
-    justify-content: center;
-    margin-bottom: 15px;
+    justify-content: flex-start;
+    margin-bottom: 18px;
     position: relative;
 }
 .box-main .product-info-right .product-info .price-box  .soldout-label {
@@ -447,36 +498,13 @@
 }
 .box-main .product-info-right .product-info .action-buttons {
     display: flex;
-    gap: 12px;
+    gap: 14px;
     margin-top: 20px;
+    flex-wrap: wrap;
 }
-.box-main .product-info-right .product-info .action-buttons .btn-buy {
-    flex: 1;
-    background: #d0021b;
-    color: #fff;
-    border: none;
-    padding: 12px 50px;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-.box-main .product-info-right .product-info .action-buttons .btn-cart {
-    flex: 1;
-    background: #2d85f3;
-    color: #fff;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-.box-main .product-info-right .product-info .action-buttons .btn-buy:hover {
-    background: #a00116;
-}
-.box-main .product-info-right .product-info .action-buttons .btn-cart:hover {
-    background: #005ecb;
+.box-main .product-info-right .product-info .action-buttons .btn {
+    flex: 1 1 140px;
+    min-width: 140px;
 }
 /*Đăc điểm nổi bật*/
 .product-highlights {
@@ -484,8 +512,9 @@
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 16px 20px;
-    margin: 25px auto;   /* cách phần trên 25px, căn giữa */
-    max-width: 1320px;     /* đồng bộ độ rộng với box chính */
+    margin: 25px auto 0;
+    width: 100%;
+    max-width: 750px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
@@ -654,9 +683,12 @@
 .review-section .review-buttons {
     display: flex;
     justify-content: space-between;
+    gap: 12px;
     margin-top: 25px;
+    flex-wrap: wrap;
 }
-.review-section .review-buttons button {
+.review-section .review-buttons button,
+.review-section .review-buttons a.btn {
     flex: 1;
     padding: 10px 15px;
     border-radius: 8px;
@@ -664,8 +696,13 @@
     font-size: 14px;
     cursor: pointer;
     transition: 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
 }
-.review-section .review-buttons .btn-view {
+.review-section .review-buttons .btn-view,
+.review-section .review-buttons a.btn-accent {
     background: var(--color-bg);
     color: black;
 }
@@ -745,4 +782,68 @@
             opacity 0.8s ease-in,
             width 0.8s ease-in,
             height 0.8s ease-in;
+}
+
+@media (max-width: 1120px) {
+    .box-main {
+        gap: 18px;
+    }
+
+    .box-main .product-info-left,
+    .box-main .product-info-right,
+    .product-highlights,
+    .review-section,
+    .product-related {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .box-main .product-info-left {
+        padding: 18px;
+    }
+
+    .box-main .product-info-right {
+        padding: 22px;
+    }
+}
+
+@media (max-width: 780px) {
+    .container-header {
+        width: 95%;
+        margin-top: 40px;
+    }
+
+    .container-header .product-title {
+        font-size: 20px;
+    }
+
+    .box-main {
+        flex-direction: column;
+    }
+
+    .box-main .product-info-left,
+    .box-main .product-info-right {
+        padding: 18px;
+    }
+
+    .box-main .product-info-right .product-info .price-box {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .box-main .product-info-right .product-info .version-select,
+    .box-main .product-info-right .product-info .color-options,
+    .box-main .product-info-right .product-info .action-buttons {
+        justify-content: stretch;
+    }
+
+    .box-main .product-info-right .product-info .action-buttons .btn {
+        width: 100%;
+    }
+
+    .product-related .product-list {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
 }
