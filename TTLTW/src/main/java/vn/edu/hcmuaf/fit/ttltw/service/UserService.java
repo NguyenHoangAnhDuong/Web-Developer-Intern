@@ -122,19 +122,39 @@ public class UserService {
         return user;
     }
 
-    public User loginByProvider(String provider, String providerId) {
-        return userDao.loginByProvider(provider, providerId);
-    }
-
-    // Kiểm tra đã tồn tại user chưa
-    // Chưa thì thêm user mới
-    public User loginOrRegisterSocial(User u) {
-        User existed = userDao.loginByProvider(u.getProvider(), u.getProviderId());
+    // Đăng nhập hoặc đăng ký qua mạng xã hội (Facebook)
+    public User loginOrRegisterSocial(User u, String provider, String providerUserId, String providerEmail) {
+        // 1. Tìm theo provider + providerUserId trong user_social_accounts
+        User existed = userDao.findByProvider(provider, providerUserId);
         if (existed != null) {
             return existed;
         }
 
-        userDao.insertSocialUser(u);
-        return userDao.loginByProvider(u.getProvider(), u.getProviderId());
+        // 2. Chưa có → tạo user mới + liên kết social account
+        int userId = userDao.insertSocialUser(u);
+        userDao.linkSocialAccount(userId, provider, providerUserId, providerEmail);
+        return userDao.findById(userId).orElse(null);
+    }
+
+    // Đăng nhập bằng Google: kiểm tra email đã tồn tại trong hệ thống chưa
+    // Nếu có → liên kết Google account; nếu chưa → tạo mới
+    public User loginOrRegisterByGoogle(User googleUser, String googleId, String email) {
+        // 1. Tìm theo provider + googleId (đã đăng nhập Google trước đó)
+        User existed = userDao.findByProvider("google", googleId);
+        if (existed != null) {
+            return existed;
+        }
+
+        // 2. Tìm theo email đã có trong hệ thống → liên kết Google account
+        existed = userDao.findByEmail(email);
+        if (existed != null) {
+            userDao.linkSocialAccount(existed.getId(), "google", googleId, email);
+            return existed;
+        }
+
+        // 3. Chưa có → tạo tài khoản mới + liên kết
+        int userId = userDao.insertSocialUser(googleUser);
+        userDao.linkSocialAccount(userId, "google", googleId, email);
+        return userDao.findById(userId).orElse(null);
     }
 }

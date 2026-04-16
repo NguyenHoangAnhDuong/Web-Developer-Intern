@@ -45,3 +45,4 @@ src/main/resources/db.properties
 src/main/resources/application.properties
 src/main/resources/email.properties
 src/main/resources/redis.properties
+src/main/webapp/WEB-INF/web.xml

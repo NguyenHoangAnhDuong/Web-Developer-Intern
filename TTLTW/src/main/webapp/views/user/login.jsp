@@ -61,7 +61,7 @@
                                     <a href="${pageContext.request.contextPath}/login-facebook" id="social-facebook">
                                         <i class="fa fa-facebook"></i>
                                     </a>
-                                    <a href="#" id="social-google"><i class="fa fa-google-plus"></i></a>
+                                    <a href="${pageContext.request.contextPath}/login-google" id="social-google"><i class="fa fa-google-plus"></i></a>
                                 </div>
                             </div>
                         </form>

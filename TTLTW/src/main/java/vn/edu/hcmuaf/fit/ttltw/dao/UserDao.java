@@ -65,7 +65,7 @@ public class UserDao {
     public User login(String input, String password) {
         String sql = """
                 SELECT id, username, first_name AS firstName, last_name AS lastName, avatar, email,
-                       roles_id AS rolesId, status, provider, provider_id AS providerId, created_at AS createdAt, updated_at AS updatedAt
+                       roles_id AS rolesId, status, created_at AS createdAt, updated_at AS updatedAt
                 FROM users
                 WHERE (email = ? OR username = ?)
                   AND password = ?
@@ -240,10 +240,9 @@ public class UserDao {
         boolean isEmail = input != null && input.contains("@");
         String sql;
         if (isEmail) {
-            // Nếu là email, chỉ tìm theo email
             sql = """
                         SELECT id, username, first_name AS firstName, last_name AS lastName, avatar, email,
-                               roles_id AS rolesId, status, provider, provider_id AS providerId, password,
+                               roles_id AS rolesId, status, password,
                                created_at AS createdAt, updated_at AS updatedAt
                         FROM users
                         WHERE email = :input
@@ -252,7 +251,7 @@ public class UserDao {
         } else {
             sql = """
                         SELECT id, username, first_name AS firstName, last_name AS lastName, avatar, email,
-                               roles_id AS rolesId, status, provider, provider_id AS providerId, password,
+                               roles_id AS rolesId, status, password,
                                created_at AS createdAt, updated_at AS updatedAt
                         FROM users
                         WHERE username = :input
@@ -267,39 +266,72 @@ public class UserDao {
                 .orElse(null));
     }
 
-    // Đăng nhap bằng bên thứ 3
-    public User loginByProvider(String provider, String providerId) {
+    // Tìm user theo email
+    public User findByEmail(String email) {
         String sql = """
-                    SELECT id, username, first_name AS firstName, last_name AS lastName, avatar, email,
-                           roles_id AS rolesId, status, provider, provider_id AS providerId, created_at AS createdAt, updated_at AS updatedAt
-                    FROM users
-                    WHERE provider = :p AND provider_id = :pid AND status = 1
-                    LIMIT 1
+                SELECT id, username, first_name AS firstName, last_name AS lastName, avatar, email,
+                       roles_id AS rolesId, status,
+                       created_at AS createdAt, updated_at AS updatedAt
+                FROM users
+                WHERE email = :email AND status = 1
+                LIMIT 1
                 """;
         return DBConnect.getJdbi().withHandle(handle -> handle.createQuery(sql)
-                .bind("p", provider)
-                .bind("pid", providerId)
+                .bind("email", email)
                 .mapToBean(User.class)
                 .findOne()
                 .orElse(null));
     }
 
-    // Thêm người dùng đăng nhập bằng bên thứ 3
-    public void insertSocialUser(User u) {
+    // Tìm user qua bảng user_social_accounts (đăng nhập bên thứ 3)
+    public User findByProvider(String provider, String providerUserId) {
         String sql = """
-                    INSERT INTO users (username, email, first_name, avatar, roles_id, status, provider, provider_id)
-                    VALUES (:un, :em, :fn, :av, :rolesId, :status, :pr, :pid)
+                SELECT u.id, u.username, u.first_name AS firstName, u.last_name AS lastName,
+                       u.avatar, u.email, u.roles_id AS rolesId, u.status,
+                       u.created_at AS createdAt, u.updated_at AS updatedAt
+                FROM user_social_accounts sa
+                JOIN users u ON u.id = sa.user_id
+                WHERE sa.provider = :provider AND sa.provider_user_id = :providerUserId AND u.status = 1
+                LIMIT 1
                 """;
+        return DBConnect.getJdbi().withHandle(handle -> handle.createQuery(sql)
+                .bind("provider", provider)
+                .bind("providerUserId", providerUserId)
+                .mapToBean(User.class)
+                .findOne()
+                .orElse(null));
+    }
 
-        DBConnect.getJdbi().withHandle(h -> h.createUpdate(sql)
+    // Tạo user mới cho đăng nhập bên thứ 3 (trả về user id)
+    public int insertSocialUser(User u) {
+        String sql = """
+                INSERT INTO users (username, email, first_name, avatar, roles_id, status)
+                VALUES (:un, :em, :fn, :av, :rolesId, :status)
+                """;
+        return DBConnect.getJdbi().withHandle(h -> h.createUpdate(sql)
                 .bind("un", u.getUsername())
                 .bind("em", u.getEmail())
                 .bind("fn", u.getFirstName())
                 .bind("av", u.getAvatar())
                 .bind("rolesId", u.getRolesId())
                 .bind("status", u.getStatus())
-                .bind("pr", u.getProvider())
-                .bind("pid", u.getProviderId())
+                .executeAndReturnGeneratedKeys("id")
+                .mapTo(Integer.class)
+                .one());
+    }
+
+    // Liên kết tài khoản mạng xã hội với user
+    public void linkSocialAccount(int userId, String provider, String providerUserId, String providerEmail) {
+        String sql = """
+                INSERT INTO user_social_accounts (user_id, provider, provider_user_id, provider_email)
+                VALUES (:userId, :provider, :providerUserId, :providerEmail)
+                ON DUPLICATE KEY UPDATE provider_email = :providerEmail
+                """;
+        DBConnect.getJdbi().withHandle(h -> h.createUpdate(sql)
+                .bind("userId", userId)
+                .bind("provider", provider)
+                .bind("providerUserId", providerUserId)
+                .bind("providerEmail", providerEmail)
                 .execute());
     }
 
