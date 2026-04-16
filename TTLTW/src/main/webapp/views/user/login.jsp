@@ -76,6 +76,7 @@
                 </div>
             </div>
 
+            <%@ include file="/views/includes/toast.jsp" %>
             <script src="${pageContext.request.contextPath}/asset/js/login.js"></script>
             <script>
                 function changeTypePass() {

@@ -98,8 +98,10 @@ public class LoginGoogleCallbackServlet extends HttpServlet {
             // Chỉ cho phép khách hàng (role == 2)
             if (user.getRolesId() != 2) {
                 session.invalidate();
-                response.sendRedirect(request.getContextPath()
-                        + "/login?error=Only user accounts can login with Google");
+                HttpSession newSession = request.getSession(true);
+                newSession.setAttribute("toastMessage", "Nhân viên vui lòng sử dụng đăng nhập thường");
+                newSession.setAttribute("toastType", "error");
+                response.sendRedirect(request.getContextPath() + "/login");
                 return;
             }
 
