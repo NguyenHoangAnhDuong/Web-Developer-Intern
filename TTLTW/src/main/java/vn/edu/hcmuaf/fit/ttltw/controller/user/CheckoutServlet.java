@@ -18,10 +18,9 @@ import java.util.Map;
 public class CheckoutServlet extends HttpServlet {
     private final OrderService orderService = new OrderService();
     private final CartService cartService = new CartServiceImpl();
-    private SuperAIService superAIService = new SuperAIService();
-    private final ShippingService shippingService = new ShippingService();
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
 
@@ -113,22 +112,13 @@ public class CheckoutServlet extends HttpServlet {
                         String vnpUrl = VnPayConfig.createPaymentUrl(orderId, finalTotal, request);
                         response.sendRedirect(vnpUrl);
                     } else {
-                        // COD
-                        String tracking = superAIService.createRealOrder(orderId, fullName, phone, fullAddress, finalTotal);
-                        if (tracking != null) {
-                            shippingService.updateShippingInfo(orderId, tracking, "SuperAI");
-
+                            orderService.handleShippingAsync(orderId, fullName, phone, fullAddress, finalTotal
+                            );
                         }
-
                         session.setAttribute("toastMessage", "Đặt hàng thành công!");
                         session.setAttribute("toastType", "success");
                         response.sendRedirect(request.getContextPath() + "/user/order-detail?orderId=" + orderId);
                     }
-                }
-             else {
-                throw new Exception("Không thể tạo đơn hàng trong hệ thống.");
-            }
-
         }  catch (Exception e) {
             e.printStackTrace();
             session.setAttribute("toastMessage", e.getMessage() != null ? e.getMessage() : "Có lỗi hệ thống xảy ra");

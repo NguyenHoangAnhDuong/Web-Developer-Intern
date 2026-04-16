@@ -16,6 +16,7 @@ public class OrderService {
     private final VoucherAdminDao voucherDao = new VoucherAdminDaoImpl();
     private final SuperAIService superAIService = new SuperAIService();
     private final ShippingService shippingService = new ShippingService();
+    private final ShippingDao shippingDao = new ShippingDao();
     public OrderService() {
         this.orderDao = new OrderDao();
         this.addressDao = new AddressDao();
@@ -174,6 +175,10 @@ public class OrderService {
                         orderId, address.getName(), address.getPhoneNumber(),
                         address.getAddress(), codAmount
                 );
+                if (tracking != null) {
+                    shippingDao.updateTrackingInfo(orderId, tracking, "SuperShip");
+                    System.out.println("✅ Saved tracking: " + tracking);
+                }
 
                 if (tracking == null || tracking.trim().isEmpty()) {
                     // debug ra lỗi
@@ -287,6 +292,29 @@ public class OrderService {
 
     public List<Voucher> getActiveVouchers() {
         return voucherDao.getActiveVouchers();
+    }
+
+
+    // tách việc gọi API vận chuyển ra chạy nền
+    // không block request user
+    // API ship có thể chậm / lỗi
+    public void handleShippingAsync(int orderId, String name, String phone, String address, double amount) {
+        new Thread(() -> {
+            try {
+                ShippingService shippingService = new ShippingService();
+                String tracking = shippingService.createShipment(
+                        orderId, name, phone, address, amount
+                );
+                if (tracking != null) {
+                    System.out.println("tracking đã được lưu " + tracking);
+                } else {
+                    System.err.println("orderService  không có tracking ");
+                }
+
+            } catch (Exception e) {
+                System.err.println("orderService async lỗi: " + e.getMessage());
+            }
+        }).start();
     }
 
 }

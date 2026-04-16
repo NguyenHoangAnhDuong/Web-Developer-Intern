@@ -58,7 +58,7 @@ public class ShippingWebhookServlet extends HttpServlet {
                 String code = json.get("code").getAsString();
                 String shortcode = json.get("shortcode").getAsString();
                 String soc = json.get("soc").getAsString();
-                
+                // fix cứng để super AI nhận thông tin trả về là 200
                 if ("SGNS336484LM.883568271".equals(code) && 
                     "883568271".equals(shortcode) && 
                     "EG27533038-24".equals(soc)) {
@@ -95,7 +95,7 @@ public class ShippingWebhookServlet extends HttpServlet {
                 statusName = json.get("status_code").getAsString();
             }
 
-            // tìm orderId dựa trên trackingCode và cập nhật
+            // tìm orderId dựa trên trackingnumber và cập nhật
             int orderId = shippingDao.getOrderIdByTracking(trackingCode);
             System.out.println(" Webhook  Nhận request: tracking=" + trackingCode + ", status=" + statusName);
             System.out.println("Webhook Raw JSON: " + buffer.toString());
@@ -142,36 +142,28 @@ public class ShippingWebhookServlet extends HttpServlet {
     }
 
     private int resolveShippingStatus(JsonObject json) {
-        if (json.has("status_code") && !json.get("status_code").isJsonNull()) {
-            try {
-                return json.get("status_code").getAsInt();
-            } catch (Exception ignored) {
-                String raw = json.get("status_code").getAsString();
-                int parsed = parseIntSafely(raw);
-                if (parsed > 0) {
-                    return parsed;
-                }
+        if (json.has("status_name") && !json.get("status_name").isJsonNull()) {
+            String name = json.get("status_name").getAsString();
+            int mapped = mapShippingStatus(name);
+            if (mapped > 0) {
+                System.out.println(" status_name: " + name + " → " + mapped);
+                return mapped;
             }
+        }
+
+        if (json.has("status_code") && !json.get("status_code").isJsonNull()) {
+            int parsed = parseIntSafely(json.get("status_code").getAsString());
+            if (parsed > 0) return parsed;
         }
 
         if (json.has("status") && !json.get("status").isJsonNull()) {
-            try {
-                return json.get("status").getAsInt();
-            } catch (Exception ignored) {
-                String raw = json.get("status").getAsString();
-                int parsed = parseIntSafely(raw);
-                if (parsed > 0) {
-                    return parsed;
-                }
-                int mapped = mapShippingStatus(raw);
-                if (mapped > 0) {
-                    return mapped;
-                }
-            }
-        }
+            String raw = json.get("status").getAsString();
 
-        if (json.has("status_name") && !json.get("status_name").isJsonNull()) {
-            return mapShippingStatus(json.get("status_name").getAsString());
+            int parsed = parseIntSafely(raw);
+            if (parsed > 0) return parsed;
+
+            int mapped = mapShippingStatus(raw);
+            if (mapped > 0) return mapped;
         }
 
         return -1;
