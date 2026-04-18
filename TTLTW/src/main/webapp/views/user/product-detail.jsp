@@ -257,14 +257,32 @@
 
         <div class="review-summary">
             <div class="review-score">
-                <span class="score">${totalFeedbacks}</span><span class="outof">/5</span>
-                <c:if test="${totalFeedbacks > 0}">
-                    <p class="review-count">${totalFeedbacks} đánh giá</p>
-                </c:if>
+                <div class="score-big">
+                    <span class="score">${averageRating}</span>
+                    <span class="outof">/5</span>
+                </div>
+                <!-- Hiển thị sao theo averageRating -->
+                <div class="stars">
+                    <c:forEach begin="1" end="5" var="i">
+                        <c:choose>
+                            <c:when test="${i <= averageRating}">
+                                <i class="fa-solid fa-star"></i>
+                            </c:when>
+                            <c:when test="${i - 0.5 <= averageRating}">
+                                <i class="fa-solid fa-star-half-stroke"></i>
+                            </c:when>
+                            <c:otherwise>
+                                <i class="fa-regular fa-star"></i>
+                            </c:otherwise>
+                        </c:choose>
+                    </c:forEach>
+                </div>
+                <p class="review-count">${totalFeedbacks} đánh giá</p>
             </div>
 
             <div class="review-bars">
-                <c:forEach begin="5" end="1" var="star">
+                <c:set var="starList" value="5,4,3,2,1"/>
+                <c:forEach var="star" items="${starList}">
                     <c:set var="countStar" value="0"/>
                     <c:forEach items="${feedbacks}" var="fb">
                         <c:if test="${fb.rating == star}">
@@ -275,12 +293,16 @@
                     <c:if test="${totalFeedbacks > 0}">
                         <c:set var="percentage" value="${countStar * 100 / totalFeedbacks}"/>
                     </c:if>
-                    <div>
-                        <span>${star}</span>
+                    <div class="bar-row">
+                        <span class="star-label">
+                            ${star} <i class="fa-solid fa-star" style="color:#f5a623;font-size:12px"></i>
+                        </span>
                         <div class="bar">
                             <div class="fill" style="width: ${percentage}%"></div>
                         </div>
-                        <span><fmt:formatNumber value="${percentage}" pattern="0.#"/>%</span>
+                        <span class="bar-pct">
+                            <fmt:formatNumber value="${percentage}" pattern="0.#"/>%
+                        </span>
                     </div>
                 </c:forEach>
             </div>

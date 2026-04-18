@@ -59,6 +59,16 @@ public class ProductDetailServlet extends HttpServlet {
         List<Map<String, Object>> variantColors = productService.getAllVariantColorsForProduct(productId);
         List<Feedback> feedbacks = feedbackService.getFeedbacksByProductId(productId);
         int totalFeedbacks = feedbackService.countByProductId(productId);
+        // Tính điểm trung bình
+        double averageRating = 0;
+        if (totalFeedbacks > 0) {
+            int sumRating = feedbacks.stream()
+                    .mapToInt(Feedback::getRating)
+                    .sum();
+            averageRating = (double) sumRating / totalFeedbacks;
+            // Làm tròn 1 chữ số thập phân
+            averageRating = Math.round(averageRating * 10.0) / 10.0;
+        }
         int brandId = product.getBrand().getId();
         int categoryId = product.getCategory().getId();
 
@@ -83,6 +93,7 @@ public class ProductDetailServlet extends HttpServlet {
         request.setAttribute("variantColors", variantColors);
         request.setAttribute("feedbacks", feedbacks);
         request.setAttribute("totalFeedbacks", totalFeedbacks);
+        request.setAttribute("averageRating", averageRating);
         request.getRequestDispatcher("/views/user/product-detail.jsp")
                 .forward(request, response);
     }
