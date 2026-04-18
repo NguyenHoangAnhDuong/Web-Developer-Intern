@@ -59,9 +59,11 @@ public class ProductDetailServlet extends HttpServlet {
         List<Map<String, Object>> variantColors = productService.getAllVariantColorsForProduct(productId);
         List<Feedback> feedbacks = feedbackService.getFeedbacksByProductId(productId);
         int totalFeedbacks = feedbackService.countByProductId(productId);
+        int brandId = product.getBrand().getId();
+        int categoryId = product.getCategory().getId();
 
         List<Map<String, Object>> relatedProducts =
-                productService.getRelatedProducts(product.getBrand().getId(), productId, 4);
+                productService.getRelatedProducts(brandId, categoryId,productId, 4);
         HttpSession session = request.getSession(false);
         if (session != null) {
             User user = (User) session.getAttribute("user");

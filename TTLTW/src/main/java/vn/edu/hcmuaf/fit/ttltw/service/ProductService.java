@@ -80,7 +80,7 @@ public interface ProductService {
 
         // Lấy 4 sản phẩm liên quan
         List<Map<String, Object>> getRelatedProducts(
-                        int brandId,
+                        int brandId, int category,
                         int excludeProductId,
                         int limit);
 
