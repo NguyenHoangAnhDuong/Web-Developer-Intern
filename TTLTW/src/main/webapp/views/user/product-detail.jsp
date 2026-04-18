@@ -34,8 +34,19 @@
         <h1 class="product-title">
             ${product.name}
             <span class="sold-info">Đã bán ${product.totalSold}</span>
-            <span class="rating"><i class="fa-solid fa-star" style="color: #f5a623;"></i>
-                ${totalFeedbacks}</span>
+                <span class="rating">
+                    <c:choose>
+                    <c:when test="${totalFeedbacks > 0}">
+                         <i class="fa-solid fa-star" style="color: #f5a623;"></i>
+                            ${averageRating}
+                        <span style="font-size:12px;color:#888">(${totalFeedbacks} đánh giá)</span>
+                    </c:when>
+                         <c:otherwise>
+                            <i class="fa-regular fa-star" style="color: #ccc;"></i>
+                            <span style="font-size:13px;color:#aaa">Chưa có đánh giá</span>
+                         </c:otherwise>
+                    </c:choose>
+</span>
             <a href="#" class="spec-link">Thông số</a>
         </h1>
     </div>
@@ -356,8 +367,8 @@
         <div class="review-buttons">
 
             <c:if test="${totalFeedbacks > 0}">
-                <a href="#review-section" class="btn btn-accent btn-view">
-                    Xem ${totalFeedbacks} đánh giá
+                <a href="${pageContext.request.contextPath}/feedback?productId=${product.id}">
+                    <button class="btn-view">Xem ${totalFeedbacks} đánh giá</button>
                 </a>
             </c:if>
             <a href="${pageContext.request.contextPath}/review?productId=${product.id}" class="btn btn-primary btn-write">
