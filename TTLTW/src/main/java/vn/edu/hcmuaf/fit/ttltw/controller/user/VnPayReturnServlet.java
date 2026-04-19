@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import vn.edu.hcmuaf.fit.ttltw.service.OrderService;
+import vn.edu.hcmuaf.fit.ttltw.service.ShippingService;
 import vn.edu.hcmuaf.fit.ttltw.service.SuperAIService;
 
 import java.io.IOException;
@@ -14,6 +15,7 @@ import java.io.IOException;
 public class VnPayReturnServlet extends HttpServlet {
     private final OrderService orderService = new OrderService();
     private final SuperAIService superAI = new SuperAIService();
+    private final ShippingService shippingService = new ShippingService();
 
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String code = req.getParameter("vnp_ResponseCode");
@@ -21,16 +23,45 @@ public class VnPayReturnServlet extends HttpServlet {
         int orderId = Integer.parseInt(txnRef.split("_")[0]);
 
         if ("00".equals(code)) {
-            // cập nhập trạng thái đã thanh toán
-            orderService.updateStatus(orderId, 3);
+            // Lấy thông tin đơn hàng để cập nhật đúng trạng thái
+            var orderOpt = orderService.getOrderById(orderId);
+            
+            if (orderOpt.isEmpty()) {
+                resp.sendRedirect("user/order-detail?orderId=" + orderId + "&payment=error&msg=Order not found");
+                return;
+            }
+            
+            var order = orderOpt.get();
+            int currentStatus = order.getStatus();
+            
+            // Chuyển từ status 1   sang 2
+            int newStatus =  currentStatus == 1  ? 2 : currentStatus;
+
+            System.out.println(" Payment success - Order " + orderId + ": " + currentStatus + " -> " + newStatus);
+
+            var result = orderService.updateStatus(orderId, newStatus);
 
             // đẩy đơn sang vận chuyển
-            var orderOpt = orderService.getOrderById(orderId);
-            if (orderOpt.isPresent()) {
-                // giả lập thông tin hoặc lấy từ bảng Address
-                superAI.createRealOrder(orderId, "Khách thanh toán Online", "090xxx", "Địa chỉ lấy từ DB", 0); // COD = 0 vì đã trả tiền
+            if ( currentStatus == 1   && newStatus == 2) {
+                try {
+                    var address = orderService.getDefaultAddress(order.getUserId());
+                    if (address != null) {
+                        String tracking = superAI.createRealOrder(
+                                orderId, 
+                                address.getName(), 
+                                address.getPhoneNumber(),
+                                address.getAddress(), 
+                                0 // COD = 0 vì đã thanh toán
+                        );
+                        if (tracking != null && !tracking.isBlank()) {
+                            shippingService.updateTrackingInfo(orderId, tracking, "SuperAI");
+                            System.out.println("tracking saved: " + tracking);
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
-
             resp.sendRedirect("user/order-detail?orderId=" + orderId + "&payment=success");
         } else {
             resp.sendRedirect("cart?action=checkout&error=payment_failed");
