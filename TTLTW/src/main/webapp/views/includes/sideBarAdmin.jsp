@@ -47,6 +47,12 @@
                 >
                 <span class="nav-tooltip">Khuyến mãi</span>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" data-target="promotions" href="${pageContext.request.contextPath}/admin/feedbacks"
+                ><span class="icon"><i class="fa-solid fa-tags"></i></span> <span class="nav-label">Đánh giá</span></a
+                >
+                <span class="nav-tooltip">Đánh giá</span>
+            </li>
         </ul>
         <ul class="nav-list second-nav">
             <li class="nav-item">
