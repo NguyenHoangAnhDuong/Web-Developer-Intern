@@ -47,5 +47,32 @@ public class FeedBackService {
         }
         return counts;
     }
-
+    public List<Feedback> searchFeedbacks(String keyword, Integer star, String status) {
+        List<Feedback> all = feedbackDao.getAllFeedbacks();
+        return all.stream()
+                .filter(f -> {
+                    if (keyword == null || keyword.isEmpty()) return true;
+                    String kw = keyword.toLowerCase();
+                    return (f.getComment()     != null && f.getComment().toLowerCase().contains(kw))
+                            || (f.getUsername()    != null && f.getUsername().toLowerCase().contains(kw))
+                            || (f.getProductName() != null && f.getProductName().toLowerCase().contains(kw));
+                })
+                .filter(f -> star == null || f.getRating() == star)
+                .filter(f -> {
+                    if (status == null || status.isEmpty()) return true;
+                    return switch (status) {
+                        case "show"    -> f.getStatus() == 1;
+                        case "hide"    -> f.getStatus() == 0;
+                        case "pending" -> f.getStatus() == 2;
+                        default        -> true;
+                    };
+                })
+                .collect(Collectors.toList());
+    }
+    public void updateStatus(int id, int status) {
+        feedbackDao.updateStatus(id, status);
+    }
+    public void deleteFeedback(int id) {
+        feedbackDao.deleteFeedback(id);
+    }
 }

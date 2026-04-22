@@ -49,7 +49,7 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link" data-target="promotions" href="${pageContext.request.contextPath}/admin/feedbacks"
-                ><span class="icon"><i class="fa-solid fa-tags"></i></span> <span class="nav-label">Đánh giá</span></a
+                ><span class="icon"><i class="fa-solid fa-award"></i></span> <span class="nav-label">Đánh giá</span></a
                 >
                 <span class="nav-tooltip">Đánh giá</span>
             </li>
