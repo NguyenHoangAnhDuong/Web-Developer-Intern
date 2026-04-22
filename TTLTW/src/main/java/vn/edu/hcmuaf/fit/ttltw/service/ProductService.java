@@ -3,6 +3,9 @@ package vn.edu.hcmuaf.fit.ttltw.service;
 import vn.edu.hcmuaf.fit.ttltw.model.Brand;
 import vn.edu.hcmuaf.fit.ttltw.model.Image;
 import vn.edu.hcmuaf.fit.ttltw.model.Product;
+import vn.edu.hcmuaf.fit.ttltw.model.ProductVariant;
+import vn.edu.hcmuaf.fit.ttltw.model.TechSpecs;
+import vn.edu.hcmuaf.fit.ttltw.model.VariantColor;
 
 import java.util.List;
 import java.util.Map;
@@ -14,6 +17,20 @@ public interface ProductService {
         int countForAdmin(String keyword, Integer status, Integer categoryId);
 
         boolean toggleStatus(int productId);
+
+        Product findProductDetailById(int productId);
+
+        List<ProductVariant> getVariantsByProduct(int productId);
+
+        List<TechSpecs> getTechSpecsByProduct(int productId);
+
+        VariantColor getDefaultVariantColor(int productId);
+
+        List<VariantColor> getColorsByVariant(int variantId);
+
+        List<Image> getImagesByVariantColor(int variantColorId);
+
+        List<Map<String, Object>> getAllVariantColorsForProduct(int productId);
 
         Map<String, Object> getProductForEditByVariantColorId(int vcId);
 

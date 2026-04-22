@@ -7,7 +7,7 @@ import vn.edu.hcmuaf.fit.ttltw.model.PaymentTypes;
 
 import java.util.List;
 
-public class paymentTypesService {
+public class PaymentTypesService {
     public final AddressDao addressDao = new AddressDao();
     private final PaymentTypesDao paymentTypeDao = new PaymentTypesDao();
 

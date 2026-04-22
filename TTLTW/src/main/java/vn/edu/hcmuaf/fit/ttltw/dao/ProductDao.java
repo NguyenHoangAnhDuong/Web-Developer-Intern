@@ -141,6 +141,8 @@ public interface ProductDao {
         // VariantColor mặc định (load trang)
         VariantColor getDefaultVariantColor(int productId);
 
+        // Lấy tất cả variant_color trong product để JS chọn giá/màu
+        List<Map<String, Object>> getAllVariantColorsForProduct(int productId);
 
 
         List<Map<String, Object>> findRelatedBySameBrand(

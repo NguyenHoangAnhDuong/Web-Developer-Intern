@@ -2,10 +2,11 @@ package vn.edu.hcmuaf.fit.ttltw.dao;
 
 import org.jdbi.v3.core.Jdbi;
 import vn.edu.hcmuaf.fit.ttltw.config.DBConnect;
+import vn.edu.hcmuaf.fit.ttltw.model.Order;
 import vn.edu.hcmuaf.fit.ttltw.model.ShippingZoneFees;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class ShippingDao {
     private final Jdbi jdbi; // Kết nối database
@@ -24,31 +25,39 @@ public class ShippingDao {
             .mapToBean(ShippingZoneFees.class)
             .list());
 }
-    // lưu mã vẫn chuyển khi đơn sau khi gọi API thành công
-    public  boolean updateShippingInfo(int orderId, String tracking, String partner) {
-        String sql = "UPDATE orders SET tracking_number = :tracking, shipping_partner = :partner, status = :status  WHERE id = :id";
+    // tìm đơn hàng theo ID
+    public Optional<Order> findOrderById(int id) {
+        String sql = "SELECT id, tracking_number, partner_name, status FROM orders WHERE id = :id LIMIT 1";
+        return jdbi.withHandle(handle -> handle.createQuery(sql)
+                .bind("id", id)
+                .mapToBean(Order.class)
+                .findOne());
+    }
+
+// lưu mã vận chuyển khi gọi API thành công
+    public boolean updateTrackingInfo(int orderId, String tracking, String partner) {
+        String sql = "UPDATE orders SET tracking_number = :tracking, partner_name = :partner WHERE id = :id";
         return jdbi.withHandle(handle -> handle.createUpdate(sql)
                 .bind("tracking", tracking)
                 .bind("partner", partner)
-                .bind("status", "Đang xử lý") // Trạng thái mặc định khi vừa đẩy đơn sang SuperAI
                 .bind("id", orderId)
                 .execute() > 0);
     }
     // trả về trang thái mới nhất của đơn hàng sau khi cập nhật trạng thái vận chuyển
-    public boolean updateOnlyShippingStatus(int orderId, String newStatus) {
+    public boolean updateOnlyShippingStatus(int orderId, int newStatus) {
         String sql = "UPDATE orders SET  status = ?, updated_at = NOW() WHERE id = ?";
         return jdbi.withHandle(handle -> handle.createUpdate(sql)
                 .bind(0, newStatus)
                 .bind(1, orderId)
                 .execute()) > 0;
     }
-    // Tìm ID đơn hàng dựa trên mã vận đơn   trả về từ đơn vị vận chuyển
+    // tìm ID đơn hàng dựa trên mã vận đơn   trả về từ đơn vị vận chuyển
 public int getOrderIdByTracking(String tracking) {
     String sql = "SELECT id FROM orders WHERE tracking_number = :tracking";
     return jdbi.withHandle(handle -> handle.createQuery(sql)
             .bind("tracking", tracking)
             .mapTo(Integer.class)
             .findOne()
-            .orElse(0)); // Trả về 0 nếu không tìm thấy đơn hàng nào khớp với mã này
+            .orElse(0)); // không tìm thấy đơn hàng khớp với mã
 }
 }

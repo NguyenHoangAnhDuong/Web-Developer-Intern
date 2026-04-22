@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/asset/css/listVouchers.css">
 </head>
 <body>
+<%@ include file="/views/includes/toast.jsp" %>
 <div class="app-wrapper">
     <!-- Header -->
     <jsp:include page="/views/includes/header.jsp"/>
@@ -97,6 +98,29 @@
                     </c:forEach>
 
                 </table>
+            </div>
+            <!--  Đặc điểm nổi bật -->
+            <div class="product-highlights">
+                <h3>Đặc điểm nổi bật</h3>
+                <ul>
+                    <c:choose>
+                        <c:when test="${not empty product.description}">
+                            <c:set var="highlights" value="${fn:split(product.description, '&#10;')}"/>
+                            <c:forEach items="${highlights}" var="highlight">
+                                <c:if test="${not empty highlight}">
+                                    <li>${highlight}</li>
+                                </c:if>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <li>Sản phẩm chất lượng cao</li>
+                            <li>Thiết kế hiện đại</li>
+                            <li>Hiệu năng mạnh mẽ</li>
+                            <li>Bảo hành chính hãng</li>
+                            <li>Hỗ trợ khách hàng 24/7</li>
+                        </c:otherwise>
+                    </c:choose>
+                </ul>
             </div>
         </div>
         <!--            cột phải-->
@@ -183,53 +207,6 @@
                     </ul>
                 </div>
 
-                <!-- ƯU ĐÃI KHUYẾN MÃI -->
-                <section class="promotions">
-                    <div class="payment-promo">
-                        <h3 class="promo-title">ƯU ĐÃI KHUYẾN MÃI</h3>
-                        <div class="promo-slider">
-                            <div class="promo-list">
-                                <c:choose>
-                                    <c:when test="${not empty promotions}">
-                                        <c:forEach items="${promotions}" var="promo" begin="0" end="4">
-                                            <div class="promo-item">
-                                                <i class="fa-solid fa-percent"></i>
-                                                <div class="promo-content">
-                                                    <p class="discount">${promo.description}</p>
-                                                    <a href="#">Xem chi tiết <i class="fa-solid fa-angle-right"></i></a>
-                                                </div>
-                                                <c:set var="quantityRemain"
-                                                       value="${promo.quantityLimit - promo.quantityUsed}"/>
-                                                <c:choose>
-                                                    <c:when test="${quantityRemain > 0}">
-                                                        <div class="promo-status remain">Còn ${quantityRemain} suất
-                                                        </div>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <div class="promo-status soldout">Hết suất</div>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </div>
-                                        </c:forEach>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <div class="promo-item">
-                                            <i class="fa-solid fa-percent"></i>
-                                            <div class="promo-content">
-                                                <p class="discount">Chưa có khuyến mãi</p>
-                                                <a href="#">Xem chi tiết <i class="fa-solid fa-angle-right"></i></a>
-                                            </div>
-                                            <div class="promo-status remain">Sắp có</div>
-                                        </div>
-                                    </c:otherwise>
-                                </c:choose>
-                            </div>
-
-                            <div class="promo-control prev"><i class="fa-solid fa-chevron-left"></i></div>
-                            <div class="promo-control next"><i class="fa-solid fa-chevron-right"></i></div>
-                        </div>
-                    </div>
-                </section>
                 <!--  Thông tin vận chuyển -->
                 <div class="shipping-box">
                     <h3>Vận chuyển & Phí ship</h3>
@@ -246,52 +223,36 @@
                     <div class="shipping-destination">
                         <c:choose>
                             <c:when test="${not empty userAddress}">
-                                <span><i class="fa fa-map-marker-alt"></i> Giao đến:
-                                    <strong>${userAddress.address}</strong></span>
+                                 <span><i class="fa fa-map-marker-alt"></i> Giao đến:<strong>${userAddress.address}</strong>
+                                 </span>
                             </c:when>
+                            <c:when test="${not empty sessionScope.user}">
+                                <span><i class="fa fa-map-marker-alt"></i> Giao đến:<strong>
+                                    <a href="${pageContext.request.contextPath}/user/addresses">
+                                        Thêm địa chỉ giao hàng
+                                    </a></strong>
+                                 </span>
+                            </c:when>
+                            <%-- Chưa đăng nhập --%>
                             <c:otherwise>
-                                <span><i class="fa fa-map-marker-alt"></i> Giao đến:
-                                    <strong>Vui lòng <a href="${pageContext.request.contextPath}/login">đăng nhập</a> để xem địa chỉ</strong></span>
+                                <span><i class="fa fa-map-marker-alt"></i> Giao đến:<strong>
+                                    <a href="${pageContext.request.contextPath}/login">Đăng nhập</a>để xem địa chỉ giao <hàng></hàng></strong>
+                                </span>
                             </c:otherwise>
                         </c:choose>
                     </div>
                 </div>
                 <!--  Nút hành động -->
                 <div class="action-buttons">
-                    <button class="btn-buy">Mua ngay</button>
-                    <button class="btn-cart"><i class="fa-solid fa-cart-plus" style="margin-right: 5px;"></i>Thêm vào
-                        giỏ hàng
-                    </button>
+                    <button class="btn btn-primary btn-buy">Mua ngay</button>
+                    <button class="btn btn-secondary btn-cart"><i class="fa-solid fa-cart-plus" style="margin-right: 5px;"></i>Thêm vào giỏ hàng</button>
                 </div>
             </div>
 
         </div>
     </div>
-    <!--  Mô tả nổi bật -->
-    <div class="product-highlights">
-        <h3>Đặc điểm nổi bật</h3>
-        <ul>
-            <c:choose>
-                <c:when test="${not empty product.description}">
-                    <c:set var="highlights" value="${fn:split(product.description, '&#10;')}"/>
-                    <c:forEach items="${highlights}" var="highlight">
-                        <c:if test="${not empty highlight}">
-                            <li>${highlight}</li>
-                        </c:if>
-                    </c:forEach>
-                </c:when>
-                <c:otherwise>
-                    <li>Sản phẩm chất lượng cao</li>
-                    <li>Thiết kế hiện đại</li>
-                    <li>Hiệu năng mạnh mẽ</li>
-                    <li>Bảo hành chính hãng</li>
-                    <li>Hỗ trợ khách hàng 24/7</li>
-                </c:otherwise>
-            </c:choose>
-        </ul>
-    </div>
     <!--  Đánh giá sản phẩm -->
-    <section class="review-section">
+    <section id="review-section" class="review-section">
         <h2>Đánh giá ${product.name}</h2>
 
         <div class="review-summary">
@@ -373,14 +334,12 @@
         <div class="review-buttons">
 
             <c:if test="${totalFeedbacks > 0}">
-                <a href="feedbackDetail.html">
-                    <button class="btn-view">
-                        Xem ${totalFeedbacks} đánh giá
-                    </button>
+                <a href="#review-section" class="btn btn-accent btn-view">
+                    Xem ${totalFeedbacks} đánh giá
                 </a>
             </c:if>
-            <a href="review.html">
-                <button class="btn-write">Viết đánh giá</button>
+            <a href="${pageContext.request.contextPath}/review?productId=${product.id}" class="btn btn-primary btn-write">
+                Viết đánh giá
             </a>
         </div>
     </section>
@@ -393,7 +352,7 @@
                     <a href="product-detail?id=${product.id}">
                         <div class="product-img">
                             <c:set var="relatedImgPath" value="${product.categoryId == 1 ? 'product' : 'accesory'}"/>
-                            <img src="${pageContext.request.contextPath}/assert/img/${relatedImgPath}/${product.image}"
+                            <img src="${product.image}"
                                  alt="${product.name}">
                             <c:if test="${product.discount > 0}">
                                 <span class="discount-badge">-${product.discount}%</span>
