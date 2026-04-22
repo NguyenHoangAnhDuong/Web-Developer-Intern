@@ -165,6 +165,69 @@
             </tbody>
         </table>
     </div>
+    <c:if test="${totalPages > 1}">
+        <div class="pagination">
+        <span class="pg-info">
+            Hiển thị ${(currentPage - 1) * 10 + 1}–${currentPage * 10 > totalItems ? totalItems : currentPage * 10}
+            / ${totalItems} đánh giá
+        </span>
+            <div class="pg-buttons">
+                <c:choose>
+                    <c:when test="${currentPage > 1}">
+                        <a href="?action=list&page=${currentPage - 1}&keyword=${keyword}&star=${starParam}&status=${status}"
+                           class="pg-btn">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </a>
+                    </c:when>
+                    <c:otherwise>
+                        <button class="pg-btn" disabled>
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                    </c:otherwise>
+                </c:choose>
+                <c:set var="startPage" value="${currentPage > 3 ? currentPage - 2 : 1}"/>
+                <c:set var="endPage"   value="${currentPage + 2 < totalPages ? currentPage + 2 : totalPages}"/>
+                <c:if test="${startPage > 1}">
+                    <a href="?action=list&page=1&keyword=${keyword}&star=${starParam}&status=${status}"
+                       class="pg-btn">1</a>
+                    <c:if test="${startPage > 2}">
+                        <span class="pg-dots">…</span>
+                    </c:if>
+                </c:if>
+                <c:forEach var="i" begin="${startPage}" end="${endPage}">
+                    <c:choose>
+                        <c:when test="${i == currentPage}">
+                            <span class="pg-btn active">${i}</span>
+                        </c:when>
+                        <c:otherwise>
+                            <a href="?action=list&page=${i}&keyword=${keyword}&star=${starParam}&status=${status}"
+                               class="pg-btn">${i}</a>
+                        </c:otherwise>
+                    </c:choose>
+                </c:forEach>
+                <c:if test="${endPage < totalPages}">
+                    <c:if test="${endPage < totalPages - 1}">
+                        <span class="pg-dots">…</span>
+                    </c:if>
+                    <a href="?action=list&page=${totalPages}&keyword=${keyword}&star=${starParam}&status=${status}"
+                       class="pg-btn">${totalPages}</a>
+                </c:if>
+                <c:choose>
+                    <c:when test="${currentPage < totalPages}">
+                        <a href="?action=list&page=${currentPage + 1}&keyword=${keyword}&star=${starParam}&status=${status}"
+                           class="pg-btn">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </a>
+                    </c:when>
+                    <c:otherwise>
+                        <button class="pg-btn" disabled>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+        </div>
+    </c:if>
 </div>
 <div class="modal-overlay" id="modal-overlay" onclick="closeDetail()">
     <div class="modal-box" onclick="event.stopPropagation()">
