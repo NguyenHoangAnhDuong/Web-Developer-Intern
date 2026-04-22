@@ -50,6 +50,8 @@ public class OrderAdminServlet extends HttpServlet {
         int orderId = Integer.parseInt(req.getParameter("orderId"));
         int newStatus = Integer.parseInt(req.getParameter("status"));
 
+        System.out.println(" cập nhập đơn hàng ID: " + orderId + ", Status: " + newStatus);
+
         Map<String, Object> result =
                 orderService.updateStatus(orderId, newStatus);
 
@@ -57,6 +59,13 @@ public class OrderAdminServlet extends HttpServlet {
 
         boolean success = (boolean) result.get("success");
         String message = (String) result.get("message");
+
+        if (!success) {
+            System.err.println("Failed to update order " + orderId + ": " + message);
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        } else {
+            System.out.println("order " + orderId + " updated successfully");
+        }
 
         resp.getWriter().print(String.format(
                 "{\"success\": %s, \"message\": \"%s\"}",
