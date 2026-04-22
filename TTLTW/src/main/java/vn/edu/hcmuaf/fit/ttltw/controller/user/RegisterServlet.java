@@ -1,19 +1,20 @@
 package vn.edu.hcmuaf.fit.ttltw.controller.user;
 
+import java.io.IOException;
+import java.security.SecureRandom;
+
+import org.mindrot.jbcrypt.BCrypt;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import org.mindrot.jbcrypt.BCrypt;
 import vn.edu.hcmuaf.fit.ttltw.dao.UserDao;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
 import vn.edu.hcmuaf.fit.ttltw.service.EmailService;
 import vn.edu.hcmuaf.fit.ttltw.service.RedisService;
-
-import java.io.IOException;
-import java.security.SecureRandom;
 
 @WebServlet(name = "RegisterServlet", value = "/register")
 public class RegisterServlet extends HttpServlet {
@@ -113,7 +114,6 @@ public class RegisterServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/verify-otp");
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────────────
 
     private void forwardWithError(HttpServletRequest request, HttpServletResponse response, String message)
             throws ServletException, IOException {

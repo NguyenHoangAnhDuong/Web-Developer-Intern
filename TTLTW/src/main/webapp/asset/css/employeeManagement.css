@@ -1,0 +1,127 @@
+/* Quản lý nhân viên */
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.btn-add {
+    background: var(--color-button);
+    color: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.btn-add:hover {
+    opacity: 0.85;
+}
+
+.role-select,
+.status-select {
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    color: #333;
+    outline: none;
+}
+
+.role-select:focus,
+.status-select:focus {
+    border-color: var(--color-button);
+}
+
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.btn:hover {
+    opacity: 0.85;
+}
+
+.btn-primary {
+    background: var(--color-button);
+    color: white;
+}
+
+.btn-secondary {
+    background: #e5e7eb;
+    color: #333;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--color-bg-main);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-overlay.show {
+    display: flex;
+}
+
+.modal-box {
+    background: white;
+    width: 480px;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: var(--box-shadow);
+}
+
+.modal-box h3 {
+    margin: 0 0 16px;
+    font-size: 18px;
+    color: #333;
+}
+
+.modal-box label {
+    display: block;
+    margin-top: 10px;
+    font-size: 13px;
+    color: #444;
+}
+
+.modal-box input,
+.modal-box select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-top: 4px;
+    box-sizing: border-box;
+    outline: none;
+}
+
+.modal-box input:focus,
+.modal-box select:focus {
+    border-color: var(--color-button);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 18px;
+}
+
+.msg-error {
+    color: var(--color-red);
+    margin-top: 8px;
+    font-size: 13px;
+    min-height: 18px;
+}
