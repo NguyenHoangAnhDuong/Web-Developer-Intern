@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import vn.edu.hcmuaf.fit.ttltw.config.VnPayConfig;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
 import vn.edu.hcmuaf.fit.ttltw.service.*;
 
@@ -111,13 +112,14 @@ public class CheckoutServlet extends HttpServlet {
                         // vnpay
                         String vnpUrl = VnPayConfig.createPaymentUrl(orderId, finalTotal, request);
                         response.sendRedirect(vnpUrl);
+                        return;
                     } else {
-                            orderService.handleShippingAsync(orderId, fullName, phone, fullAddress, finalTotal
-                            );
+                            orderService.handleShippingAsync(orderId, fullName, phone, fullAddress, finalTotal);
                         }
                         session.setAttribute("toastMessage", "Đặt hàng thành công!");
                         session.setAttribute("toastType", "success");
                         response.sendRedirect(request.getContextPath() + "/user/order-detail?orderId=" + orderId);
+
                     }
         }  catch (Exception e) {
             e.printStackTrace();

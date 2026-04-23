@@ -142,7 +142,7 @@
         }).then(confirmed => {
             if (!confirmed) return;
 
-            fetch('${pageContext.request.contextPath}/user/order', {
+            fetch('${pageContext.request.contextPath}/api/order/cancel', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
@@ -151,7 +151,7 @@
             })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.success) {
+                    if (data.status === 'success') {
                         setTimeout(() => {
                             showToast('Hủy đơn hàng thành công!', 'success', 3000);
                             setTimeout(() => location.reload(), 1500);

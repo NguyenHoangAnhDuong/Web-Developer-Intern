@@ -153,7 +153,10 @@ public class ShippingWebhookServlet extends HttpServlet {
 
         if (json.has("status_code") && !json.get("status_code").isJsonNull()) {
             int parsed = parseIntSafely(json.get("status_code").getAsString());
-            if (parsed > 0) return parsed;
+            if (parsed >=   0) {
+                if (parsed == 0) return 4;
+                return parsed;
+            }
         }
 
         if (json.has("status") && !json.get("status").isJsonNull()) {
@@ -193,7 +196,7 @@ public class ShippingWebhookServlet extends HttpServlet {
         if (normalized.contains("deliver") || normalized.contains("done") || normalized.contains("completed") || normalized.contains("đã giao")) {
             return 3;
         }
-        if (normalized.contains("cancel") || normalized.contains("hủy")) {
+        if (normalized.contains("cancel") || normalized.contains("hủy") || normalized.contains("huy")) {
             return 4;
         }
         if (normalized.contains("prepare") || normalized.contains("pending") || normalized.contains("created") || normalized.contains("đang lên đơn")) {
