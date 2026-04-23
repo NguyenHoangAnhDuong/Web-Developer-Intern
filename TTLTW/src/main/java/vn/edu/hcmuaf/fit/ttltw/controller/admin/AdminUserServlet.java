@@ -1,5 +1,8 @@
 package vn.edu.hcmuaf.fit.ttltw.controller.admin;
 
+import java.io.IOException;
+import java.util.List;
+
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -8,9 +11,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
 import vn.edu.hcmuaf.fit.ttltw.service.UserService;
-
-import java.io.IOException;
-import java.util.List;
 
 @WebServlet(name = "AdminUserServlet", urlPatterns = { "/admin/users" })
 public class AdminUserServlet extends HttpServlet {
@@ -100,9 +100,6 @@ public class AdminUserServlet extends HttpServlet {
         rd.forward(req, resp);
     }
 
-    /**
-     * Xử lý POST: Cập nhật role và status của user
-     */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {

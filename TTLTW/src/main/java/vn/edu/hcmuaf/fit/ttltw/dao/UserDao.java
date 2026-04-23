@@ -82,6 +82,15 @@ public class UserDao {
                 .orElse(null));
     }
 
+    // Lấy thông tin đầy đủ khách hàng theo id (chỉ lấy role = 2)
+    public Optional<User> findCustomerDetailById(int id) {
+        return DBConnect.getJdbi().withHandle(handle -> handle
+                .createQuery("SELECT id, username, first_name AS firstName, last_name AS lastName, email, avatar, roles_id AS rolesId, status FROM users WHERE id = :id AND roles_id = 2")
+                .bind("id", id)
+                .mapToBean(User.class)
+                .findOne());
+    }
+
     // lây thông tin qua tìm id người dùng
     public Optional<User> findById(int id) {
         return DBConnect.getJdbi().withHandle(handle -> handle
@@ -292,6 +301,68 @@ public class UserDao {
                 .bind("pr", u.getProvider())
                 .bind("pid", u.getProviderId())
                 .execute());
+    }
+
+    // =========================================================
+    // Employee management (dành cho module RBAC)
+    // Nhân viên = user có role khác 'customer' và 'super_admin'
+    // =========================================================
+
+    public int createEmployee(String firstName, String lastName, String username, String email,
+                              String hashedPassword, int rolesId) {
+        String sql = """
+                INSERT INTO users (first_name, last_name, username, password, email, roles_id, status)
+                VALUES (:fn, :ln, :un, :pw, :em, :rid, 1)
+                """;
+        return DBConnect.getJdbi().withHandle(h -> h.createUpdate(sql)
+                .bind("fn", firstName)
+                .bind("ln", lastName)
+                .bind("un", username)
+                .bind("pw", hashedPassword)
+                .bind("em", email)
+                .bind("rid", rolesId)
+                .executeAndReturnGeneratedKeys("id").mapTo(Integer.class).one());
+    }
+
+    public int countEmployees(String search) {
+        StringBuilder sql = new StringBuilder(
+                "SELECT COUNT(*) FROM users u JOIN roles r ON r.id = u.roles_id " +
+                        "WHERE r.name NOT IN ('customer','super_admin')");
+        if (search != null && !search.isBlank()) {
+            sql.append(" AND (u.username LIKE :s OR u.email LIKE :s " +
+                    "OR u.first_name LIKE :s OR u.last_name LIKE :s)");
+        }
+        return DBConnect.getJdbi().withHandle(h -> {
+            var q = h.createQuery(sql.toString());
+            if (search != null && !search.isBlank()) q.bind("s", "%" + search.trim() + "%");
+            return q.mapTo(Integer.class).one();
+        });
+    }
+
+    public List<User> getEmployeesPaginated(String search, int offset, int limit) {
+        StringBuilder sql = new StringBuilder("""
+                SELECT u.id, u.username, u.first_name AS firstName, u.last_name AS lastName,
+                       u.email, u.roles_id AS rolesId, u.status
+                FROM users u
+                JOIN roles r ON r.id = u.roles_id
+                WHERE r.name NOT IN ('customer','super_admin')
+                """);
+        if (search != null && !search.isBlank()) {
+            sql.append(" AND (u.username LIKE :s OR u.email LIKE :s " +
+                    "OR u.first_name LIKE :s OR u.last_name LIKE :s)");
+        }
+        sql.append(" ORDER BY u.id DESC LIMIT :lim OFFSET :off");
+        return DBConnect.getJdbi().withHandle(h -> {
+            var q = h.createQuery(sql.toString()).bind("lim", limit).bind("off", offset);
+            if (search != null && !search.isBlank()) q.bind("s", "%" + search.trim() + "%");
+            return q.mapToBean(User.class).list();
+        });
+    }
+
+    public boolean updateEmployeeRoleStatus(int id, int rolesId, int status) {
+        String sql = "UPDATE users SET roles_id = :rid, status = :st WHERE id = :id";
+        return DBConnect.getJdbi().withHandle(h -> h.createUpdate(sql)
+                .bind("rid", rolesId).bind("st", status).bind("id", id).execute()) > 0;
     }
 
     public boolean checkPassword(int userId, String oldPass) {
