@@ -321,4 +321,7 @@ public class OrderService {
     public String getTrackingByOrderId(int orderId) {
         return shippingDao.getTrackingByOrderId(orderId);
     }
+    public boolean updateStatusOnly(int orderId, int newStatus) {
+        return orderDao.updateStatus(orderId, newStatus);
+    }
 }

@@ -37,12 +37,9 @@ public class VnPayReturnServlet extends HttpServlet {
             // Chuyển từ status 1   sang 2
             int newStatus =  currentStatus == 1  ? 2 : currentStatus;
 
-            System.out.println(" Payment success - Order " + orderId + ": " + currentStatus + " -> " + newStatus);
-
-            var result = orderService.updateStatus(orderId, newStatus);
-
             // đẩy đơn sang vận chuyển
-            if ( currentStatus == 1   && newStatus == 2) {
+            if ( currentStatus == 1  ) {
+                orderService.updateStatusOnly(orderId, 2);
                 try {
                     var address = orderService.getDefaultAddress(order.getUserId());
                     if (address != null) {
@@ -59,6 +56,7 @@ public class VnPayReturnServlet extends HttpServlet {
                         }
                     }
                 } catch (Exception e) {
+                    System.err.println("VnPayReturn: Lỗi gọi SuperAI - " + e.getMessage());
                     e.printStackTrace();
                 }
             }

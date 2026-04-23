@@ -258,4 +258,11 @@ public class OrderDao {
             return orderId;
         }));
     }
+
+    public void cancelExpiredOrders(int minutes) {
+        String sql = "UPDATE orders SET status = 4 WHERE status = 1 AND payment_type_id = 2 AND created_at < NOW() - interval :minutes MINUTE";
+        jdbi.withHandle(handle -> handle.createUpdate(sql)
+                .bind("minutes", minutes)
+                .execute());
+    }
 }
