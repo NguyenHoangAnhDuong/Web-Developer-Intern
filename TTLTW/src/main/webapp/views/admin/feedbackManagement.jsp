@@ -139,21 +139,18 @@
                                     </button>
                                     <c:if test="${fb.status != 1}">
                                         <a href="${pageContext.request.contextPath}/admin/feedbacks?action=approve&id=${fb.id}&keyword=${keyword}&star=${starParam}&status=${status}"
-                                           class="btn-action btn-approve"
-                                           onclick="return confirm('Duyệt đánh giá này?')">
+                                           class="btn-action btn-approve">
                                             Duyệt
                                         </a>
                                     </c:if>
                                     <c:if test="${fb.status != 0}">
                                         <a href="${pageContext.request.contextPath}/admin/feedbacks?action=hide&id=${fb.id}&keyword=${keyword}&star=${starParam}&status=${status}"
-                                           class="btn-action btn-hide"
-                                           onclick="return confirm('Ẩn đánh giá này?')">
+                                           class="btn-action btn-hide">
                                             Ẩn
                                         </a>
                                     </c:if>
                                     <a href="${pageContext.request.contextPath}/admin/feedbacks?action=delete&id=${fb.id}&keyword=${keyword}&star=${starParam}&status=${status}"
-                                       class="btn-action btn-delete"
-                                       onclick="return confirm('Xóa vĩnh viễn đánh giá này?')">
+                                       class="btn-action btn-delete">
                                         Xóa
                                     </a>
                                 </div>
@@ -265,12 +262,9 @@
         </div>
         <div class="modal-footer">
             <button class="btn-action btn-view" onclick="closeDetail()">Đóng</button>
-            <a id="d-approve-link" class="btn-action btn-approve"
-               onclick="return confirm('Duyệt đánh giá này?')">Duyệt</a>
-            <a id="d-hide-link" class="btn-action btn-hide"
-               onclick="return confirm('Ẩn đánh giá này?')">Ẩn</a>
-            <a id="d-delete-link" class="btn-action btn-delete"
-               onclick="return confirm('Xóa vĩnh viễn đánh giá này?')">Xóa</a>
+            <a id="d-approve-link" class="btn-action btn-approve">Duyệt</a>
+            <a id="d-hide-link" class="btn-action btn-hide">Ẩn</a>
+            <a id="d-delete-link" class="btn-action btn-delete">Xóa</a>
         </div>
     </div>
 </div>

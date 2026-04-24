@@ -1,4 +1,22 @@
 const ctx = document.querySelector('meta[name="context-path"]')?.content || '';
+document.querySelectorAll('.btn-approve:not(#d-approve-link)').forEach(btn => {
+    btn.addEventListener('click', e => {
+        e.preventDefault();
+        showConfirmToast('Duyệt đánh giá này?', () => window.location.href = btn.href);
+    });
+});
+document.querySelectorAll('.btn-hide:not(#d-hide-link)').forEach(btn => {
+    btn.addEventListener('click', e => {
+        e.preventDefault();
+        showConfirmToast('Ẩn đánh giá này?', () => window.location.href = btn.href);
+    });
+});
+document.querySelectorAll('.btn-delete:not(#d-delete-link)').forEach(btn => {
+    btn.addEventListener('click', e => {
+        e.preventDefault();
+        showConfirmToast('Xóa vĩnh viễn đánh giá này?', () => window.location.href = btn.href);
+    });
+});
 document.querySelectorAll('.btn-view').forEach(btn => {
     btn.addEventListener('click', () => {
         openDetail(
@@ -34,9 +52,21 @@ function openDetail(username, productName, rating, comment, createdAt, status, i
     const approveLink = document.getElementById('d-approve-link');
     const hideLink    = document.getElementById('d-hide-link');
     const deleteLink  = document.getElementById('d-delete-link');
-    approveLink.href = `${base}?action=approve&id=${id}`;
-    hideLink.href    = `${base}?action=hide&id=${id}`;
-    deleteLink.href  = `${base}?action=delete&id=${id}`;
+    const approveHref = `${base}?action=approve&id=${id}`;
+    const hideHref   = `${base}?action=hide&id=${id}`;
+    const deleteHref  = `${base}?action=delete&id=${id}`;
+    approveLink.onclick = (e) => {
+        e.preventDefault();
+        showConfirmToast('Duyệt đánh giá này?', () => window.location.href = approveHref);
+    };
+    hideLink.onclick = (e) => {
+        e.preventDefault();
+        showConfirmToast('Ẩn đánh giá này?', () => window.location.href = hideHref);
+    };
+    deleteLink.onclick = (e) => {
+        e.preventDefault();
+        showConfirmToast('Xóa vĩnh viễn đánh giá này?', () => window.location.href = deleteHref);
+    };
     // Ẩn nút không cần thiết
     approveLink.style.display = status !== 1 ? 'inline-flex' : 'none';
     hideLink.style.display    = status !== 0 ? 'inline-flex' : 'none';
@@ -49,3 +79,47 @@ function closeDetail() {
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeDetail();
 });
+function showConfirmToast(message, onConfirm) {
+    const old = document.getElementById('confirm-toast');
+    if (old) old.remove();
+    const el = document.createElement('div');
+    el.id = 'confirm-toast';
+    el.className = 'toast confirm-toast show';
+    el.style.cssText = `
+        position:fixed; top:20px; right:30px; min-width:280px;
+        padding:14px 18px; border-radius:8px; color:#fff;
+        font-size:14px; font-weight:500; z-index:9999999;
+        background:#1e293b; box-shadow:0 8px 24px rgba(0,0,0,0.2);
+        display:flex; flex-direction:column; gap:10px;
+    `;
+    el.innerHTML = `
+        <span>${message}</span>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button id="ct-cancel" style="padding:5px 14px;border-radius:6px;border:none;
+                background:#475569;color:#fff;cursor:pointer;font-size:13px">Hủy</button>
+            <button id="ct-ok" style="padding:5px 14px;border-radius:6px;border:none;
+                background:#ef4444;color:#fff;cursor:pointer;font-size:13px">Xác nhận</button>
+        </div>
+    `;
+    document.body.appendChild(el);
+    document.getElementById('ct-cancel').onclick = () => el.remove();
+    document.getElementById('ct-ok').onclick = () => {
+        el.remove();
+        onConfirm();
+    };
+}
+function showToast(message, type = 'success') {
+    const old = document.getElementById('toast');
+    if (old) old.remove();
+    const toast = document.createElement('div');
+    toast.id = 'toast';
+    toast.className = `toast ${type}`;
+    toast.innerText = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => toast.classList.add('show'), 100);
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 3500);
+}
