@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
+import vn.edu.hcmuaf.fit.ttltw.utils.PermissionUtil;
 
 @WebFilter(urlPatterns = {"/cart", "/checkout", "/profile", "/user/*", "/admin/*"})
 public class LoginFilter implements Filter {
@@ -54,17 +55,20 @@ public class LoginFilter implements Filter {
             request.getRequestDispatcher("/login").forward(request, response);
             return;
         }
-        int role = user.getRolesId(); // 1 = admin, 2 = user
+        // Đảm bảo session đã có roleName (phòng trường hợp đăng nhập bằng social, redirect sớm…)
+        if (PermissionUtil.getRoleName(session) == null) {
+            PermissionUtil.loadAndCache(session, user);
+        }
+        boolean isCustomer = PermissionUtil.isCustomer(session);
+
         // Kiểm tra phân quyền
-        if (requestURI.startsWith(contextPath + "/admin") && role != 1) {
-            // User thường không vào admin được
+        if (requestURI.startsWith(contextPath + "/admin") && isCustomer) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập trang này!");
             return;
         }
         if ((requestURI.startsWith(contextPath + "/cart")
                 || requestURI.startsWith(contextPath + "/user")
-                || requestURI.startsWith(contextPath + "/checkout")) && role == 1) {
-            // Admin không vào trang user
+                || requestURI.startsWith(contextPath + "/checkout")) && !isCustomer) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Bạn không có quyền truy cập trang này!");
             return;
         }

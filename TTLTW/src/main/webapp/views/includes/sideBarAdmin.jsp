@@ -1,5 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<c:set var="sbIsSuper" value="${sessionScope.roleName == 'super_admin'}" />
+<c:set var="sbPerms" value="${sessionScope.permissions}" />
 <!-- Sidebar Admin -->
 <aside class="sidebar" id="sidebar">
     <div class="brand">
@@ -53,6 +55,22 @@
                 >
                 <span class="nav-tooltip">Đánh giá</span>
             </li>
+            <c:if test="${sbIsSuper || (sbPerms != null && (sbPerms.contains('employee.view') || sbPerms.contains('employee.create')))}">
+                <li class="nav-item">
+                    <a class="nav-link" data-target="employees" href="${pageContext.request.contextPath}/admin/employees"
+                    ><span class="icon"><i class="fa-solid fa-user-tie"></i></span>
+                        <span class="nav-label">Nhân viên</span></a>
+                    <span class="nav-tooltip">Nhân viên</span>
+                </li>
+            </c:if>
+            <c:if test="${sbIsSuper}">
+                <li class="nav-item">
+                    <a class="nav-link" data-target="roles" href="${pageContext.request.contextPath}/admin/roles"
+                    ><span class="icon"><i class="fa-solid fa-user-shield"></i></span>
+                        <span class="nav-label">Vai trò &amp; Quyền</span></a>
+                    <span class="nav-tooltip">Vai trò &amp; Quyền</span>
+                </li>
+            </c:if>
         </ul>
         <ul class="nav-list second-nav">
             <li class="nav-item">
