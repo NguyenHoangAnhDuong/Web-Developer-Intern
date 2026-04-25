@@ -266,14 +266,15 @@ public class UserDao {
                 .orElse(null));
     }
 
-    // Tìm user theo email
+    // Tìm user theo email (không filter status — caller tự kiểm tra để hiển thị
+    // message phù hợp khi tài khoản bị khóa)
     public User findByEmail(String email) {
         String sql = """
                 SELECT id, username, first_name AS firstName, last_name AS lastName, avatar, email,
                        roles_id AS rolesId, status,
                        created_at AS createdAt, updated_at AS updatedAt
                 FROM users
-                WHERE email = :email AND status = 1
+                WHERE email = :email
                 LIMIT 1
                 """;
         return DBConnect.getJdbi().withHandle(handle -> handle.createQuery(sql)
@@ -284,6 +285,7 @@ public class UserDao {
     }
 
     // Tìm user qua bảng user_social_accounts (đăng nhập bên thứ 3)
+    // Không filter status — caller tự kiểm tra để chặn tài khoản bị khóa với message rõ ràng
     public User findByProvider(String provider, String providerUserId) {
         String sql = """
                 SELECT u.id, u.username, u.first_name AS firstName, u.last_name AS lastName,
@@ -291,7 +293,7 @@ public class UserDao {
                        u.created_at AS createdAt, u.updated_at AS updatedAt
                 FROM user_social_accounts sa
                 JOIN users u ON u.id = sa.user_id
-                WHERE sa.provider = :provider AND sa.provider_user_id = :providerUserId AND u.status = 1
+                WHERE sa.provider = :provider AND sa.provider_user_id = :providerUserId
                 LIMIT 1
                 """;
         return DBConnect.getJdbi().withHandle(handle -> handle.createQuery(sql)

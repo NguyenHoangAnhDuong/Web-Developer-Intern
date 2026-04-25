@@ -99,11 +99,23 @@ public class LoginFacebookCallbackServlet extends HttpServlet {
 
             HttpSession session = request.getSession();
 
+            // Tài khoản bị khóa → chặn ở mọi kênh đăng nhập
+            if (user.getStatus() != 1) {
+                session.invalidate();
+                HttpSession newSession = request.getSession(true);
+                newSession.setAttribute("toastMessage", "Tài khoản đã bị khóa, vui lòng liên hệ quản trị viên.");
+                newSession.setAttribute("toastType", "error");
+                response.sendRedirect(request.getContextPath() + "/login");
+                return;
+            }
+
             // Chỉ cho phép khách hàng (role == 2)
             if (user.getRolesId() != 2) {
                 session.invalidate();
-                response.sendRedirect(request.getContextPath()
-                        + "/login?error=Only user accounts can login with Facebook");
+                HttpSession newSession = request.getSession(true);
+                newSession.setAttribute("toastMessage", "Nhân viên vui lòng sử dụng đăng nhập thường");
+                newSession.setAttribute("toastType", "error");
+                response.sendRedirect(request.getContextPath() + "/login");
                 return;
             }
             session.setAttribute("user", user);
