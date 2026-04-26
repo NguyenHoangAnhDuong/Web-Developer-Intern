@@ -56,6 +56,13 @@ public class AdminCustomerDetailServlet extends HttpServlet {
             req.setAttribute("savedSuccess", true);
         }
 
+        String pwdResult = req.getParameter("pwd");
+        if ("1".equals(pwdResult)) {
+            req.setAttribute("passwordResetSuccess", true);
+        } else if ("0".equals(pwdResult)) {
+            req.setAttribute("passwordResetError", req.getParameter("msg"));
+        }
+
         RequestDispatcher rd = req.getRequestDispatcher("/views/admin/customerDetail.jsp");
         rd.forward(req, resp);
     }
@@ -64,7 +71,21 @@ public class AdminCustomerDetailServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
+        req.setCharacterEncoding("UTF-8");
         int id = Integer.parseInt(req.getParameter("id"));
+        String action = req.getParameter("action");
+
+        if ("resetPassword".equals(action)) {
+            String newPassword = req.getParameter("newPassword");
+            String result = userService.resetPasswordByAdmin(id, newPassword);
+            boolean ok = "Cập nhật mật khẩu thành công".equals(result);
+            String redirect = req.getContextPath() + "/admin/customers/detail?id=" + id
+                    + (ok ? "&pwd=1"
+                          : "&pwd=0&msg=" + java.net.URLEncoder.encode(result, java.nio.charset.StandardCharsets.UTF_8));
+            resp.sendRedirect(redirect);
+            return;
+        }
+
         String firstName = req.getParameter("firstName");
         String lastName = req.getParameter("lastName");
         String email = req.getParameter("email");

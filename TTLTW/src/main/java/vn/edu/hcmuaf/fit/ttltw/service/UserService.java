@@ -67,6 +67,17 @@ public class UserService {
         return ok ? "Đổi mật khẩu thành công" : "Đổi mật khẩu thất bại";
     }
 
+    // Admin/nhân viên reset mật khẩu hộ khách hàng (không cần mật khẩu cũ)
+    public String resetPasswordByAdmin(int userId, String newPass) {
+        if (newPass == null || newPass.isBlank())
+            return "Mật khẩu mới không được để trống!";
+        if (!PASSWORD_PATTERN.matcher(newPass).matches())
+            return "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!";
+        String hashed = BCrypt.hashpw(newPass, BCrypt.gensalt());
+        boolean ok = userDao.updatePassword(userId, hashed);
+        return ok ? "Cập nhật mật khẩu thành công" : "Cập nhật mật khẩu thất bại";
+    }
+
     // Đăng ký (hash password)
     public boolean register(User user) {
         String hash = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
