@@ -49,6 +49,12 @@
                 >
                 <span class="nav-tooltip">Khuyến mãi</span>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" data-target="promotions" href="${pageContext.request.contextPath}/admin/feedbacks"
+                ><span class="icon"><i class="fa-solid fa-award"></i></span> <span class="nav-label">Đánh giá</span></a
+                >
+                <span class="nav-tooltip">Đánh giá</span>
+            </li>
             <c:if test="${sbIsSuper || (sbPerms != null && (sbPerms.contains('employee.view') || sbPerms.contains('employee.create')))}">
                 <li class="nav-item">
                     <a class="nav-link" data-target="employees" href="${pageContext.request.contextPath}/admin/employees"

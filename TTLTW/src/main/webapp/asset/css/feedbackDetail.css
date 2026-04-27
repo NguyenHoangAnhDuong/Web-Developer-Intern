@@ -1,0 +1,273 @@
+.container-header {
+    width: 90%;
+    max-width: 1000px;
+    margin: 80px auto 10px auto;
+}
+.container-header .breadcrumb {
+    font-size: 14px;
+    color: #666;
+}
+.container-header .breadcrumb a {
+    color: #2d85f3;
+    text-decoration: none;
+}
+.container-header .breadcrumb a:hover {
+    text-decoration: underline;
+}
+.container-header .breadcrumb span {
+    margin: 0 5px;
+    color: #aaa;
+}
+/* Section chính */
+.review-section {
+    width: 90%;
+    max-width: 1000px;
+    margin: 0 auto 40px auto;
+    background: var(--color-bg, #fff);
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.review-section h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 24px;
+    color: #222;
+}
+/* Tổng quan */
+.review-summary {
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+/* Điểm số */
+.review-score {
+    text-align: center;
+    min-width: 160px;
+}
+.score-big {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 2px;
+}
+.review-score .score {
+    font-size: 52px;
+    font-weight: bold;
+    color: #ff9800;
+    line-height: 1;
+}
+.review-score .outof {
+    font-size: 20px;
+    color: #888;
+}
+.review-score .stars {
+    color: #f5a623;
+    font-size: 18px;
+    margin: 8px 0 4px;
+}
+.review-score .review-count {
+    font-size: 13px;
+    color: #666;
+    margin: 0 0 14px;
+}
+.review-score .btn-primary {
+    background: var(--color-button, #2d85f3);
+    color: #fff;
+    border: none;
+    padding: 9px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.review-score .btn-primary:hover {
+    opacity: 0.85;
+}
+/* Thanh bar */
+.review-bars {
+    flex: 1;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.bar-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    text-decoration: none;
+    color: #333;
+    padding: 5px 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.bar-row:hover {
+    background: #f0f0f0;
+}
+
+.bar-row.active {
+    background: #e3f2fd;
+}
+.star-label {
+    min-width: 30px;
+    text-align: right;
+    color: #555;
+    font-weight: 500;
+    white-space: nowrap;
+}
+.star-label i {
+    color: #f5a623;
+    font-size: 11px;
+    margin-left: 2px;
+}
+
+.bar {
+    flex: 1;
+    height: 8px;
+    background: #eee;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.fill {
+    height: 100%;
+    background: #f5a623;
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+.bar-pct {
+    min-width: 42px;
+    text-align: right;
+    color: #555;
+    font-size: 13px;
+}
+/* Nút lọc sao */
+.filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+.filter a {
+    text-decoration: none;
+}
+
+.filter button {
+    border: 1px solid #ccc;
+    padding: 7px 14px;
+    border-radius: 20px;
+    background: var(--color-bg, #fff);
+    cursor: pointer;
+    font-size: 14px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s;
+}
+.filter button.active,
+.filter button:hover {
+    background: #e3f2fd;
+    border-color: #1976d2;
+    color: #1976d2;
+    font-weight: 600;
+}
+
+/* Từng review */
+.review-item {
+    border-top: 1px solid #f0f0f0;
+    padding: 18px 0;
+}
+
+.review-item:first-child {
+    border-top: none;
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.review-header .name {
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #333;
+}
+
+.review-header .name i {
+    color: #bbb;
+    font-size: 20px;
+}
+.review-header .bought {
+    color: #4caf50;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.review-header .bought i {
+    font-size: 13px;
+}
+
+.stars {
+    color: #f5a623;
+    font-size: 16px;
+    margin: 4px 0 6px;
+    letter-spacing: 2px;
+}
+
+.review-text {
+    color: #444;
+    font-size: 14px;
+    line-height: 1.7;
+    margin: 0 0 8px;
+}
+
+.review-footer {
+    font-size: 12px;
+    color: #999;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.review-footer i {
+    font-size: 12px;
+}
+/* Không có đánh giá */
+.no-review {
+    text-align: center;
+    color: #aaa;
+    padding: 50px 0;
+    font-size: 15px;
+}
+/* Responsive */
+@media (max-width: 680px) {
+    .review-summary {
+        flex-direction: column;
+        gap: 20px;
+    }
+    .review-score {
+        width: 100%;
+    }
+    .review-bars {
+        width: 100%;
+    }
+}
