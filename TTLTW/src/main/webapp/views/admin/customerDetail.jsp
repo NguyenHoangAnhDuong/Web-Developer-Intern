@@ -32,6 +32,20 @@
             </div>
         </c:if>
 
+        <c:if test="${passwordResetSuccess}">
+            <div class="saved-notice">
+                <i class="fa-solid fa-circle-check"></i>
+                Mật khẩu mới đã được cập nhật thành công cho khách hàng.
+            </div>
+        </c:if>
+
+        <c:if test="${not empty passwordResetError}">
+            <div class="error-notice">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <c:out value="${passwordResetError}"/>
+            </div>
+        </c:if>
+
         <div class="detail-card">
 
             <!-- Avatar -->
@@ -120,6 +134,46 @@
             </form>
 
         </div>
+
+        <!-- Đặt lại mật khẩu (dành cho admin/nhân viên hỗ trợ khách hàng quên mật khẩu) -->
+        <div class="password-reset-card">
+            <div class="password-reset-header">
+                <h3><i class="fa-solid fa-key"></i> Đặt lại mật khẩu</h3>
+                <p>Sử dụng khi khách hàng quên mật khẩu và nhờ nhân viên hỗ trợ tạo mật khẩu mới.</p>
+            </div>
+
+            <button type="button" class="btn-reset-pwd" id="reset-pwd-btn">
+                <i class="fa-solid fa-rotate-right"></i> Cập nhật mật khẩu mới
+            </button>
+
+            <form id="reset-pwd-form" class="reset-pwd-form" method="POST"
+                  action="${pageContext.request.contextPath}/admin/customers/detail"
+                  style="display:none;">
+                <input type="hidden" name="id" value="${customer.id}">
+                <input type="hidden" name="action" value="resetPassword">
+
+                <div class="reset-pwd-row">
+                    <div class="reset-pwd-input">
+                        <input type="password" name="newPassword" id="newPassword"
+                               placeholder="Nhập mật khẩu mới" autocomplete="new-password" required>
+                        <button type="button" class="btn-toggle-pwd" id="toggle-pwd-btn"
+                                aria-label="Hiện/ẩn mật khẩu">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                    <button type="submit" class="btn-confirm-pwd">
+                        <i class="fa-solid fa-check"></i> Cập nhật
+                    </button>
+                    <button type="button" class="btn-cancel-pwd" id="cancel-pwd-btn">
+                        <i class="fa-solid fa-xmark"></i> Hủy
+                    </button>
+                </div>
+                <small class="pwd-hint">
+                    Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt.
+                </small>
+            </form>
+        </div>
+
     </div>
 </div>
 
