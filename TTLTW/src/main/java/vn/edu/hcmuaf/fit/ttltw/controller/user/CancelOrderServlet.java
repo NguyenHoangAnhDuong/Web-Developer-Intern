@@ -9,6 +9,7 @@ import vn.edu.hcmuaf.fit.ttltw.service.OrderService;
 import vn.edu.hcmuaf.fit.ttltw.service.SuperAIService;
 
 import java.io.IOException;
+import java.util.Map;
 
 @WebServlet("/api/order/cancel")
 public class CancelOrderServlet extends HttpServlet {
@@ -28,25 +29,23 @@ public class CancelOrderServlet extends HttpServlet {
                 return;
             }
 
-
-            boolean success =superAIService.cancelOrder(trackingCode);
+            // Gọi OrderService.updateStatus để hủy cả API và DB
+            Map<String, Object> result = orderService.updateStatus(orderId, 4);
 
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
 
-            if (success) {
+            if ((Boolean) result.get("success")) {
                 response.getWriter().write("{\"status\":\"success\"}");
             } else {
                 response.setStatus(400);
-                response.getWriter().write("{\"status\":\"fail\"}");
+                response.getWriter().write("{\"status\":\"fail\", \"message\":\"" + result.get("message") + "\"}");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
             response.setStatus(500);
+            response.getWriter().write("{\"status\":\"error\"}");
         }
-
-
-
     }
 }

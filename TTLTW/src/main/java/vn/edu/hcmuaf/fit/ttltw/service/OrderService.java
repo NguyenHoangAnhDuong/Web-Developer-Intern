@@ -202,6 +202,31 @@ public class OrderService {
                 System.err.println(" OrderService   Exception calling SuperAI  : " + e.getMessage());
                 e.printStackTrace();
             }
+        } else if (newStatus == 4 && (current == 2 || current == 1 || current == 14)) {
+            try {
+                tracking = order.getTrackingNumber();
+                if (tracking == null || tracking.trim().isEmpty()) {
+                    tracking = shippingDao.getTrackingByOrderId(orderId);
+                }
+
+                if (tracking != null && !tracking.trim().isEmpty()) {
+                    boolean cancelSuccess = superAIService.cancelOrder(tracking);
+                    if (!cancelSuccess) {
+                        result.put("success", false);
+                        result.put("message", "Hủy ở đơn vị vận chuyển thất bại, chưa cập nhật DB.");
+                        return result;
+                    }
+                    apiCalled = true;
+                } else {
+                    System.out.println(" không có mã tracking code  " + orderId );
+                }
+            } catch (Exception e) {
+                System.err.println( e.getMessage());
+                e.printStackTrace();
+                result.put("success", false);
+                result.put("message", "Lỗi gọi API hủy đơn vận chuyển.");
+                return result;
+            }
         }
 
 
