@@ -17,6 +17,7 @@ public class OrderService {
     private final SuperAIService superAIService = new SuperAIService();
     private final ShippingService shippingService = new ShippingService();
     private final ShippingDao shippingDao = new ShippingDao();
+
     public OrderService() {
         this.orderDao = new OrderDao();
         this.addressDao = new AddressDao();
@@ -34,14 +35,14 @@ public class OrderService {
     public Optional<Order> getOrderById(int orderId) {
         return orderDao.getOrderById(orderId);
     }
-
-    public int createOrder(Order order) {
-        return orderDao.createOrder(order);
-    }
-
-    public boolean updateOrderStatus(int orderId, int status) {
-        return orderDao.updateOrderStatus(orderId, status);
-    }
+//
+//    public int createOrder(Order order) {
+//        return orderDao.createOrder(order);
+//    }
+//
+//    public boolean updateOrderStatus(int orderId, int status) {
+//        return orderDao.updateOrderStatus(orderId, status);
+//    }
 
     public boolean cancelOrder(int orderId, int userId) {
         return orderDao.cancelOrder(orderId, userId);
@@ -177,7 +178,7 @@ public class OrderService {
                 );
                 if (tracking != null) {
                     shippingDao.updateTrackingInfo(orderId, tracking, "SuperShip");
-                    System.out.println("✅ Saved tracking: " + tracking);
+                    System.out.println("Saved tracking: " + tracking);
                 }
 
                 if (tracking == null || tracking.trim().isEmpty()) {
@@ -198,10 +199,11 @@ public class OrderService {
                 }
 
             } catch (Exception e) {
-                System.err.println(" OrderService   Exception calling SuperAI (network issue?): " + e.getMessage());
+                System.err.println(" OrderService   Exception calling SuperAI  : " + e.getMessage());
                 e.printStackTrace();
             }
         }
+
 
         // mới cập nhật trạng thái đơn hàng trong DB
         if (!orderDao.updateStatus(orderId, newStatus)) {
@@ -214,7 +216,7 @@ public class OrderService {
         System.out.println(" OrderService  Order " + orderId + " status updated to " + getStatusName(newStatus));
         result.put("success", true);
         result.put("tracking", tracking); // Trả về tracking để Admin thấy nếu cần
-        
+
         if (newStatus == 2 && !apiCalled) {
             result.put("message", "Cập nhật thành công.  Lỗi gọi API vận chuyển, cần cập nhật mã vận đơn sau.");
         } else {
@@ -224,7 +226,7 @@ public class OrderService {
     }
 
     public int processOrder(int userId, int addressId, String paymentMethod, String voucherCode,
-            Map<Integer, Integer> cart, int paymentStatus,String buyerNote, double shippingFee) {
+                            Map<Integer, Integer> cart, int paymentStatus, String buyerNote, double shippingFee) {
         double subtotal = 0;
         for (Map.Entry<Integer, Integer> entry : cart.entrySet()) {
             Map<String, Object> product = orderDao.getProductForCart(entry.getKey());
@@ -294,7 +296,6 @@ public class OrderService {
         return voucherDao.getActiveVouchers();
     }
 
-
     // tách việc gọi API vận chuyển ra chạy nền
     // không block request user
     // API ship có thể chậm / lỗi
@@ -317,4 +318,10 @@ public class OrderService {
         }).start();
     }
 
+    public String getTrackingByOrderId(int orderId) {
+        return shippingDao.getTrackingByOrderId(orderId);
+    }
+    public boolean updateStatusOnly(int orderId, int newStatus) {
+        return orderDao.updateStatus(orderId, newStatus);
+    }
 }

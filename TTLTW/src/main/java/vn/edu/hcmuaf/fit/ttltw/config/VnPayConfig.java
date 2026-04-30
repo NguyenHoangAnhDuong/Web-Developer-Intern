@@ -1,4 +1,4 @@
-package vn.edu.hcmuaf.fit.ttltw.service;
+package vn.edu.hcmuaf.fit.ttltw.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 

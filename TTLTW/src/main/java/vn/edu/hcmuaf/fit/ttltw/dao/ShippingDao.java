@@ -60,4 +60,15 @@ public int getOrderIdByTracking(String tracking) {
             .findOne()
             .orElse(0)); // không tìm thấy đơn hàng khớp với mã
 }
+    public String getTrackingByOrderId(int orderId) {
+        String sql = "SELECT tracking_number FROM orders WHERE id = :id";
+
+        return jdbi.withHandle(handle ->
+                handle.createQuery(sql)
+                        .bind("id", orderId)
+                        .mapTo(String.class)
+                        .findOne()
+                        .orElse(null)
+        );
+    }
 }
