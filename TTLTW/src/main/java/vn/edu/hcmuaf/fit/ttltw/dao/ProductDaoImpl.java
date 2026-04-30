@@ -1435,6 +1435,7 @@ public class ProductDaoImpl implements ProductDao {
     @Override
     public List<Map<String, Object>>    findRelatedBySameBrand(
             int brandId,
+            int categoryId,
             int excludeProductId,
             int limit) {
         String sql = """
@@ -1456,6 +1457,7 @@ public class ProductDaoImpl implements ProductDao {
                     LEFT JOIN feedbacks f ON p.id = f.product_id AND f.status = 1
                     WHERE p.status = 1
                       AND p.brand_id = :brandId
+                      AND p.category_id = :categoryId
                       AND p.id <> :excludeId
                     GROUP BY p.id, p.name, p.img, p.discount_percentage,
                              p.total_sold, p.release_date,
@@ -1467,6 +1469,7 @@ public class ProductDaoImpl implements ProductDao {
         return jdbi.withHandle(handle -> {
             List<Map<String, Object>> rawResults = handle.createQuery(sql)
                     .bind("brandId", brandId)
+                    .bind("categoryId", categoryId)
                     .bind("excludeId", excludeProductId)
                     .bind("limit", limit)
                     .map((rs, ctx) -> {
@@ -1490,7 +1493,7 @@ public class ProductDaoImpl implements ProductDao {
 
     @Override
     public List<Map<String, Object>> findFallbackRelatedProducts(
-            int excludeProductId,
+            int categoryId,
             List<Integer> excludeIds,
             int limit) {
         String sql = """
@@ -1511,7 +1514,7 @@ public class ProductDaoImpl implements ProductDao {
                     LEFT JOIN variant_colors vc ON v.id = vc.variant_id
                     LEFT JOIN feedbacks f ON p.id = f.product_id AND f.status = 1
                     WHERE p.status = 1
-                      AND p.id <> :excludeId
+                      AND p.category_id  = :categoryId
                       AND p.id NOT IN (<excludeIds>)
                     GROUP BY p.id, p.name, p.img, p.discount_percentage,
                              p.total_sold, p.release_date,
@@ -1522,7 +1525,7 @@ public class ProductDaoImpl implements ProductDao {
 
         return jdbi.withHandle(handle -> {
             List<Map<String, Object>> rawResults = handle.createQuery(sql)
-                    .bind("excludeId", excludeProductId)
+                    .bind("categoryId", categoryId)
                     .bindList("excludeIds", excludeIds.isEmpty() ? List.of(-1) : excludeIds)
                     .bind("limit", limit)
                     .map((rs, ctx) -> {

@@ -206,4 +206,32 @@ public class SuperAIService {
 
         return new String[]{street, commune, district, province};
     }
+
+    // gọi API hủy đơn hàng
+    public boolean cancelOrder(String trackingCode) {
+        try {
+            Map<String, Object> body = new HashMap<>();
+            body.put("code", trackingCode);
+            String json = new Gson().toJson(body);
+
+            HttpClient client = HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(15))
+                    .build();
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.superai.vn/v1/platform/orders/cancel"))
+                    .header("Content-Type", "application/json; charset=UTF-8")
+                    .header("Token", API_TOKEN) //
+                    .timeout(Duration.ofSeconds(30))
+                    .POST(HttpRequest.BodyPublishers.ofString(json, StandardCharsets.UTF_8))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 200;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

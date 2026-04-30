@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static vn.edu.hcmuaf.fit.ttltw.config.DBConnect.getJdbi;
 
@@ -340,20 +341,20 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Map<String, Object>> getRelatedProducts(
-            int brandId,
+            int brandId, int categoryId,
             int excludeProductId, int limit) {
 
-        List<Map<String, Object>> products = productDao.findRelatedBySameBrand(brandId, excludeProductId, limit);
+        List<Map<String, Object>> products = productDao.findRelatedBySameBrand(brandId, categoryId,excludeProductId, limit);
 
         if (products.size() < limit) {
             int remain = limit - products.size();
 
             List<Integer> existedIds = products.stream()
                     .map(p -> (Integer) p.get("id"))
-                    .toList();
-
+                    .collect(Collectors.toList());
+            existedIds.add(excludeProductId);
             List<Map<String, Object>> fallback = productDao.findFallbackRelatedProducts(
-                    excludeProductId,
+                    categoryId,
                     existedIds,
                     remain);
 
