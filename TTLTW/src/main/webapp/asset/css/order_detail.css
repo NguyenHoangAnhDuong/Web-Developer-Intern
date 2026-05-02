@@ -194,6 +194,18 @@ body {
     color: #666;
     font-size: 14px;
 }
+.shipping-detail {
+    margin-top: 18px;
+}
+.shipping-detail .small {
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+.shipping-detail div:last-child {
+    color: #111;
+    font-weight: 600;
+}
 @media (max-width: 900px) {
     .container {
         flex-direction: column;

@@ -131,6 +131,20 @@ public class OrderDetailServlet extends HttpServlet {
             orderData.put("paymentStatusText", paymentStatusText);
             orderData.put("paymentStatusClass", paymentStatusClass);
             orderData.put("paymentMethodName", paymentType != null ? paymentType.getName() : "N/A");
+            orderData.put("shippingPartner", order.getPartnerName() != null && !order.getPartnerName().isEmpty() ? order.getPartnerName() : "Chưa có");
+
+            String expectedDelivery;
+            if (order.getStatus() == 3) {
+                expectedDelivery = "Đã giao";
+            } else if (order.getStatus() == 4) {
+                expectedDelivery = "Đơn hàng đã hủy";
+            } else {
+                Calendar deliveryCalendar = Calendar.getInstance();
+                deliveryCalendar.setTime(order.getCreatedAt());
+                deliveryCalendar.add(Calendar.DAY_OF_MONTH, 3);
+                expectedDelivery = "Khoảng " + dateFormat.format(deliveryCalendar.getTime());
+            }
+            orderData.put("expectedDelivery", expectedDelivery);
 
             // Thông tin địa chỉ
             Map<String, String> addressData = new HashMap<>();
