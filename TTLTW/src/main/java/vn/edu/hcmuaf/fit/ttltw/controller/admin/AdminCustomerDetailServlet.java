@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import vn.edu.hcmuaf.fit.ttltw.dao.UserDao;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
 import vn.edu.hcmuaf.fit.ttltw.service.UserService;
+import vn.edu.hcmuaf.fit.ttltw.utils.PermissionUtil;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -28,6 +29,11 @@ public class AdminCustomerDetailServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+
+        if (!PermissionUtil.has(req, "customer.view")) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Không có quyền xem chi tiết khách hàng");
+            return;
+        }
 
         String idParam = req.getParameter("id");
         if (idParam == null) {
@@ -76,6 +82,10 @@ public class AdminCustomerDetailServlet extends HttpServlet {
         String action = req.getParameter("action");
 
         if ("resetPassword".equals(action)) {
+            if (!PermissionUtil.has(req, "customer.reset_password")) {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Không có quyền đặt lại mật khẩu");
+                return;
+            }
             String newPassword = req.getParameter("newPassword");
             String result = userService.resetPasswordByAdmin(id, newPassword);
             boolean ok = "Cập nhật mật khẩu thành công".equals(result);
@@ -86,6 +96,10 @@ public class AdminCustomerDetailServlet extends HttpServlet {
             return;
         }
 
+        if (!PermissionUtil.has(req, "customer.update")) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Không có quyền cập nhật khách hàng");
+            return;
+        }
         String firstName = req.getParameter("firstName");
         String lastName = req.getParameter("lastName");
         String email = req.getParameter("email");

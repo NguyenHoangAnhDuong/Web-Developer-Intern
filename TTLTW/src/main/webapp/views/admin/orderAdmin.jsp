@@ -4,6 +4,9 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 
 <c:set var="isAjax" value="${param.ajax == 'true'}"/>
+<c:set var="isSuper" value="${sessionScope.roleName == 'super_admin'}" />
+<c:set var="perms" value="${sessionScope.permissions}" />
+<c:set var="canUpdateOrder" value="${isSuper || (perms != null && perms.contains('order.update'))}" />
 
 <c:if test="${!isAjax}">
     <!DOCTYPE html>
@@ -78,7 +81,7 @@
                 <td>${item.customerPhone}</td>
                 <td>${item.order.createdAt}</td>
                 <td>
-                    <select class="status-select status-${item.order.status}" data-id="${item.order.id}">
+                    <select class="status-select status-${item.order.status}" data-id="${item.order.id}" ${canUpdateOrder ? '' : 'disabled'}>
                         <option value="1" ${item.order.status == 1 ? 'selected' : ''}>Đang lên đơn</option>
                         <option value="2" ${item.order.status == 2 ? 'selected' : ''}>Đang giao</option>
                         <option value="3" ${item.order.status == 3 ? 'selected' : ''}>Đã giao</option>

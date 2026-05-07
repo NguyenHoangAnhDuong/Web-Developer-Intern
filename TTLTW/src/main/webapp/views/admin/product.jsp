@@ -3,6 +3,10 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <fmt:setLocale value="vi_VN"/>
+<c:set var="isSuper" value="${sessionScope.roleName == 'super_admin'}" />
+<c:set var="perms" value="${sessionScope.permissions}" />
+<c:set var="canCreateProduct" value="${isSuper || (perms != null && perms.contains('product.create'))}" />
+<c:set var="canUpdateProduct" value="${isSuper || (perms != null && perms.contains('product.update'))}" />
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -56,10 +60,12 @@
                 <button class="btn-filter">Tìm kiếm</button>
             </form>
 
-            <a class="btn-add"
-               href="${pageContext.request.contextPath}/admin/product/add">
-                + Thêm sản phẩm
-            </a>
+            <c:if test="${canCreateProduct}">
+                <a class="btn-add"
+                   href="${pageContext.request.contextPath}/admin/product/add">
+                    + Thêm sản phẩm
+                </a>
+            </c:if>
 
         </div>
 
@@ -115,19 +121,21 @@
                     <td>${row.quantity}</td>
 
                     <td class="actionsProduct">
-                        <a class="btn-edit"
-                           href="${pageContext.request.contextPath}/admin/products/edit?id=${row.vc_id}">
-                            <i class="fa-solid fa-pencil"></i>
-                        </a>
+                        <c:if test="${canUpdateProduct}">
+                            <a class="btn-edit"
+                               href="${pageContext.request.contextPath}/admin/products/edit?id=${row.vc_id}">
+                                <i class="fa-solid fa-pencil"></i>
+                            </a>
 
-                        <button type="button"
-                                class="btn-toggle ajax-toggle"
-                                data-id="${row.vc_id}"
-                                title="${row.vc_status == 1 ? 'Ẩn' : 'Hiện'}">
+                            <button type="button"
+                                    class="btn-toggle ajax-toggle"
+                                    data-id="${row.vc_id}"
+                                    title="${row.vc_status == 1 ? 'Ẩn' : 'Hiện'}">
 
-                            <i class="fa-solid ${row.vc_status == 1 ? 'fa-eye' : 'fa-eye-slash'}"></i>
+                                <i class="fa-solid ${row.vc_status == 1 ? 'fa-eye' : 'fa-eye-slash'}"></i>
 
-                        </button>
+                            </button>
+                        </c:if>
                     </td>
 
                 </tr>

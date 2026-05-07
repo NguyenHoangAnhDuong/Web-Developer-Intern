@@ -2,6 +2,10 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<c:set var="isSuper" value="${sessionScope.roleName == 'super_admin'}" />
+<c:set var="perms" value="${sessionScope.permissions}" />
+<c:set var="canUpdateFeedback" value="${isSuper || (perms != null && perms.contains('feedback.update'))}" />
+<c:set var="canDeleteFeedback" value="${isSuper || (perms != null && perms.contains('feedback.delete'))}" />
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -137,22 +141,24 @@
                                             data-id="${fb.id}">
                                         Xem
                                     </button>
-                                    <c:if test="${fb.status != 1}">
+                                    <c:if test="${canUpdateFeedback && fb.status != 1}">
                                         <a href="${pageContext.request.contextPath}/admin/feedbacks?action=approve&id=${fb.id}&keyword=${keyword}&star=${starParam}&status=${status}"
                                            class="btn-action btn-approve">
                                             Duyệt
                                         </a>
                                     </c:if>
-                                    <c:if test="${fb.status != 0}">
+                                    <c:if test="${canUpdateFeedback && fb.status != 0}">
                                         <a href="${pageContext.request.contextPath}/admin/feedbacks?action=hide&id=${fb.id}&keyword=${keyword}&star=${starParam}&status=${status}"
                                            class="btn-action btn-hide">
                                             Ẩn
                                         </a>
                                     </c:if>
-                                    <a href="${pageContext.request.contextPath}/admin/feedbacks?action=delete&id=${fb.id}&keyword=${keyword}&star=${starParam}&status=${status}"
-                                       class="btn-action btn-delete">
-                                        Xóa
-                                    </a>
+                                    <c:if test="${canDeleteFeedback}">
+                                        <a href="${pageContext.request.contextPath}/admin/feedbacks?action=delete&id=${fb.id}&keyword=${keyword}&star=${starParam}&status=${status}"
+                                           class="btn-action btn-delete">
+                                            Xóa
+                                        </a>
+                                    </c:if>
                                 </div>
                             </td>
                         </tr>
