@@ -24,13 +24,14 @@ public class FeedbackManagementServlet extends HttpServlet {
             throws ServletException, IOException {
         String action = request.getParameter("action");
         if (action == null) action = "list";
-        String requiredPerm = switch (action) {
-            case "list" -> "feedback.view";
-            case "approve", "hide" -> "feedback.update";
-            case "delete" -> "feedback.delete";
-            default -> null;
+        boolean allowed = switch (action) {
+            case "list" -> PermissionUtil.hasAny(request.getSession(false),
+                    "feedback.view", "feedback.update", "feedback.delete");
+            case "approve", "hide" -> PermissionUtil.has(request, "feedback.update");
+            case "delete" -> PermissionUtil.has(request, "feedback.delete");
+            default -> false; // deny-by-default cho action lạ
         };
-        if (requiredPerm != null && !PermissionUtil.has(request, requiredPerm)) {
+        if (!allowed) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "Không có quyền thực hiện hành động này");
             return;
         }

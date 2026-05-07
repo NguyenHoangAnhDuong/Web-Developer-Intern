@@ -23,6 +23,7 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/asset/css/sidebarAdmin.css">
     </head>
     <body>
+    <%@ include file="/views/includes/toast.jsp" %>
 
     <script>
         const contextPath = '${pageContext.request.contextPath}';

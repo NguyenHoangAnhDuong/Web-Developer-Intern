@@ -14,13 +14,25 @@ import vn.edu.hcmuaf.fit.ttltw.utils.PermissionUtil;
 import java.io.IOException;
 
 /**
- * Lớp filter này kiểm tra quyền truy cập theo URL cho mọi request vào /admin/*.
- * Nó CHỈ chặy sau khi LoginFilter đã xác nhận user đã đăng nhập và là staff (không phải khách hàng).
- * Đối với super_admin: bỏ qua mọi check.
- * Đối với các URL liên quan đến quản lý nhân viên / vai trò: đã được kiểm tra trong servlet, filter cũng kiểm tra cho đồng nhất.
+ * Filter kiểm tra permission theo URL cho mọi request /admin/*.
+ *
+ * THỨ TỰ FILTER: Servlet 6 spec không guarantee thứ tự giữa LoginFilter và filter này
+ * vì cả hai đều dùng @WebFilter cùng URL pattern /admin/*. Logic dưới đây được THIẾT KẾ
+ * order-independent:
+ *   - Nếu chạy TRƯỚC LoginFilter: session null / customer → chain.doFilter để LoginFilter xử lý.
+ *   - Nếu chạy SAU LoginFilter: các trường hợp đó không tới được filter này.
+ * Cả hai chiều đều cho hành vi đúng. KHÔNG được phá vỡ tính chất này khi sửa filter.
+ *
+ * Các URL nhân viên / vai trò (/admin/employees, /admin/roles) được kiểm tra trong servlet
+ * (EmployeeAdminServlet, RoleAdminServlet) — filter này SKIP cho chúng.
  */
 @WebFilter(urlPatterns = {"/admin/*"})
 public class AdminPermissionFilter implements Filter {
+
+    /** Sentinel: nếu resolveRequired trả về mảng này → từ chối (không quyền nào hợp lệ). */
+    private static final String[] DENY = new String[0];
+    /** Sentinel: bỏ qua check (URL không thuộc phạm vi). */
+    private static final String[] SKIP = null;
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain)
@@ -51,19 +63,33 @@ public class AdminPermissionFilter implements Filter {
         String uri = req.getRequestURI();
         String path = uri.startsWith(contextPath) ? uri.substring(contextPath.length()) : uri;
         String method = req.getMethod();
+        // CHÚ Ý: req.getParameter() với multipart/form-data sẽ TRIGGER parse body trước khi
+        // servlet kịp đọc các Part. Hiện tại các route multipart (ProductAddEServlet) KHÔNG
+        // dùng "action" param, nên path-based check vẫn chạy đúng. Khi thêm route multipart
+        // mới có "action", phải route bằng path/query thay vì gọi getParameter ở đây.
         String action = req.getParameter("action");
 
-        String required = resolveRequiredPermission(path, method, action);
+        String[] required = resolveRequiredPermission(path, method, action);
 
-        // Không có yêu cầu permission cụ thể (ví dụ /admin/dashboard, hoặc URL không khớp) → cho qua
-        if (required == null) {
+        // SKIP (null) → URL không thuộc phạm vi quản lý của filter, cho qua
+        if (required == SKIP) {
             chain.doFilter(servletRequest, servletResponse);
             return;
         }
 
-        if (PermissionUtil.getPermissions(session).contains(required)) {
-            chain.doFilter(servletRequest, servletResponse);
+        // DENY (mảng rỗng) → từ chối ngay (vd action không hợp lệ)
+        if (required.length == 0) {
+            denyAccess(req, resp);
             return;
+        }
+
+        // Có ít nhất 1 permission khớp → cho qua
+        java.util.Set<String> userPerms = PermissionUtil.getPermissions(session);
+        for (String p : required) {
+            if (userPerms.contains(p)) {
+                chain.doFilter(servletRequest, servletResponse);
+                return;
+            }
         }
 
         // Từ chối truy cập
@@ -71,72 +97,76 @@ public class AdminPermissionFilter implements Filter {
     }
 
     /**
-     * Trả về tên permission được yêu cầu cho request, hoặc null nếu không cần kiểm tra.
+     * Trả về danh sách permission yêu cầu (hợp với "any of"):
+     *   - SKIP (null): bỏ qua check
+     *   - DENY (mảng rỗng): từ chối ngay
+     *   - { "x" }: cần permission x
+     *   - { "x", "y" }: cần x hoặc y
      */
-    private String resolveRequiredPermission(String path, String method, String action) {
+    private String[] resolveRequiredPermission(String path, String method, String action) {
         boolean isPost = "POST".equalsIgnoreCase(method);
 
         // ----- DASHBOARD -----
-        if (path.equals("/admin/dashboard")) return null; // mở cho mọi staff đã đăng nhập
+        if (path.equals("/admin/dashboard")) return SKIP; // mở cho mọi staff đã đăng nhập
 
         // ----- PRODUCT -----
         if (path.equals("/admin/products")) {
-            if (isPost) {
-                // doPost hiện chỉ xử lý action=toggle (ẩn/hiện sản phẩm) → coi như update
-                return "product.update";
-            }
-            return "product.view";
+            // doPost hiện chỉ xử lý action=toggle → coi như update
+            return isPost ? new String[]{"product.update"} : new String[]{"product.view"};
         }
         if (path.equals("/admin/product/add")) {
-            return "product.create"; // cả GET (mở form) và POST (lưu)
+            return new String[]{"product.create"};
         }
         if (path.equals("/admin/products/edit")) {
-            return "product.update";
+            return new String[]{"product.update"};
         }
 
         // ----- ORDER -----
         if (path.equals("/admin/orders")) {
-            return isPost ? "order.update" : "order.view";
+            return isPost ? new String[]{"order.update"} : new String[]{"order.view"};
         }
 
         // ----- CUSTOMER -----
         if (path.equals("/admin/users")) {
-            return isPost ? "customer.update" : "customer.view";
+            return isPost ? new String[]{"customer.update"} : new String[]{"customer.view"};
         }
         if (path.equals("/admin/customers/detail")) {
             if (isPost) {
-                if ("resetPassword".equals(action)) return "customer.reset_password";
-                return "customer.update";
+                if ("resetPassword".equals(action)) return new String[]{"customer.reset_password"};
+                return new String[]{"customer.update"};
             }
-            return "customer.view";
+            return new String[]{"customer.view"};
         }
 
         // ----- VOUCHER -----
         if (path.equals("/admin/vouchers")) {
-            if (!isPost) return "voucher.view";
-            if (action == null) return "voucher.view";
+            if (!isPost) return new String[]{"voucher.view"};
+            if (action == null) return DENY;
             return switch (action) {
-                case "addVoucher" -> "voucher.create";
-                case "update", "toggle" -> "voucher.update";
-                case "delete" -> "voucher.delete";
-                default -> "voucher.view";
+                case "addVoucher" -> new String[]{"voucher.create"};
+                case "update", "toggle" -> new String[]{"voucher.update"};
+                case "delete" -> new String[]{"voucher.delete"};
+                default -> DENY;
             };
         }
 
         // ----- FEEDBACK -----
         if (path.equals("/admin/feedbacks")) {
-            // Feedback dùng GET cho cả list/approve/hide/delete
-            if (action == null || action.equals("list")) return "feedback.view";
+            // list (hoặc null action) cho phép nếu user có BẤT KỲ permission feedback nào
+            // → user chỉ có feedback.delete vẫn xem được list để chọn item xóa
+            if (action == null || action.equals("list")) {
+                return new String[]{"feedback.view", "feedback.update", "feedback.delete"};
+            }
             return switch (action) {
-                case "approve", "hide" -> "feedback.update";
-                case "delete" -> "feedback.delete";
-                default -> "feedback.view";
+                case "approve", "hide" -> new String[]{"feedback.update"};
+                case "delete" -> new String[]{"feedback.delete"};
+                default -> DENY;
             };
         }
 
         // ----- EMPLOYEE / ROLE -----
-        // Đã được kiểm tra trong servlet (EmployeeAdminServlet, RoleAdminServlet) nên không cần lặp ở đây
-        return null;
+        // Đã được kiểm tra trong servlet (EmployeeAdminServlet, RoleAdminServlet)
+        return SKIP;
     }
 
     private void denyAccess(HttpServletRequest req, HttpServletResponse resp) throws IOException {

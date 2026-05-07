@@ -35,7 +35,13 @@ public class ProductEditServlet  extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Không có quyền sửa sản phẩm");
             return;
         }
-        int vcId = Integer.parseInt(req.getParameter("id"));
+        int vcId;
+        try {
+            vcId = Integer.parseInt(req.getParameter("id"));
+        } catch (NumberFormatException e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID không hợp lệ");
+            return;
+        }
         Map<String, Object> productMap = productService.getProductForEditByVariantColorId(vcId);
 
         // Gán vào biến 'product' cho form Phone

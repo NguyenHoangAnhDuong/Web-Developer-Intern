@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/asset/css/feedbackManagement.css">
 </head>
 <body class="admin-body">
+<%@ include file="/views/includes/toast.jsp" %>
 
 <jsp:include page="/views/includes/sideBarAdmin.jsp"/>
 
@@ -268,9 +269,13 @@
         </div>
         <div class="modal-footer">
             <button class="btn-action btn-view" onclick="closeDetail()">Đóng</button>
-            <a id="d-approve-link" class="btn-action btn-approve">Duyệt</a>
-            <a id="d-hide-link" class="btn-action btn-hide">Ẩn</a>
-            <a id="d-delete-link" class="btn-action btn-delete">Xóa</a>
+            <c:if test="${canUpdateFeedback}">
+                <a id="d-approve-link" class="btn-action btn-approve">Duyệt</a>
+                <a id="d-hide-link" class="btn-action btn-hide">Ẩn</a>
+            </c:if>
+            <c:if test="${canDeleteFeedback}">
+                <a id="d-delete-link" class="btn-action btn-delete">Xóa</a>
+            </c:if>
         </div>
     </div>
 </div>

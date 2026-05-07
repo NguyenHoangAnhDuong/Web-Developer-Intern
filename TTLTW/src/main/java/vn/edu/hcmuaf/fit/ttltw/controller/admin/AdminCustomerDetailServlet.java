@@ -78,7 +78,13 @@ public class AdminCustomerDetailServlet extends HttpServlet {
             throws ServletException, IOException {
 
         req.setCharacterEncoding("UTF-8");
-        int id = Integer.parseInt(req.getParameter("id"));
+        int id;
+        try {
+            id = Integer.parseInt(req.getParameter("id"));
+        } catch (NumberFormatException e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID không hợp lệ");
+            return;
+        }
         String action = req.getParameter("action");
 
         if ("resetPassword".equals(action)) {

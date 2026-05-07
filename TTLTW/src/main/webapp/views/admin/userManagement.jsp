@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/asset/css/toast.css">
 </head>
 <body>
+<%@ include file="/views/includes/toast.jsp" %>
 <div class="app">
     <%@ include file="/views/includes/sideBarAdmin.jsp" %>
 

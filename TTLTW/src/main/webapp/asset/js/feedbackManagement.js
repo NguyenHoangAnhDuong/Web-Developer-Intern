@@ -55,21 +55,26 @@ function openDetail(username, productName, rating, comment, createdAt, status, i
     const approveHref = `${base}?action=approve&id=${id}`;
     const hideHref   = `${base}?action=hide&id=${id}`;
     const deleteHref  = `${base}?action=delete&id=${id}`;
-    approveLink.onclick = (e) => {
-        e.preventDefault();
-        showConfirmToast('Duyệt đánh giá này?', () => window.location.href = approveHref);
-    };
-    hideLink.onclick = (e) => {
-        e.preventDefault();
-        showConfirmToast('Ẩn đánh giá này?', () => window.location.href = hideHref);
-    };
-    deleteLink.onclick = (e) => {
-        e.preventDefault();
-        showConfirmToast('Xóa vĩnh viễn đánh giá này?', () => window.location.href = deleteHref);
-    };
-    // Ẩn nút không cần thiết
-    approveLink.style.display = status !== 1 ? 'inline-flex' : 'none';
-    hideLink.style.display    = status !== 0 ? 'inline-flex' : 'none';
+    if (approveLink) {
+        approveLink.onclick = (e) => {
+            e.preventDefault();
+            showConfirmToast('Duyệt đánh giá này?', () => window.location.href = approveHref);
+        };
+        approveLink.style.display = status !== 1 ? 'inline-flex' : 'none';
+    }
+    if (hideLink) {
+        hideLink.onclick = (e) => {
+            e.preventDefault();
+            showConfirmToast('Ẩn đánh giá này?', () => window.location.href = hideHref);
+        };
+        hideLink.style.display = status !== 0 ? 'inline-flex' : 'none';
+    }
+    if (deleteLink) {
+        deleteLink.onclick = (e) => {
+            e.preventDefault();
+            showConfirmToast('Xóa vĩnh viễn đánh giá này?', () => window.location.href = deleteHref);
+        };
+    }
     document.getElementById('modal-overlay').classList.add('open');
 }
 function closeDetail() {

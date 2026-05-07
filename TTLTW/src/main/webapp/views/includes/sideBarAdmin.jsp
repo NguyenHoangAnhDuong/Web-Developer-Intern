@@ -2,7 +2,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <c:set var="sbIsSuper" value="${sessionScope.roleName == 'super_admin'}" />
 <c:set var="sbPerms" value="${sessionScope.permissions}" />
-<c:set var="sbHasProduct"  value="${sbIsSuper || (sbPerms != null && (sbPerms.contains('product.view') || sbPerms.contains('product.create') || sbPerms.contains('product.update') || sbPerms.contains('product.delete')))}" />
+<c:set var="sbHasProduct"  value="${sbIsSuper || (sbPerms != null && (sbPerms.contains('product.view') || sbPerms.contains('product.create') || sbPerms.contains('product.update')))}" />
 <c:set var="sbHasOrder"    value="${sbIsSuper || (sbPerms != null && (sbPerms.contains('order.view') || sbPerms.contains('order.update')))}" />
 <c:set var="sbHasCustomer" value="${sbIsSuper || (sbPerms != null && (sbPerms.contains('customer.view') || sbPerms.contains('customer.update') || sbPerms.contains('customer.reset_password')))}" />
 <c:set var="sbHasVoucher"  value="${sbIsSuper || (sbPerms != null && (sbPerms.contains('voucher.view') || sbPerms.contains('voucher.create') || sbPerms.contains('voucher.update') || sbPerms.contains('voucher.delete')))}" />
