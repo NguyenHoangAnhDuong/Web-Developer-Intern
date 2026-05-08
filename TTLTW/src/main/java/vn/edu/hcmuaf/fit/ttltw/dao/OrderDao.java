@@ -97,6 +97,7 @@ public class OrderDao {
                     order.setAddressId(rs.getInt("address_id"));
                     order.setCreatedAt(rs.getTimestamp("created_at"));
                     order.setUpdatedAt(rs.getTimestamp("updated_at"));
+                    order.setCancellationReason(rs.getString("cancellation_reason"));
 
                     map.put("order", order);
                     map.put("customerName", rs.getString("customer_name"));
@@ -140,6 +141,7 @@ public class OrderDao {
                 order.setAddressId(rs.getInt("address_id"));
                 order.setCreatedAt(rs.getTimestamp("created_at"));
                 order.setUpdatedAt(rs.getTimestamp("updated_at"));
+                order.setCancellationReason(rs.getString("cancellation_reason"));
 
                 map.put("order", order);
                 map.put("customerName", rs.getString("customer_name"));
@@ -264,5 +266,20 @@ public class OrderDao {
         jdbi.withHandle(handle -> handle.createUpdate(sql)
                 .bind("minutes", minutes)
                 .execute());
+    }
+
+    public boolean cancelOrderWithReason(int orderId, int status, String cancellationReason) {
+        String sql = """
+                UPDATE orders
+                SET status = :status,
+                    cancellation_reason = :reason,
+                    updated_at = NOW()
+                WHERE id = :id
+                """;
+        return jdbi.withHandle(handle -> handle.createUpdate(sql)
+                .bind("status", status)
+                .bind("reason", cancellationReason)
+                .bind("id", orderId)
+                .execute()) > 0;
     }
 }
