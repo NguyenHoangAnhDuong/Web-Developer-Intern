@@ -4,6 +4,8 @@ import org.jdbi.v3.core.Jdbi;
 import vn.edu.hcmuaf.fit.ttltw.config.DBConnect;
 import vn.edu.hcmuaf.fit.ttltw.model.Order;
 import vn.edu.hcmuaf.fit.ttltw.model.ShippingZoneFees;
+import vn.edu.hcmuaf.fit.ttltw.service.SuperAIService;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -14,25 +16,27 @@ public class ShippingDao {
     public ShippingDao() {
         this.jdbi = DBConnect.getJdbi();
     }
+//    private final SuperAIService superAIService = new SuperAIService();
+//       public List<ShippingZoneFees> getListFeesByProvince(String provinceName) {
+//        if (provinceName == null || provinceName.trim().isEmpty()) return new ArrayList<>();
+//        String cleanProvince = provinceName.trim();
+//        String sql = "SELECT f.* FROM shipping_zone_fees f JOIN shipping_zones z ON f.zone_id = z.id WHERE LOWER(z.provinces) LIKE LOWER(:province) AND f.is_active = 1 AND z.is_active = 1";
+//
+//        return jdbi.withHandle(handle -> handle.createQuery(sql)
+//                .bind("province", "%" + cleanProvince + "%")
+//                .mapToBean(ShippingZoneFees.class)
+//                .list());
+//    }
 
-  public List<ShippingZoneFees> getListFeesByProvince(String provinceName) {
-    if (provinceName == null || provinceName.trim().isEmpty()) return new ArrayList<>();
-    String cleanProvince = provinceName.trim();
-    String sql = "SELECT f.* FROM shipping_zone_fees f JOIN shipping_zones z ON f.zone_id = z.id WHERE LOWER(z.provinces) LIKE LOWER(:province) AND f.is_active = 1 AND z.is_active = 1";
 
-    return jdbi.withHandle(handle -> handle.createQuery(sql)
-            .bind("province", "%" + cleanProvince + "%")
-            .mapToBean(ShippingZoneFees.class)
-            .list());
-}
     // tìm đơn hàng theo ID
-    public Optional<Order> findOrderById(int id) {
-        String sql = "SELECT id, tracking_number, partner_name, status FROM orders WHERE id = :id LIMIT 1";
-        return jdbi.withHandle(handle -> handle.createQuery(sql)
-                .bind("id", id)
-                .mapToBean(Order.class)
-                .findOne());
-    }
+//    public Optional<Order> findOrderById(int id) {
+//        String sql = "SELECT id, tracking_number, partner_name, status FROM orders WHERE id = :id LIMIT 1";
+//        return jdbi.withHandle(handle -> handle.createQuery(sql)
+//                .bind("id", id)
+//                .mapToBean(Order.class)
+//                .findOne());
+//    }
 
 // lưu mã vận chuyển khi gọi API thành công
     public boolean updateTrackingInfo(int orderId, String tracking, String partner) {
