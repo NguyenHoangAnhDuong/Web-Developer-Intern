@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpSession;
 import vn.edu.hcmuaf.fit.ttltw.model.*;
 import vn.edu.hcmuaf.fit.ttltw.service.ProductService;
 import vn.edu.hcmuaf.fit.ttltw.service.ProductServiceImpl;
+import vn.edu.hcmuaf.fit.ttltw.utils.PermissionUtil;
 
 import java.io.IOException;
 import java.util.Map;
@@ -30,7 +31,17 @@ public class ProductEditServlet  extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        int vcId = Integer.parseInt(req.getParameter("id"));
+        if (!PermissionUtil.has(req, "product.update")) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Không có quyền sửa sản phẩm");
+            return;
+        }
+        int vcId;
+        try {
+            vcId = Integer.parseInt(req.getParameter("id"));
+        } catch (NumberFormatException e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID không hợp lệ");
+            return;
+        }
         Map<String, Object> productMap = productService.getProductForEditByVariantColorId(vcId);
 
         // Gán vào biến 'product' cho form Phone
@@ -50,6 +61,10 @@ public class ProductEditServlet  extends HttpServlet {
     }
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        if (!PermissionUtil.has(req, "product.update")) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Không có quyền sửa sản phẩm");
+            return;
+        }
         try {
             int productId = Integer.parseInt(req.getParameter("productId"));
             int categoryId = Integer.parseInt(req.getParameter("categoryId"));

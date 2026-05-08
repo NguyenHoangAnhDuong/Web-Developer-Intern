@@ -23,6 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+<%@ include file="/views/includes/toast.jsp" %>
 <script>
     const revenueByDaysData = [
         <c:forEach var="item" items="${revenueByDays}" varStatus="status">

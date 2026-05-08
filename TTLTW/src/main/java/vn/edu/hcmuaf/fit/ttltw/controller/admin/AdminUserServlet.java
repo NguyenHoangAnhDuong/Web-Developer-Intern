@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
 import vn.edu.hcmuaf.fit.ttltw.service.UserService;
+import vn.edu.hcmuaf.fit.ttltw.utils.PermissionUtil;
 
 @WebServlet(name = "AdminUserServlet", urlPatterns = { "/admin/users" })
 public class AdminUserServlet extends HttpServlet {
@@ -26,6 +27,11 @@ public class AdminUserServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+
+        if (!PermissionUtil.has(req, "customer.view")) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Không có quyền xem khách hàng");
+            return;
+        }
 
         // Lấy các tham số filter từ URL
         String searchTerm = req.getParameter("search");
@@ -103,6 +109,13 @@ public class AdminUserServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+
+        if (!PermissionUtil.has(req, "customer.update")) {
+            resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            resp.setContentType("application/json; charset=UTF-8");
+            resp.getWriter().write("{\"success\":false,\"message\":\"Không có quyền cập nhật khách hàng\"}");
+            return;
+        }
 
         int id = Integer.parseInt(req.getParameter("id"));
         int role = Integer.parseInt(req.getParameter("role"));
