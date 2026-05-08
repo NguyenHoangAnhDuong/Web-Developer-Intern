@@ -35,11 +35,13 @@ function updateFinalTotal() {
 
 function updateShipping(fee) {
     const shippingEl = document.getElementById("shipping-val");
+    const shippingFeeInput = document.getElementById("shippingFeeInput");
     if (!shippingEl) return;
 
     const shipping = parseFloat(fee || 0);
     shippingEl.dataset.value = shipping;
     shippingEl.innerText = formatVND(shipping);
+    if (shippingFeeInput) shippingFeeInput.value = shipping;
     updateFinalTotal();
 }
 
@@ -122,6 +124,8 @@ function applyVoucher(code, discountAmount, minOrder, maxReduce, type, btnEl) {
 document.addEventListener("DOMContentLoaded", function () {
     const orderBtn = document.querySelector(".round-black-btn");
     const orderForm = document.querySelector("form[action='placeOrder']");
+    const toggleShippingBtn = document.getElementById("toggleShippingOptions");
+    const hiddenShippingOptions = document.querySelectorAll(".shipping-option-hidden");
     if (orderBtn && orderForm) {
         orderBtn.addEventListener("click", function (e) {
             e.preventDefault(); // Ngăn chặn mọi hành động mặc định
@@ -144,5 +148,16 @@ document.addEventListener("DOMContentLoaded", function () {
         updateShipping(checkedShipping.dataset.fee);
     } else {
         updateFinalTotal();
+    }
+
+    if (toggleShippingBtn) {
+        toggleShippingBtn.addEventListener("click", function () {
+            const isExpanded = this.dataset.expanded === "true";
+            hiddenShippingOptions.forEach((item) => {
+                item.style.display = isExpanded ? "none" : "block";
+            });
+            this.dataset.expanded = isExpanded ? "false" : "true";
+            this.innerText = isExpanded ? "Xem thêm" : "Ẩn bớt";
+        });
     }
 });

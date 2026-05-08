@@ -396,3 +396,29 @@ section {
     font-weight: bold;
     color: #ee4d2d;
 }
+
+.shipping-option-wrap.shipping-option-hidden {
+    display: none;
+}
+.shipping-toggle-btn {
+    margin-top: 12px;
+    border: none;
+    background: transparent;
+    color: #2563eb;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    padding: 4px 0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: transparent;
+    transition: text-decoration-color 0.2s ease, color 0.2s ease;
+}
+
+.shipping-toggle-btn:hover {
+    text-decoration-color: #1d4ed8;
+    background-color: transparent !important;
+    border: none !important;
+}
+
+

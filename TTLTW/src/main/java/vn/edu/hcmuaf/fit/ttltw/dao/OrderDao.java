@@ -78,6 +78,14 @@ public class OrderDao {
                 .execute()) > 0;
     }
 
+    public List<Order> getExpiredOrdersForAutoCancel(int minutes) {
+        String sql = "SELECT * FROM orders WHERE status = 1 AND payment_type_id = 2 AND created_at < NOW() - interval :minutes MINUTE";
+        return jdbi.withHandle(handle -> handle.createQuery(sql)
+                .bind("minutes", minutes)
+                .mapToBean(Order.class)
+                .list());
+    }
+
     // Lấy tất cả order
     public List<Map<String, Object>> findAll() {
         String sql = "SELECT o.*, a.name AS customer_name, a.phone_number AS customer_phone " +
@@ -259,10 +267,4 @@ public class OrderDao {
         }));
     }
 
-    public void cancelExpiredOrders(int minutes) {
-        String sql = "UPDATE orders SET status = 4 WHERE status = 1 AND payment_type_id = 2 AND created_at < NOW() - interval :minutes MINUTE";
-        jdbi.withHandle(handle -> handle.createUpdate(sql)
-                .bind("minutes", minutes)
-                .execute());
-    }
 }
