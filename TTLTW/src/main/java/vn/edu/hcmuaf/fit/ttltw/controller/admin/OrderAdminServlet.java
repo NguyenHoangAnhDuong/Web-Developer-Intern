@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import vn.edu.hcmuaf.fit.ttltw.service.OrderService;
+import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.util.List;
@@ -24,6 +25,15 @@ public class OrderAdminServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
+        String getOrderDetails = req.getParameter("getOrderDetails");
+        if ("true".equals(getOrderDetails)) {
+            int orderId = Integer.parseInt(req.getParameter("orderId"));
+            Map<String, Object> orderDetails = orderService.getOrderDetailsForAdmin(orderId);
+            resp.setContentType("application/json;charset=UTF-8");
+            Gson gson = new Gson();
+            resp.getWriter().print(gson.toJson(orderDetails));
+            return;
+        }
         String keyword = req.getParameter("keyword");
         String statusFilterRaw = req.getParameter("statusFilter");
         // String ajax = req.getParameter("ajax");
@@ -48,30 +58,41 @@ public class OrderAdminServlet extends HttpServlet {
             throws IOException {
 
         int orderId = Integer.parseInt(req.getParameter("orderId"));
-        int newStatus = Integer.parseInt(req.getParameter("status"));
-
-        System.out.println(" cập nhập đơn hàng ID: " + orderId + ", Status: " + newStatus);
-
-        Map<String, Object> result =
-                orderService.updateStatus(orderId, newStatus);
-
+        String action = req.getParameter("action");
         resp.setContentType("application/json;charset=UTF-8");
-
-        boolean success = (boolean) result.get("success");
-        String message = (String) result.get("message");
-
-        if (!success) {
-            System.err.println("Failed to update order " + orderId + ": " + message);
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+        if ("cancelOrder".equals(action)) {
+            // Hủy đơn hàng với lý do
+            String cancellationReason = req.getParameter("cancellationReason");
+            Map<String, Object> result = orderService.cancelOrderWithReason(orderId, cancellationReason);
+            boolean success = (boolean) result.get("success");
+            String message = (String) result.get("message");
+            if (!success) {
+                System.err.println("Failed to cancel order " + orderId + ": " + message);
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            }
+            resp.getWriter().print(String.format(
+                    "{\"success\": %s, \"message\": \"%s\"}",
+                    success,
+                    message.replace("\"", "\\\"")
+            ));
         } else {
-            System.out.println("order " + orderId + " updated successfully");
-        }
+            // Thay đổi trạng thái đơn hàng
+            int newStatus = Integer.parseInt(req.getParameter("status"));
+            Map<String, Object> result = orderService.updateStatus(orderId, newStatus);
 
-        resp.getWriter().print(String.format(
-                "{\"success\": %s, \"message\": \"%s\"}",
-                success,
-                message.replace("\"", "\\\"")
-        ));
+            boolean success = (boolean) result.get("success");
+            String message = (String) result.get("message");
+
+            if (!success) {
+                System.err.println("Failed to update order " + orderId + ": " + message);
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            }
+            resp.getWriter().print(String.format(
+                    "{\"success\": %s, \"message\": \"%s\"}",
+                    success,
+                    message.replace("\"", "\\\"")
+            ));
+        }
     }
 }
 
