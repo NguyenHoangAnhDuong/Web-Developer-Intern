@@ -43,12 +43,24 @@ function loadOrders() {
     const keyword = searchInput?.value || '';
     const statusFilterValue = statusFilterSelect?.value || '';
     fetch(`${contextPath}/admin/orders?ajax=true&keyword=${encodeURIComponent(keyword)}&statusFilter=${statusFilterValue}`)
-        .then(res => res.text())
+        .then(res => {
+            if (res.status === 403) {
+                showToast('Bạn không có quyền xem đơn hàng', false);
+                return null;
+            }
+            if (!res.ok) {
+                showToast('Không tải được danh sách đơn', false);
+                return null;
+            }
+            return res.text();
+        })
         .then(html => {
+            if (html === null) return;
             tableBody.innerHTML = html;
             bindStatusChange();
             bindOrderRowClick();
-        });
+        })
+        .catch(() => showToast('Lỗi kết nối server', false));
 }
 searchInput.addEventListener('input', loadOrders);
 statusFilterSelect.addEventListener('change', loadOrders);

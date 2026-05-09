@@ -10,6 +10,7 @@ import vn.edu.hcmuaf.fit.ttltw.dao.VoucherAdminDaoImpl;
 import vn.edu.hcmuaf.fit.ttltw.model.Voucher;
 import vn.edu.hcmuaf.fit.ttltw.service.VoucherAdminService;
 import vn.edu.hcmuaf.fit.ttltw.service.VoucherAdminServiceImpl;
+import vn.edu.hcmuaf.fit.ttltw.utils.PermissionUtil;
 import vn.edu.hcmuaf.fit.ttltw.validation.ValidationException;
 
 import java.io.IOException;
@@ -31,6 +32,11 @@ public class VoucherAdminServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+
+        if (!PermissionUtil.has(req, "voucher.view")) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Không có quyền xem khuyến mãi");
+            return;
+        }
 
         String keyword = req.getParameter("keyword");
         String statusParam = req.getParameter("status");
@@ -70,6 +76,15 @@ public class VoucherAdminServlet extends HttpServlet {
         try {
             if (action == null || action.isBlank()) {
                 throw new ValidationException("Action không được xác định");
+            }
+            String requiredPerm = switch (action) {
+                case "addVoucher" -> "voucher.create";
+                case "update", "toggle" -> "voucher.update";
+                case "delete" -> "voucher.delete";
+                default -> null;
+            };
+            if (requiredPerm != null && !PermissionUtil.has(req, requiredPerm)) {
+                throw new ValidationException("Bạn không có quyền thực hiện hành động này");
             }
             switch (action) {
 

@@ -1,5 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<c:set var="isSuper" value="${sessionScope.roleName == 'super_admin'}" />
+<c:set var="perms" value="${sessionScope.permissions}" />
+<c:set var="canUpdateCustomer" value="${isSuper || (perms != null && perms.contains('customer.update'))}" />
+<c:set var="canResetCustomerPwd" value="${isSuper || (perms != null && perms.contains('customer.reset_password'))}" />
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -13,6 +17,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/asset/css/customerDetail.css">
 </head>
 <body>
+<%@ include file="/views/includes/toast.jsp" %>
 <div class="app">
     <%@ include file="/views/includes/sideBarAdmin.jsp" %>
 
@@ -123,19 +128,22 @@
                     </div>
                 </div>
 
-                <div class="form-actions">
-                    <button type="button" class="btn-update" id="update-btn">
-                        <i class="fa-solid fa-pen"></i> Cập nhật
-                    </button>
-                    <button type="submit" class="btn-save" id="save-btn" style="display:none;">
-                        <i class="fa-solid fa-floppy-disk"></i> Lưu
-                    </button>
-                </div>
+                <c:if test="${canUpdateCustomer}">
+                    <div class="form-actions">
+                        <button type="button" class="btn-update" id="update-btn">
+                            <i class="fa-solid fa-pen"></i> Cập nhật
+                        </button>
+                        <button type="submit" class="btn-save" id="save-btn" style="display:none;">
+                            <i class="fa-solid fa-floppy-disk"></i> Lưu
+                        </button>
+                    </div>
+                </c:if>
             </form>
 
         </div>
 
         <!-- Đặt lại mật khẩu (dành cho admin/nhân viên hỗ trợ khách hàng quên mật khẩu) -->
+        <c:if test="${canResetCustomerPwd}">
         <div class="password-reset-card">
             <div class="password-reset-header">
                 <h3><i class="fa-solid fa-key"></i> Đặt lại mật khẩu</h3>
@@ -173,6 +181,7 @@
                 </small>
             </form>
         </div>
+        </c:if>
 
     </div>
 </div>

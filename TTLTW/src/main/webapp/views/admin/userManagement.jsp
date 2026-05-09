@@ -1,5 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<c:set var="isSuper" value="${sessionScope.roleName == 'super_admin'}" />
+<c:set var="perms" value="${sessionScope.permissions}" />
+<c:set var="canUpdateCustomer" value="${isSuper || (perms != null && perms.contains('customer.update'))}" />
 <html>
 <head>
     <meta charset="UTF-8">
@@ -13,6 +16,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/asset/css/toast.css">
 </head>
 <body>
+<%@ include file="/views/includes/toast.jsp" %>
 <div class="app">
     <%@ include file="/views/includes/sideBarAdmin.jsp" %>
 
@@ -129,18 +133,20 @@
                                    class="action-icon-link" title="Xem chi tiết">
                                     <i class="fa-solid fa-pen edit-icon"></i>
                                 </a>
-                                <c:choose>
-                                    <c:when test="${u.status == 1}">
-                                        <i class="fa-solid fa-lock toggle-status-icon lock-icon"
-                                           data-id="${u.id}" data-status="0"
-                                           title="Khóa tài khoản"></i>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <i class="fa-solid fa-unlock toggle-status-icon unlock-icon"
-                                           data-id="${u.id}" data-status="1"
-                                           title="Mở khóa tài khoản"></i>
-                                    </c:otherwise>
-                                </c:choose>
+                                <c:if test="${canUpdateCustomer}">
+                                    <c:choose>
+                                        <c:when test="${u.status == 1}">
+                                            <i class="fa-solid fa-lock toggle-status-icon lock-icon"
+                                               data-id="${u.id}" data-status="0"
+                                               title="Khóa tài khoản"></i>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <i class="fa-solid fa-unlock toggle-status-icon unlock-icon"
+                                               data-id="${u.id}" data-status="1"
+                                               title="Mở khóa tài khoản"></i>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:if>
                             </td>
 
                         </tr>

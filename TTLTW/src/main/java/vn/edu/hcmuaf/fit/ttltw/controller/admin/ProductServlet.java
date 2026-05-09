@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import vn.edu.hcmuaf.fit.ttltw.service.ProductService;
 import vn.edu.hcmuaf.fit.ttltw.service.ProductServiceImpl;
+import vn.edu.hcmuaf.fit.ttltw.utils.PermissionUtil;
 
 import java.io.IOException;
 import java.util.List;
@@ -27,6 +28,10 @@ public class ProductServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
+        if (!PermissionUtil.has(req, "product.view")) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Không có quyền xem danh sách sản phẩm");
+            return;
+        }
 
         String keyword = req.getParameter("keyword");
 
@@ -81,6 +86,13 @@ public class ProductServlet extends HttpServlet {
         if ("toggle".equals(action)) {
 
             HttpSession session = req.getSession();
+
+            if (!PermissionUtil.has(req, "product.update")) {
+                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                resp.setContentType("application/json; charset=UTF-8");
+                resp.getWriter().write("{\"success\":false,\"message\":\"Không có quyền cập nhật sản phẩm\"}");
+                return;
+            }
 
             try {
                 int id = Integer.parseInt(req.getParameter("id"));

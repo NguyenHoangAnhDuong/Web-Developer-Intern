@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import vn.edu.hcmuaf.fit.ttltw.service.OrderService;
 import com.google.gson.Gson;
+import vn.edu.hcmuaf.fit.ttltw.utils.PermissionUtil;
 
 import java.io.IOException;
 import java.util.List;
@@ -34,9 +35,13 @@ public class OrderAdminServlet extends HttpServlet {
             resp.getWriter().print(gson.toJson(orderDetails));
             return;
         }
+        if (!PermissionUtil.has(req, "order.view")) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Không có quyền xem đơn hàng");
+            return;
+        }
+
         String keyword = req.getParameter("keyword");
         String statusFilterRaw = req.getParameter("statusFilter");
-        // String ajax = req.getParameter("ajax");
 
         Integer statusFilter = null;
         if (statusFilterRaw != null && !statusFilterRaw.isEmpty()) {
@@ -56,6 +61,13 @@ public class OrderAdminServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
+
+        if (!PermissionUtil.has(req, "order.update")) {
+            resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            resp.setContentType("application/json; charset=UTF-8");
+            resp.getWriter().write("{\"success\":false,\"message\":\"Không có quyền cập nhật đơn hàng\"}");
+            return;
+        }
 
         int orderId = Integer.parseInt(req.getParameter("orderId"));
         String action = req.getParameter("action");

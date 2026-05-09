@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import vn.edu.hcmuaf.fit.ttltw.model.Feedback;
 import vn.edu.hcmuaf.fit.ttltw.service.FeedBackService;
+import vn.edu.hcmuaf.fit.ttltw.utils.PermissionUtil;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -23,6 +24,17 @@ public class FeedbackManagementServlet extends HttpServlet {
             throws ServletException, IOException {
         String action = request.getParameter("action");
         if (action == null) action = "list";
+        boolean allowed = switch (action) {
+            case "list" -> PermissionUtil.hasAny(request.getSession(false),
+                    "feedback.view", "feedback.update", "feedback.delete");
+            case "approve", "hide" -> PermissionUtil.has(request, "feedback.update");
+            case "delete" -> PermissionUtil.has(request, "feedback.delete");
+            default -> false; // deny-by-default cho action lạ
+        };
+        if (!allowed) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Không có quyền thực hiện hành động này");
+            return;
+        }
         switch (action) {
             case "list"    -> showList(request, response);
             case "approve" -> updateStatus(request, response, 1);

@@ -126,26 +126,46 @@
 <%--            chọn đơn vị vận chuyển --%>
             <section class="shipping-method">
                 <h3 class="title"><i class="fa-solid fa-truck-fast"></i> Đơn vị vận chuyển</h3>
-                <div class="shipping-container">
-                    <c:forEach var="option" items="${shippingOptions}" varStatus="loop">
-                        <label class="shipping-card">
-                            <input type="radio" name="shippingPartner" value="${option.shippingMethod}"
-                                   data-fee="${option.baseFee}"
-                                ${loop.first ? 'checked' : ''}
-                                              class="shipping-option">
-                            <div class="shipping-info">
-                    <span class="name">
-                        <c:choose>
-                            <c:when test="${option.shippingMethod == 'standard'}">Giao hàng tiêu chuẩn</c:when>
-                            <c:otherwise>Giao hàng hỏa tốc</c:otherwise>
-                        </c:choose>
-                    </span>
-                                <span class="desc">Dự kiến: ${option.estimatedDays} ngày</span>
-                            </div>
-                            <span class="price"><fmt:formatNumber value="${option.baseFee}" pattern="#,###"/>₫</span>
-                        </label>
-                    </c:forEach>
-                </div>
+                <c:choose>
+                    <c:when test="${not empty shippingMethods}">
+                        <div class="shipping-container" id="shippingOptionsContainer">
+                            <c:forEach var="method" items="${shippingMethods}" varStatus="loop">
+                                <div class="shipping-option-wrap ${loop.index >= 2 ? 'shipping-option-hidden' : ''}">
+                                    <label class="shipping-card">
+                                        <input type="radio" name="shippingPartner" value="${method.name}"
+                                               data-fee="${empty method.fee ? 0 : method.fee}"
+                                               data-name="${method.name}"
+                                               ${loop.first ? 'checked' : ''}
+                                               class="shipping-option">
+                                        <div class="shipping-info">
+                                            <span class="name">${method.name}</span>
+                                            <span class="desc">
+                                                <c:choose>
+                                                    <c:when test="${not empty method.estimatedDays}">${method.estimatedDays}</c:when>
+                                                    <c:otherwise>Đang cập nhật thời gian giao</c:otherwise>
+                                                </c:choose>
+                                            </span>
+                                        </div>
+                                        <span class="price">
+                                            <c:choose>
+                                                <c:when test="${not empty method.fee}">
+                                                    <fmt:formatNumber value="${method.fee}" pattern="#,###"/>₫
+                                                </c:when>
+                                                <c:otherwise>Chưa có phí</c:otherwise>
+                                            </c:choose>
+                                        </span>
+                                    </label>
+                                </div>
+                            </c:forEach>
+                        </div>
+                        <c:if test="${shippingMethods.size() > 2}">
+                            <button type="button" class="shipping-toggle-btn" id="toggleShippingOptions">Xem thêm</button>
+                        </c:if>
+                    </c:when>
+                    <c:otherwise>
+                        <div class="shipping-empty">Không có đơn vị vận chuyển phù hợp.</div>
+                    </c:otherwise>
+                </c:choose>
                 <input type="hidden" name="finalTotal" id="finalTotalInput" value="${subtotal + shippingFee}">
                 <input type="hidden" name="shippingFee" id="shippingFeeInput" value="${shippingFee}">
             </section>
