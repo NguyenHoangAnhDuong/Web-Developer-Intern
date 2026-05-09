@@ -114,6 +114,12 @@
                     <div id="payment-method"><%= orderData.get("paymentMethodName") %></div>
                 </div>
             </div>
+            <div class="shipping-detail" style="margin-top:18px">
+                <div class="small">Đơn vị vận chuyển</div>
+                <div id="shipping-partner"><%= orderData.get("shippingPartner") %></div>
+                <div class="small" style="margin-top:12px">Thời gian dự kiến giao</div>
+                <div id="expected-delivery"><%= orderData.get("expectedDelivery") %></div>
+            </div>
         </div>
 
         <div class="card section" aria-labelledby="address-heading">

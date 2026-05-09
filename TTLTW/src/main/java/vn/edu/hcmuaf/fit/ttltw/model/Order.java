@@ -16,6 +16,7 @@ public class Order implements Serializable{
     private String note;
     private String trackingNumber;
     private String partnerName;
+    private String cancellationReason;
     private Timestamp createdAt;
 
     public String getNote() {
@@ -42,12 +43,20 @@ public class Order implements Serializable{
         this.partnerName = partnerName;
     }
 
+    public String getCancellationReason() {
+        return cancellationReason;
+    }
+
+    public void setCancellationReason(String cancellationReason) {
+        this.cancellationReason = cancellationReason;
+    }
+
     private Timestamp updatedAt;
 
     public Order() {
     }
 
-    public Order(int id, int status, Integer voucherId, int paymentTypeId, double feeShipping, double totalAmount, double discountAmount, int userId, int addressId, String note, String trackingNumber, String partnerName, Timestamp createdAt, Timestamp updatedAt) {
+    public Order(int id, int status, Integer voucherId, int paymentTypeId, double feeShipping, double totalAmount, double discountAmount, int userId, int addressId, String note, String trackingNumber, String partnerName, String cancellationReason, Timestamp createdAt, Timestamp updatedAt) {
         this.id = id;
         this.status = status;
         this.voucherId = voucherId;
@@ -60,6 +69,7 @@ public class Order implements Serializable{
         this.note = note;
         this.trackingNumber = trackingNumber;
         this.partnerName = partnerName;
+        this.cancellationReason = cancellationReason;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -166,6 +176,7 @@ public class Order implements Serializable{
                 ", addressId=" + addressId +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
+                ", cancellationReason=" + cancellationReason +
                 '}';
     }
 }

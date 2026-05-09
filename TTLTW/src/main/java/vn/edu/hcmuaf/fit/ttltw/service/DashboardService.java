@@ -15,9 +15,11 @@ public interface DashboardService {
 
     List<Map<String, Object>> getRevenueByDays(int days);
 
-    List<Map<String, Object>> getRevenueByCategory();
+    List<Map<String, Object>> getRevenueByDateRange(String startDate, String endDate);
 
-    List<Map<String, Object>> getTopProducts();
+    List<Map<String, Object>> getRevenueByCategory(String startDate, String endDate);
+
+    List<Map<String, Object>> getTopProducts(String startDate, String endDate);
 
     List<Map<String, Object>> getRecentUsers();
 }

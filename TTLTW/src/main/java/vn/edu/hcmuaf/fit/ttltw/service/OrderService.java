@@ -13,6 +13,7 @@ public class OrderService {
     private final OrderDao orderDao;
     private final AddressDao addressDao;
     private final PaymentTypesDao paymentTypesDao;
+    private final OrderDetailDao orderDetailDao;
     private final VoucherAdminDao voucherDao = new VoucherAdminDaoImpl();
     private final SuperAIService superAIService = new SuperAIService();
     private final ShippingService shippingService = new ShippingService();
@@ -22,6 +23,7 @@ public class OrderService {
         this.orderDao = new OrderDao();
         this.addressDao = new AddressDao();
         this.paymentTypesDao = new PaymentTypesDao();
+        this.orderDetailDao = new OrderDetailDao();
     }
 
     public List<Order> getUserOrders(int userId) {
@@ -348,5 +350,69 @@ public class OrderService {
     }
     public boolean updateStatusOnly(int orderId, int newStatus) {
         return orderDao.updateStatus(orderId, newStatus);
+    }
+    public Map<String, Object> getOrderDetailsForAdmin(int orderId) {
+        Map<String, Object> result = new HashMap<>();
+        Optional<Order> optOrder = orderDao.getOrderById(orderId);
+        if (optOrder.isEmpty()) {
+            result.put("success", false);
+            result.put("message", "Đơn hàng không tồn tại");
+            return result;
+        }
+        Order order = optOrder.get();
+        Address address = getOrderAddress(order.getAddressId());
+        // Lấy chi tiết đơn hàng
+        List<OrderDetail> orderDetails = orderDetailDao.getOrderDetailsByOrderId(orderId);
+        
+        List<Map<String, Object>> items = new java.util.ArrayList<>();
+        for (OrderDetail detail : orderDetails) {
+            Map<String, String> productInfo = orderDetailDao.getProductInfoByVariantId(detail.getVariantId());
+            Map<String, Object> item = new HashMap<>();
+            item.put("productName", productInfo.getOrDefault("productName", "N/A"));
+            item.put("variantName", productInfo.getOrDefault("variantName", ""));
+            item.put("colorName", productInfo.getOrDefault("colorName", ""));
+            item.put("quantity", detail.getQuantity());
+            item.put("price", detail.getPrice());
+            item.put("totalMoney", detail.getTotalMoney());
+            items.add(item);
+        }
+        result.put("success", true);
+        result.put("order", order);
+        result.put("address", address);
+        result.put("items", items);
+        result.put("statusName", getStatusName(order.getStatus()));
+        result.put("statusClass", getStatusClass(order.getStatus()));
+        return result;
+    }
+    public Map<String, Object> cancelOrderWithReason(int orderId, String cancellationReason) {
+        Map<String, Object> result = new HashMap<>();
+        Optional<Order> opt = orderDao.getOrderById(orderId);
+        if (opt.isEmpty()) {
+            result.put("success", false);
+            result.put("message", "Đơn hàng không tồn tại");
+            return result;
+        }
+        Order order = opt.get();
+        int currentStatus = order.getStatus();
+        // Kiểm tra trạng thái - chỉ có thể hủy các đơn hàng ở trạng thái 1 hoặc 2
+        if (currentStatus != 1 && currentStatus != 2) {
+            result.put("success", false);
+            result.put("message", "Không thể hủy đơn hàng ở trạng thái " + getStatusName(currentStatus));
+            return result;
+        }
+        if (cancellationReason == null || cancellationReason.trim().isEmpty()) {
+            result.put("success", false);
+            result.put("message", "Vui lòng nhập lý do hủy đơn hàng");
+            return result;
+        }
+        // Cập nhật status sang 4 (hủy) và lưu lý do hủy
+        if (!orderDao.cancelOrderWithReason(orderId, 4, cancellationReason)) {
+            result.put("success", false);
+            result.put("message", "Lỗi DB: Không thể hủy đơn hàng");
+            return result;
+        }
+        result.put("success", true);
+        result.put("message", "Hủy đơn hàng thành công");
+        return result;
     }
 }
