@@ -1,0 +1,271 @@
+.app {
+    display: flex;
+    height: 100vh;
+}
+.container {
+    flex-grow: 1;
+    padding-top: 5rem;
+    justify-content: center;
+    margin-left: 250px;
+
+}
+.content {
+    overflow-y: auto;
+    padding: 20px;
+}
+.container .content .topbar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: calc(100% - 250px);
+    height: 5rem;
+    background-color: var(--color-bg);
+    z-index: 40;
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+.container .content .topbar.transparent {
+    background-color: transparent; /* Khi cuộn xuống */
+    box-shadow: none;
+}
+.container .content .topbar.transparent .hidden,.container .content .topbar.transparent .page-title {
+    display: none;
+}
+
+.container .content .topbar .page-title {
+    font-size: 25px;
+    margin: 5px 0;
+}
+.container .content .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.container .content .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.container .content .notification-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+}
+/*thống kê tổng*/
+.content #pages {
+    background: white;
+    border-radius: 10px;
+    padding: 10px;
+    margin: 20px 10px 0 50px ;
+}
+.content .page h3 {
+    font-size: 23px;
+    color: var(--color-button);
+    font-weight: bold;
+    text-transform: uppercase;
+}
+/* action buttons row */
+.content #pages .actions-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    margin-bottom: 8px;
+    justify-content: end;
+}
+
+.content #pages .btn-ghost-accent {
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    padding: 8px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.content #pages .btn-outline-accent {
+    padding: 8px 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 10px;
+}
+.content #pages .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+.content #pages .grid .card {
+    flex-direction: column;
+    padding: 10px;
+    border: 1px solid;
+    display: flex;
+    margin: 5px 5px;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+    background: #d3dcd1;
+}
+.content #pages .grid .card .muted {
+    margin-top: 5px;
+}
+.content #pages .kpi-grid {
+    margin-top: 12px;
+}
+
+.content #pages .users-list {
+    margin-top: 8px;
+}
+.content #pages .user-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.02);
+    cursor: pointer;
+}
+.content #pages .user-item.last {
+    border-bottom: none;
+}
+.content #pages .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+/* avatar variants used in HTML */
+.content #pages .avatar.variant-1 {
+    background: linear-gradient(135deg, var(--color-bg), var(--color-head));
+}
+.content #pages .avatar.variant-2 {
+    background: linear-gradient(135deg, #f97316, #fb923c);
+}
+.content #pages .avatar.variant-3 {
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+}
+.content #pages .avatar.variant-4 {
+    background: linear-gradient(135deg, #10b981, #34d399);
+}
+.content #pages .avatar.variant-5 {
+    background: linear-gradient(135deg, #f43f5e, #fb7185);
+}
+
+.content #pages .user-name {
+    font-weight: 700;
+}
+.content #pages .user-meta {
+    font-size: 13px;
+}
+
+.content #pages .view-all-wrap {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+}
+.content #pages .view-all-wrap .btn-outline-accent {
+    background: var(--color-button);
+}
+.content #pages .charts-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    margin-top: 12px;
+}
+.content #pages .charts-grid .filter-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+.content #pages .charts-grid .filter-btn {
+    background: var(--color-head);
+    border: none;
+    padding: 8px 16px;
+    color: black;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.content #pages .charts-grid .filter-btn.active,
+.content #pages .charts-grid .filter-btn:hover {
+    background: var(--color-button);
+    color: #fff;
+}
+
+.content #pages .charts-grid .date-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.content #pages .charts-grid .date-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.content #pages .charts-grid .date-form label {
+    font-size: 14px;
+    color: var(--color-grey);
+}
+
+.content #pages .charts-grid .date-form input[type="date"] {
+    padding: 6px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    background: var(--color-bg);
+    color: var(--color-grey);
+    font-size: 14px;
+}
+
+.content #pages .charts-grid .date-form input[type="date"]:focus {
+    outline: none;
+    border-color: var(--color-button);
+}
+
+.content #pages .right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.content #pages .charts-grid .chart-card {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+
+}
+
+.content #pages .chart-card {
+    position: relative;
+    padding: 12px;
+    border-radius: 12px;
+    background: var(--color-bg);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    display: flex;
+    flex-direction: column;
+    align-items: center;      /* canh giữa nội dung (canvas) */
+    justify-content: center;
+}
+.content #pages .chart-card canvas {
+    width: 100% ;
+    height: auto;     /* tự thay đổi theo tỉ lệ */
+    max-height: 500px; /* giới hạn chiều cao tối đa nếu cần */
+    display: block;
+
+}
+.content #pages .short-canvas {
+    height: 180px !important;
+}
+
+
+
+
+

@@ -1,0 +1,180 @@
+/* Quản lý vai trò & phân quyền */
+
+.role-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 20px;
+    padding: 20px 0;
+}
+
+/* === DANH SÁCH VAI TRÒ === */
+.role-list {
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid #eee;
+}
+
+.role-list h3 {
+    margin: 0 0 12px;
+    font-size: 16px;
+    color: #333;
+}
+
+.role-item {
+    padding: 10px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #333;
+    transition: background-color 0.2s;
+}
+
+.role-item:hover {
+    background: #f3f4f6;
+}
+
+.role-item.active {
+    background: var(--color-button);
+    color: white;
+}
+
+.role-item .sys-badge {
+    font-size: 11px;
+    background: var(--color-bg-header);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.btn-add-role {
+    width: 100%;
+    margin-top: 12px;
+    background: var(--color-button);
+    color: white;
+    padding: 8px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.btn-add-role:hover {
+    opacity: 0.85;
+}
+
+/* === CHI TIẾT VAI TRÒ === */
+.role-detail {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #eee;
+}
+
+.role-detail h3 {
+    margin: 16px 0 10px;
+    font-size: 16px;
+    color: #333;
+}
+
+.module-group {
+    margin-bottom: 18px;
+}
+
+.module-group h4 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    color: var(--color-button);
+    text-transform: uppercase;
+}
+
+.perm-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 6px;
+}
+
+.perm-grid label {
+    display: flex;
+    gap: 6px;
+    font-size: 13px;
+    padding: 4px 6px;
+    color: #444;
+    align-items: center;
+}
+
+.perm-grid input[type="checkbox"] {
+    accent-color: var(--color-button);
+}
+
+/* === FORM === */
+.form-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.form-row > div {
+    flex: 1;
+}
+
+.form-row label {
+    font-size: 13px;
+    color: #444;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.form-row input,
+.form-row textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.form-row input:focus,
+.form-row textarea:focus {
+    border-color: var(--color-button);
+}
+
+/* === BUTTONS === */
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: opacity 0.2s;
+}
+
+.btn:hover {
+    opacity: 0.85;
+}
+
+.btn-primary {
+    background: var(--color-button);
+    color: white;
+}
+
+.btn-danger {
+    background: var(--color-red);
+    color: white;
+}
+
+.btn-secondary {
+    background: #e5e7eb;
+    color: #333;
+}
+
+.actions-bar {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 16px;
+}

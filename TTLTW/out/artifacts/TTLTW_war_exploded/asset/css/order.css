@@ -1,0 +1,200 @@
+body {
+    background: var(--color-bg);
+
+}
+.orders-section {
+    width: 100%;
+    max-width: 992px;
+    margin: 0;
+    background: #fff;
+    border-radius: 4px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.orders-section h2 {
+    text-align: center;
+    color: #333;
+    font-weight:bold;
+    margin-bottom: 25px;
+    font-size:20px;
+}
+.status-tabs {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #eee;
+}
+
+.status-tabs .tab {
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    font-weight: bold;
+    color: #666;
+    cursor: pointer;
+    transition: color 0.3s, border-bottom 0.3s;
+}
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.order-card {
+
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 15px;
+    background: #fff;
+    transition: box-shadow 0.3s;
+}
+
+.order-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+
+}
+
+.order-info img {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.order-detail h3 {
+    margin: 0;
+    color: #222;
+    font-size: 16px;
+}
+
+.order-detail p {
+    margin: 4px 0;
+    color: #555;
+    font-size: 14px;
+}
+
+.price {
+    color: black;
+
+}
+
+.status {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+
+.status.shipping {
+    background: #fdf5e6;
+    color: #f39c12;
+}
+
+.status.delivered {
+    background: #eafaf1;
+    color: #27ae60;
+}
+
+.status.cancelled {
+    background: #fdecea;
+    color: #e74c3c;
+}
+
+.actions .btn {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+.actions .btn.review {
+    background: #27ae60;
+    color: #fff;
+}
+.actions .btn.review:hover {
+    background: #1f8f50;
+}
+.actions .btn.repurchase {
+    background: #007bff;
+    color: #fff;
+}
+.actions .btn.repurchase:hover {
+    background: #0069d9;
+}
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+  margin-top: 10px;
+}
+
+.order-footer .total {
+  font-size: 16px;
+  font-weight: 700;
+  color: #222;
+}
+
+.order-footer .total .total-price {
+  color: #e74c3c;
+  margin-left: 6px;
+  font-weight: 800;
+}
+
+.order-footer .order-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* thanh cuộn */
+.orders-list {
+    max-height: 600px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+/* Tùy chỉnh thanh cuộn */
+.orders-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.orders-list::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+.orders-list::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+.orders-list::-webkit-scrollbar-track {
+    background: #f2f2f2;
+    border-radius: 4px;
+}
+.status-tabs .tab {
+  background: none;
+  border: none;
+  padding: 10px 20px;
+  font-weight: bold;
+  color: #666;
+  cursor: pointer;
+  transition: color 0.3s, border-bottom 0.3s;
+  border-bottom: 3px solid transparent;
+}
+
+.status-tabs .tab:hover {
+  color: #222;
+}
+
+.status-tabs .tab.active {
+  color: var(--color-button);
+  border-bottom: 3px solid var(--color-button);
+}

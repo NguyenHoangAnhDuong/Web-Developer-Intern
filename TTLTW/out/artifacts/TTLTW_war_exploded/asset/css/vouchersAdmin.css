@@ -1,0 +1,373 @@
+.app {
+    display: flex;
+    height: 100vh;
+    background: white;
+}
+.container {
+    flex-grow: 1;
+    margin-left: 250px;
+    overflow:  visible;
+    padding-top: 5rem;
+    height: auto;
+}
+.page-content {
+    padding-top: 5rem;
+}
+.container .topbar {
+    position: fixed;
+    top: 0;
+    right: 0;
+
+    width: calc(100% - 250px);
+    height: 5rem;
+    background-color: var(--color-bg);
+    border-bottom: 1px solid #e5e7eb;
+    z-index: 40;
+    padding: 0 1.5rem;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+.container .topbar .page-title {
+    font-size: 25px;
+    margin: 5px 0;
+}
+.container .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.container .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* --- Toolbar --- */
+.container .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+
+}
+
+.container .toolbar .left {
+    display: flex;
+    gap: 10px;
+}
+
+.container .toolbar input[type="text"],
+.container .toolbar select {
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+.container .topbar.transparent {
+    background-color: transparent; /* Khi cuộn xuống */
+    box-shadow: none;
+}
+.container .topbar.transparent .hidden,.container .topbar.transparent .page-title {
+    display: none;
+}
+/* --- Button Add --- */
+.btn-add {
+    background-color: var(--color-button);
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+}
+.btn-add:hover {
+    opacity: 0.8;
+}
+.table-container{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    margin-left: 50px;
+}
+#promoTable {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+#promoTable thead {
+    background-color: var(--color-button);
+    color: white;
+}
+
+#promoTable th,
+#promoTable td {
+    text-align: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+#promoTable tbody tr:hover {
+    background-color: #f2f6ff;
+}
+
+.status {
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status.active {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.status.inactive {
+    background-color: #f8d7da;
+    color: #842029;
+}
+
+#promoTable .btn-edit,
+#promoTable .btn-delete,
+#promoTable .btn-toggle {
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 0 2px;
+    font-weight: 500;
+    transition: 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#promoTable .btn-edit {
+    background-color: #ffc107;
+    color: #000;
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+}
+
+#promoTable .btn-delete {
+    background-color: #dc3545;
+    color: white;
+}
+
+#promoTable .btn-toggle {
+    color: white;
+    min-width: 40px;
+    height: 34px;
+    font-size: 16px;
+}
+#promoTable .btn-toggle:has(.fa-toggle-on) {
+    background-color: #28a745;
+}
+
+#promoTable .btn-toggle:has(.fa-toggle-off) {
+    background-color: #6c757d;
+}
+#promoTable .btn-toggle .fa-toggle-on,
+#promoTable .btn-toggle .fa-toggle-off {
+    color: #ffffff;
+    font-size: 18px;
+}
+#promoTable .btn-edit:hover {
+    background-color: #e0a800;
+}
+#promoTable .btn-delete:hover {
+    background-color: #bb2d3b;
+}
+#promoTable .btn-toggle:hover {
+    opacity: 0.8;
+}
+#promoModal.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+}
+
+#promoModal.modal.show,
+#promoModal.modal[style*="display: flex"] {
+    display: flex !important;
+}
+.modal .modal-content form {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 20px;
+}
+
+.modal .modal-content h3,
+.modal .modal-buttons {
+    grid-column: 1 / 3;
+}
+
+.modal .modal-content label,
+.modal .modal-content input,
+.modal .modal-content select {
+    width: 100%;
+}
+/* Nút căn phải */
+.modal .modal-buttons {
+    justify-content: flex-end;
+}
+
+.modal .modal-content {
+    background: white;
+    padding: 20px;
+    width: 500px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.3s ease;
+}
+
+.modal .modal-content h3 {
+    margin-bottom: 15px;
+    text-align: center;
+    color: var(--color-button);
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.modal .modal-content label {
+    display: block;
+    margin: 8px 0;
+    font-weight: 500;
+    color: var(--color-grey);
+    font-size: 14px;
+}
+.modal .modal-content select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.modal .modal-content input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.modal .modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.modal .btn-save {
+    background: var(--color-button);
+    color: white;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.modal .btn-save:hover {
+    opacity: 0.8;
+}
+
+.modal .btn-cancel {
+    background: #6c757d;
+    color: white;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.modal .btn-cancel:hover {
+    background: #5a6268;
+}
+
+
+
+@keyframes fadeIn {
+    from {
+        opacity: 0; transform: translateY(-10px);
+    }
+    to {
+        opacity: 1; transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        bottom: 30px; opacity: 1;
+    }
+    to {
+        bottom: 0; opacity: 0;
+    }
+}
+.container .footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    font-size: 14px;
+    color: #555;
+}
+
+.container .pagination {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.container .pagination .page-num,
+.container .pagination .page-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: 0.2s;
+    border: 1px solid #dee2e6;
+    color: var(--color-button);
+    background: white;
+}
+.container .pagination .page-num.active {
+    background-color: var(--color-button);
+    color: white;
+    border-color: var(--color-button);
+    cursor: default;
+}
+
+.container .pagination .page-num:not(.active):hover,
+.container .pagination .page-arrow:not(.disabled):hover {
+    background-color: #f0f4ff;
+    border-color: var(--color-button);
+}
+.container .pagination .page-arrow.disabled {
+    color: #ccc;
+    border-color: #eee;
+    cursor: not-allowed;
+    background: #fafafa;
+}
+.muted.hidden{
+    font-size: 22px;
+    font-weight: 500;
+    color: #333333;
+}

@@ -1,0 +1,216 @@
+body {
+    font-family: var(--font);
+    background-color: #fff;
+    color: #333;
+    padding: 0;
+}
+.order-detail-container {
+    display: flex;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 16px;
+
+}
+.status-pill {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.status-paid {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-unpaid {
+    background-color: #fff3cd;
+    color: #856404;
+}
+.card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    width: 100%;
+}
+
+.section {
+    margin-bottom: 20px;
+}
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+}
+
+.order-id {
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.meta {
+    font-size: 14px;
+    color: #666;
+    margin-top: 4px;
+}
+
+.status-pill {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background-color: #f0f0f0;
+    font-size: 13px;
+}
+.items {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.item-info {
+    flex: 1;
+}
+
+.item-info .name {
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.variant, .small {
+    font-size: 14px;
+    color: #666;
+}
+
+.price-qty {
+    text-align: right;
+}
+
+.price {
+    font-weight: 600;
+    color: #222;
+}
+
+.qty {
+    font-size: 14px;
+    color: #777;
+}
+.totals {
+    border-top: 1px solid #eee;
+    padding-top: 16px;
+}
+
+.totals .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+}
+
+.totals .row.total-amount {
+    font-weight: 600;
+    font-size: 16px;
+    border-top: 1px dashed #ddd;
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 16px;
+}
+.btn-review {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: #27ae60;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.3s ease;
+}
+.btn-review:hover {
+    background: #1f8f50;
+}
+.item-action {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+.action .btn-ghost {
+    background: #fff !important;
+    border: 1px solid #ccc !important;
+}
+
+.action .btn-ghost:hover {
+    background: #007bff;
+    color: #fff;
+    border-color: #007bff;
+}
+
+/* Nút bị vô hiệu sau khi hủy */
+.disabled-btn {
+    color: #999 !important;
+    border-color: #ddd !important;
+    background: #f8f8f8 !important;
+    cursor: default !important;
+}
+
+.disabled-btn:hover {
+    background: #f8f8f8 !important;
+}
+.note {
+    font-size: 13px;
+    color: #666;
+    margin-top: 8px;
+}
+.right {
+    width: 340px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.address .muted {
+    color: #666;
+    font-size: 14px;
+}
+.shipping-detail {
+    margin-top: 18px;
+}
+.shipping-detail .small {
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+.shipping-detail div:last-child {
+    color: #111;
+    font-weight: 600;
+}
+@media (max-width: 900px) {
+    .container {
+        flex-direction: column;
+    }
+    .right {
+        width: 100%;
+    }
+}
