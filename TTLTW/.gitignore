@@ -39,7 +39,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
-/pom.xml
+# /pom.xml
 src/main/resources/config.properties
 src/main/resources/db.properties
 src/main/resources/application.properties
