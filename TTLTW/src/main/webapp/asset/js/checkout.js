@@ -57,7 +57,6 @@ function applyVoucherFromBtn(btn) {
     applyVoucher(code, discountAmount, minOrder, maxReduce, type, btn);
 }
 
-
 function updateAddress(name, phone, address, id) {
     const nameEl = document.querySelector(".address strong");
     const phoneEl = document.querySelector(".address span");
@@ -91,6 +90,18 @@ function applyVoucher(code, discountAmount, minOrder, maxReduce, type, btnEl) {
 
     let discount = 0;
 
+    // nếu click vào áp dụng rồi sẽ không được nhấn áp dụng nữa
+    const clickedVoucher = btnEl ? btnEl.closest('.voucher') : null;
+    if (clickedVoucher && clickedVoucher.classList.contains('active')) {
+        // reset discount
+        document.getElementById("discount-display").innerText = '0';
+        document.getElementById("appliedVoucherInput").value = '';
+        document.querySelectorAll(".voucher").forEach(v => v.classList.remove("active"));
+        document.querySelectorAll('.voucher-right button').forEach(b => { b.disabled = false; b.innerText = 'Áp dụng'; });
+        updateFinalTotal();
+        return;
+    }
+
     if (subtotal < minOrder) {
         showToast("Đơn hàng chưa đủ điều kiện áp dụng", "error");
         return;
@@ -106,19 +117,19 @@ function applyVoucher(code, discountAmount, minOrder, maxReduce, type, btnEl) {
         discount = discountAmount;
     }
 
-    document.getElementById("discount-display").innerText =
-        discount.toLocaleString("vi-VN");
-
+    document.getElementById("discount-display").innerText = discount.toLocaleString("vi-VN");
     document.getElementById("appliedVoucherInput").value = code;
-
     updateFinalTotal();
 
-    document.querySelectorAll(".voucher")
-        .forEach(v => v.classList.remove("active"));
+   // voucher áp dụng và cập nhập button
+    document.querySelectorAll(".voucher").forEach(v => v.classList.remove("active"));
+    document.querySelectorAll('.voucher-right button').forEach(b => { b.disabled = false; b.innerText = 'Áp dụng'; });
 
-    const btn = btnEl;
-    if (btn) {
-        btn.closest(".voucher")?.classList.add("active");
+    if (btnEl) {
+        const parent = btnEl.closest('.voucher');
+        parent?.classList.add('active');
+        btnEl.innerText = 'Đã áp dụng';
+        btnEl.disabled = true;
     }
 }
 document.addEventListener("DOMContentLoaded", function () {
@@ -159,5 +170,20 @@ document.addEventListener("DOMContentLoaded", function () {
             this.dataset.expanded = isExpanded ? "false" : "true";
             this.innerText = isExpanded ? "Xem thêm" : "Ẩn bớt";
         });
+    }
+
+    const appliedCode = document.getElementById("appliedVoucherInput")?.value || "";
+    if (appliedCode) {
+        const appliedButton = Array.from(document.querySelectorAll(".voucher-right button"))
+            .find((button) => (button.dataset.code || "") === appliedCode);
+
+        if (appliedButton) {
+            const code = appliedButton.dataset.code || "";
+            const discountAmount = parseFloat(appliedButton.dataset.discount || 0);
+            const minOrder = parseFloat(appliedButton.dataset.minOrder || 0);
+            const maxReduce = parseFloat(appliedButton.dataset.maxReduce || 0);
+            const type = appliedButton.dataset.type || "";
+            applyVoucher(code, discountAmount, minOrder, maxReduce, type, appliedButton);
+        }
     }
 });
