@@ -1,10 +1,76 @@
+const addressModal = document.getElementById("addressModal");
 const addressList = document.getElementById("addressList");
 const changeBtn = document.getElementById("changeAddressBtn");
+const closeAddressModal = document.getElementById("closeAddressModal");
+const checkoutAddressId = document.getElementById("checkoutAddressId");
+const checkoutFullName = document.getElementById("checkoutFullName");
+const checkoutPhone = document.getElementById("checkoutPhone");
+const checkoutFullAddress = document.getElementById("checkoutFullAddress");
+const selectedAddressName = document.getElementById("selectedAddressName");
+const selectedAddressPhone = document.getElementById("selectedAddressPhone");
+const selectedAddressText = document.getElementById("selectedAddressText");
+const selectedAddressBadge = document.getElementById("selectedAddressBadge");
 
-if (changeBtn && addressList) {
+function openAddressModal() {
+    if (!addressModal) return;
+    addressModal.classList.add("open");
+    addressModal.setAttribute("aria-hidden", "false");
+}
+
+function closeAddressSelection() {
+    if (!addressModal) return;
+    addressModal.classList.remove("open");
+    addressModal.setAttribute("aria-hidden", "true");
+}
+
+function setSelectedAddress({ id, name, phone, address, isDefault }) {
+    if (checkoutAddressId) checkoutAddressId.value = id || "";
+    if (checkoutFullName) checkoutFullName.value = name || "";
+    if (checkoutPhone) checkoutPhone.value = phone || "";
+    if (checkoutFullAddress) checkoutFullAddress.value = address || "";
+
+    if (selectedAddressName) selectedAddressName.textContent = name || "";
+    if (selectedAddressPhone) selectedAddressPhone.textContent = phone ? `(${phone})` : "";
+    if (selectedAddressText) selectedAddressText.textContent = address || "";
+    if (selectedAddressBadge) selectedAddressBadge.textContent = isDefault ? "Mặc định" : "Đã chọn";
+
+    document.querySelectorAll(".address-option").forEach((option) => {
+        option.classList.toggle("active", option.dataset.id === String(id));
+    });
+}
+
+if (changeBtn && addressModal) {
     changeBtn.addEventListener("click", (e) => {
         e.preventDefault();
-        addressList.classList.toggle("hidden");
+        openAddressModal();
+    });
+}
+
+if (closeAddressModal) {
+    closeAddressModal.addEventListener("click", closeAddressSelection);
+}
+
+if (addressModal) {
+    addressModal.addEventListener("click", (e) => {
+        if (e.target === addressModal) {
+            closeAddressSelection();
+        }
+    });
+}
+
+if (addressList) {
+    addressList.addEventListener("click", (e) => {
+        const option = e.target.closest(".address-option");
+        if (!option) return;
+
+        setSelectedAddress({
+            id: option.dataset.id,
+            name: option.dataset.name,
+            phone: option.dataset.phone,
+            address: option.dataset.address,
+            isDefault: option.dataset.default === "true"
+        });
+        closeAddressSelection();
     });
 }
 function formatVND(amount) {
@@ -58,17 +124,13 @@ function applyVoucherFromBtn(btn) {
 }
 
 function updateAddress(name, phone, address, id) {
-    const nameEl = document.querySelector(".address strong");
-    const phoneEl = document.querySelector(".address span");
-    const addrEl = document.querySelector(".address p:nth-of-type(2)");
-    const hiddenInput = document.querySelector("input[name='addressId']");
-
-    if (nameEl) nameEl.textContent = name;
-    if (phoneEl) phoneEl.textContent = `(${phone})`;
-    if (addrEl) addrEl.childNodes[0].textContent = address + ' ';
-    if (hiddenInput) hiddenInput.value = id;
-
-    if (addressList) addressList.classList.add("hidden");
+    setSelectedAddress({
+        id,
+        name,
+        phone,
+        address,
+        isDefault: false
+    });
 }
 
 const scrollContainer = document.getElementById("voucherScroll");
@@ -185,5 +247,16 @@ document.addEventListener("DOMContentLoaded", function () {
             const type = appliedButton.dataset.type || "";
             applyVoucher(code, discountAmount, minOrder, maxReduce, type, appliedButton);
         }
+    }
+
+    const activeAddressOption = document.querySelector(".address-option.active");
+    if (activeAddressOption && checkoutAddressId) {
+        setSelectedAddress({
+            id: activeAddressOption.dataset.id,
+            name: activeAddressOption.dataset.name,
+            phone: activeAddressOption.dataset.phone,
+            address: activeAddressOption.dataset.address,
+            isDefault: activeAddressOption.dataset.default === "true"
+        });
     }
 });
