@@ -21,6 +21,7 @@ import java.util.Map;
 public class CartServlet extends HttpServlet {
     private final CartService cartService = new CartServiceImpl();
     private final OrderService orderService = new OrderService();
+    private final AddressService addressService = new AddressService();
     private final ShippingService shippingService = new ShippingService();
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -94,6 +95,7 @@ public class CartServlet extends HttpServlet {
         // Lấy địa chỉ mặc định của người dùng
         Address defaultAddress = orderService.getDefaultAddress(userId);
         request.setAttribute("defaultAddress", defaultAddress);
+                request.setAttribute("addresses", addressService.getAll(userId));
 
       // lấy danh sách đơn vị vận chuyển từ API
         if (defaultAddress != null) {
