@@ -8,6 +8,7 @@ import com.google.gson.JsonParser;
 import vn.edu.hcmuaf.fit.ttltw.model.ShippingZoneFees;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -42,7 +43,7 @@ public class SuperAIService {
         try (InputStream input = SuperAIService.class.getClassLoader().getResourceAsStream("config.properties")) {
             Properties prop = new Properties();
             if (input != null) {
-                prop.load(input);
+                prop.load(new InputStreamReader(input, StandardCharsets.UTF_8));
                 API_TOKEN = prop.getProperty("supership.api.token");
                 API_URL = prop.getProperty("supership.api.url");
                 CANCEL_URL = prop.getProperty("supership.cancel.api.url", "https://api.superai.vn/v1/platform/orders/cancel");
@@ -77,47 +78,31 @@ public class SuperAIService {
                 }
                 String mockProp = prop.getProperty("supership.mock.mode", "false");
                 MOCK_MODE = Boolean.parseBoolean(mockProp);
-                // debug
-                System.out.println(" loaded config - URL: " + API_URL);
-                System.out.println(" token: " + (API_TOKEN != null ? API_TOKEN.substring(0, Math.min(10, API_TOKEN.length())) + "..." : "NULL"));
-                System.out.println(" mock Mode: " + MOCK_MODE + (MOCK_MODE ? " fake tracking number" : ""));
-
-                // kiểm tra kết nối mạng
-                if (!MOCK_MODE && API_URL != null) {
-                    try {
-                        String host = URI.create(API_URL).getHost();
-                        java.net.InetAddress.getByName(host);
-                        System.out.println("network test PASSED - Can reach: " + host);
-                    } catch (Exception netEx) {
-                        System.err.println("network test FAILED - Cannot reach: " + API_URL);
-                        System.err.println("   Reason: " + netEx.getMessage());
-                    }
-                }
 
 
             }
         } catch (Exception e) {
-            System.err.println(" superAIServices Lỗi tải cấu hình: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("superAIServices lỗi tải cấu hình: " + e.getMessage());
             MOCK_MODE = true;
         }
     }
 
-    public String[] parseAddressPublic(String fullAddress) {
-        return parseAddress(fullAddress);
-    }
+    //tách địa chỉ
+//    public String[] parseAddressPublic(String fullAddress) {
+//        return parseAddress(fullAddress);
+//    }
 
+    // lấy danh sách đơn vị vận chuyển từ superAI
     public List<Map<String, Object>> getShippingCarriers() {
         List<Map<String, Object>> carriers = new ArrayList<>();
-        System.out.println("[SuperAI] Calling carriers API: " + CARRIER_LIST_URL);
         JsonObject root = fetchJsonFromUrl(CARRIER_LIST_URL);
         if (root == null) {
-            System.err.println("[SuperAI] carriers API returned null response");
+            System.err.println("  API phản hồi null");
             return carriers;
         }
         JsonArray carrierArray = extractArray(root, "data");
         if (carrierArray == null) {
-            System.err.println("[SuperAI] carriers API missing data array. Raw response: " + root);
+            System.err.println(" carrierArray == null  " + root);
             return carriers;
         }
 
@@ -143,29 +128,21 @@ public class SuperAIService {
         return carriers;
     }
 
-    public List<ShippingZoneFees> getShippingFeeOptions() {
-        return getShippingFeeOptions("", DEFAULT_WEIGHT, DEFAULT_VALUE);
-    }
 
+    // Gọi API giá vận chuyển
     public List<ShippingZoneFees> getShippingFeeOptions(String fullAddress, long weight, long value) {
         List<ShippingZoneFees> options = new ArrayList<>();
         String priceRequestBody = buildPriceRequestBody(fullAddress, weight, value);
-        System.out.println("[SuperAI] Calling price API: " + SHIPPING_FEES_URL);
-        System.out.println("[SuperAI] Sender config: province=" + SENDER_PROVINCE + ", district=" + SENDER_DISTRICT + ", commune=" + SENDER_COMMUNE + ", address=" + SENDER_ADDRESS);
-        System.out.println("[SuperAI] price request body: " + priceRequestBody);
 
         JsonObject root = fetchJsonFromUrl(SHIPPING_FEES_URL, priceRequestBody);
         if (root == null) {
-            System.err.println("[SuperAI] price API returned null response");
+            System.err.println("giá phản hồi null");
             return options;
         }
-
-        System.out.println("[SuperAI] price API full response: " + root.toString());
 
         JsonArray serviceArray = null;
         if (root.has("data") && root.get("data").isJsonObject()) {
             JsonObject data = root.getAsJsonObject("data");
-            System.out.println("[SuperAI] data object: " + data.toString());
             if (data.has("services") && data.get("services").isJsonArray()) {
                 serviceArray = data.getAsJsonArray("services");
             }
@@ -174,10 +151,9 @@ public class SuperAIService {
         }
 
         if (serviceArray == null) {
-            System.err.println("[SuperAI] price API missing services array. Raw response: " + root);
+            System.err.println("serviceArray == null" + root);
             return options;
         }
-        System.out.println("[SuperAI] Found " + serviceArray.size() + " services in price API response");
 
         for (JsonElement element : serviceArray) {
             if (!element.isJsonObject()) {
@@ -207,10 +183,8 @@ public class SuperAIService {
             fee.setIsActive(1);
             options.add(fee);
         }
-        
-        // Fallback: if no services found, create default option so UI shows at least one fee option
+
         if (options.isEmpty()) {
-            System.err.println("[SuperAI] WARNING: price API returned 0 services. Creating fallback default option with base fee 30000");
             ShippingZoneFees defaultFee = new ShippingZoneFees();
             defaultFee.setId(0);
             defaultFee.setZoneId(0);
@@ -225,19 +199,17 @@ public class SuperAIService {
         return options;
     }
 
-    public List<ShippingZoneFees> getShippingServices(String fullAddress, long weight, long value) {
-        return getShippingFeeOptions(fullAddress, weight > 0 ? weight : DEFAULT_WEIGHT, value > 0 ? value : DEFAULT_VALUE);
-    }
-// gọi API bên thứ 3
+    //    public List<ShippingZoneFees> getShippingServices(String fullAddress, long weight, long value) {
+//        return getShippingFeeOptions(fullAddress, weight > 0 ? weight : DEFAULT_WEIGHT, value > 0 ? value : DEFAULT_VALUE);
+//    }
+// Tạo một đơn hàng
     public String createRealOrder(int orderId, String name, String phone, String fullAddress, double amount) {
-        // fake tracking number phòng trường hợp mạng lỗi , hoặc API bên thứ 3 gặp lỗi
         if (MOCK_MODE) {
             String mockTracking = "SHIP" + System.currentTimeMillis() + "-MOCK";
             return mockTracking;
         }
 
         try {
-            // Validate config
             if (API_URL == null || API_URL.trim().isEmpty()) {
                 return null;
             }
@@ -245,7 +217,6 @@ public class SuperAIService {
                 return null;
             }
             String[] parsed = parseAddress(fullAddress);
-            //  xây dựng cấu trúc JSON theo mẫu curl của SuperAI
             Map<String, Object> body = new HashMap<>();
             body.put("name", name);
             body.put("phone", phone);
@@ -263,7 +234,6 @@ public class SuperAIService {
             body.put("product_type", "2");
             body.put("note", "Cho xem hàng, không thử");
 
-            // thêm mảng products
             List<Map<String, Object>> products = new ArrayList<>();
             Map<String, Object> p = new HashMap<>();
             p.put("sku", "DH" + orderId);
@@ -275,10 +245,6 @@ public class SuperAIService {
             body.put("products", products);
 
             String jsonBody = new Gson().toJson(body);
-
-            // Log kiểm tra dữ liệu trước khi gửi
-            System.out.println("  request to: " + API_URL);
-            System.out.println("  Request JSON: " + jsonBody);
 
             HttpClient client = HttpClient.newBuilder()
                     .connectTimeout(Duration.ofSeconds(15))
@@ -302,18 +268,16 @@ public class SuperAIService {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
             String responseBody = response.body();
 
-            System.out.println("response Status: " + response.statusCode());
-            System.out.println("response Body: " + responseBody);
+
 
             if (response.statusCode() != 200) {
-                System.err.println(" API Error - HTTP " + response.statusCode());
-                System.err.println("error Response: " + responseBody);
+                System.err.println(response.statusCode());
+                System.err.println( responseBody);
                 return null;
             }
 
             JsonObject resJson = JsonParser.parseString(responseBody).getAsJsonObject();
 
-            // Check for error
             if (resJson.has("error") && resJson.get("error").getAsBoolean()) {
                 String errorMsg = resJson.has("message") ? resJson.get("message").getAsString() : "Unknown error";
                 System.err.println("  API trả về error: " + errorMsg);
@@ -335,25 +299,20 @@ public class SuperAIService {
             }
 
             if (trackingCode != null && !trackingCode.trim().isEmpty()) {
-                System.out.println("tracking number: " + trackingCode);
                 return trackingCode;
             } else {
-                System.err.println("no tracking number in response");
-                System.err.println("response : " + resJson.toString());
+                System.err.println( "tracking number k phan hồi");
                 return null;
             }
 
         } catch (Exception e) {
-            System.err.println("  type: " + e.getClass().getName());
-            System.err.println("   message: " + (e.getMessage() != null ? e.getMessage() : "NULL"));
-            e.printStackTrace();
+            System.err.println("createRealOrder failed: " + e.getClass().getName() + " - " + (e.getMessage() != null ? e.getMessage() : "NULL"));
             return null;
         }
     }
-// chuyển đổi địa chỉ để lấy địa chỉ chính xác không bị lỗi khi tách json
+    //  chia đường, xã, quận ,tỉnh.
     private String[] parseAddress(String fullAddress) {
         if (fullAddress == null) return new String[]{"", "", "", ""};
-        // →xử lí 2 trường hợp dạng cách nhau dấu '/' và ','
         String normalized = fullAddress
                 .replace("/ \r\n", "|||")
                 .replace("/\r\n", "|||")
@@ -363,7 +322,6 @@ public class SuperAIService {
 
         String[] parts = normalized.split("\\|\\|\\|");
 
-        // Clean up
         List<String> cleaned = new ArrayList<>();
         for (String part : parts) {
             String trimmed = part.trim();
@@ -379,22 +337,19 @@ public class SuperAIService {
         return new String[]{street, commune, district, province};
     }
 
-    // gọi API hủy đơn hàng
+    // hủy đơn hàng
     public boolean cancelOrder(String trackingCode) {
         try {
             Map<String, Object> body = new HashMap<>();
             body.put("code", trackingCode);
             String json = new Gson().toJson(body);
-            System.out.println("[SuperAI] Calling cancel API: " + CANCEL_URL + " with code=" + trackingCode);
-            System.out.println("[SuperAI] cancel request body: " + json);
+
 
             JsonObject response = fetchJsonFromUrl(CANCEL_URL, json);
             if (response == null) {
-                System.err.println("[SuperAI] cancel API returned null response for code=" + trackingCode);
+                System.err.println("cancel API returned null response for code=" + trackingCode);
                 return false;
             }
-
-            System.out.println("[SuperAI] cancel response body: " + response);
 
             if (response.has("error") && response.get("error").isJsonPrimitive()) {
                 boolean ok = !response.get("error").getAsBoolean();
@@ -402,7 +357,7 @@ public class SuperAIService {
                     String message = response.has("message") && !response.get("message").isJsonNull()
                             ? response.get("message").getAsString()
                             : "Unknown cancel error";
-                    System.err.println("[SuperAI] cancel API reported error. message=" + message + ", code=" + trackingCode);
+                    System.err.println("cancel API reported error. message=" + message + ", code=" + trackingCode);
                 }
                 return ok;
             }
@@ -415,10 +370,12 @@ public class SuperAIService {
         }
     }
 
+    // gửi yêu cầu Get
     private JsonObject fetchJsonFromUrl(String url) {
         return fetchJsonFromUrl(url, null);
     }
 
+    // gửi  GET hoặc POST và  phản hồi JSON
     private JsonObject fetchJsonFromUrl(String url, String requestBody) {
         if (url == null || url.trim().isEmpty()) {
             return null;
@@ -429,45 +386,75 @@ public class SuperAIService {
                     .connectTimeout(Duration.ofSeconds(15))
                     .build();
 
-            HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .header("Accept", "application/json")
-                    .timeout(Duration.ofSeconds(30));
-
             String endpointToken = resolveTokenByUrl(url);
-            if (endpointToken != null && !endpointToken.trim().isEmpty()) {
-                requestBuilder.header("Token", endpointToken);
-            } else {
-                System.err.println("[SuperAI] Missing token for endpoint: " + url);
+
+            int maxAttempts = 3;
+            int attempt = 0;
+            while (attempt < maxAttempts) {
+                attempt++;
+                try {
+                    HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
+                            .uri(URI.create(url))
+                            .header("Accept", "application/json")
+                            .header("User-Agent", "TTLTW-SuperAI-Client/1.0")
+                            .timeout(Duration.ofSeconds(30));
+
+                    if (endpointToken != null && !endpointToken.trim().isEmpty()) {
+                        requestBuilder.header("Token", endpointToken);
+                    } else {
+                        System.err.println( url);
+                    }
+
+                    if (requestBody == null) {
+                        requestBuilder.GET();
+                    } else {
+                        requestBuilder.header("Content-Type", "application/json; charset=UTF-8")
+                                .POST(HttpRequest.BodyPublishers.ofString(requestBody, StandardCharsets.UTF_8));
+                    }
+
+                    String method = requestBody == null ? "GET" : "POST";
+
+                    HttpResponse<String> response = client.send(
+                            requestBuilder.build(),
+                            HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
+                    );
+
+                    String responseBody = response.body();
+
+                    if (response.statusCode() != 200) {
+                        System.err.println( responseBody);
+                        try {
+                            return JsonParser.parseString(responseBody).getAsJsonObject();
+                        } catch (Exception parseEx) {
+                            System.err.println(parseEx.getMessage());
+                        }
+                    } else {
+                        try {
+                            return JsonParser.parseString(responseBody).getAsJsonObject();
+                        } catch (Exception parseEx) {
+                            System.err.println( parseEx.getMessage());
+                            return null;
+                        }
+                    }
+
+                } catch (Exception e) {
+                    System.err.println( e.getMessage());
+                    if (attempt >= maxAttempts) {
+                        System.err.println( url);
+                        return null;
+                    }
+                    try {
+                        Thread.sleep(250L * attempt); // small backoff
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        return null;
+                    }
+                }
             }
 
-            if (requestBody == null) {
-                requestBuilder.GET();
-            } else {
-                requestBuilder.header("Content-Type", "application/json; charset=UTF-8")
-                        .POST(HttpRequest.BodyPublishers.ofString(requestBody, StandardCharsets.UTF_8));
-            }
-
-            String method = requestBody == null ? "GET" : "POST";
-
-            HttpResponse<String> response = client.send(
-                    requestBuilder.build(),
-                    HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8)
-            );
-
-            String responseBody = response.body();
-            System.out.println("[SuperAI] " + method + " " + url + " -> HTTP " + response.statusCode());
-
-            if (response.statusCode() != 200) {
-                System.err.println("[SuperAI] " + method + " API Error - HTTP " + response.statusCode() + " for " + url);
-                System.err.println("[SuperAI] error response body: " + responseBody);
-                return null;
-            }
-
-            return JsonParser.parseString(responseBody).getAsJsonObject();
+            return null;
         } catch (Exception e) {
-            String method = requestBody == null ? "GET" : "POST";
-            System.err.println("[SuperAI] " + method + " API failed for " + url + ": " + e.getMessage());
+            System.err.println(  e.getMessage());
             return null;
         }
     }
@@ -508,6 +495,7 @@ public class SuperAIService {
         return fallbackToken(API_TOKEN);
     }
 
+    // Trả về token đã được cấu hình, sử dụng token chính khi cần
     private String fallbackToken(String token) {
         if (token != null && !token.trim().isEmpty()) {
             return token;
@@ -518,9 +506,8 @@ public class SuperAIService {
         return null;
     }
 
-    private String safeString(String value) {
-        return value == null ? "" : value.trim();
-    }
+
+    // Trích xuất mảng
 
     private JsonArray extractArray(JsonObject root, String fieldName) {
         if (root == null || fieldName == null || fieldName.isBlank() || !root.has(fieldName) || root.get(fieldName).isJsonNull()) {

@@ -431,6 +431,39 @@ section {
     text-align: center;
 }
 
+/* Highlight applied voucher */
+.voucher.active {
+    border: 2px solid var(--color-button);
+    box-shadow: 0 8px 20px rgba(34, 139, 230, 0.18);
+    transform: translateY(-6px);
+}
+
+.voucher .applied-badge {
+    display: none;
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: var(--color-button);
+    color: #fff;
+    font-weight: 700;
+    border-radius: 50px;
+    padding: 4px 10px;
+    font-size: 13px;
+}
+
+.voucher.active .applied-badge {
+    display: inline-block;
+}
+
+.voucher.active .voucher-right button {
+    background: #6b7280;
+    cursor: default;
+}
+
+.voucher.active .voucher-right button:disabled {
+    opacity: 0.65;
+}
+
 .badge {
     position: absolute;
     top: 8px;

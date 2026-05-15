@@ -90,6 +90,7 @@
                 <div class="voucher-container">
                     <c:forEach var="v" items="${availableVouchers}">
                         <div class="voucher">
+                            <span class="applied-badge">Đã áp dụng</span>
                             <div class="voucher-left">
                                 <div class="icon"><img src="${pageContext.request.contextPath}/assert/img/logo.png" alt="logo"></div>
                             </div>
