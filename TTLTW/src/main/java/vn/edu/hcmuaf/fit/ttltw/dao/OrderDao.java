@@ -284,10 +284,24 @@ public class OrderDao {
                     updated_at = NOW()
                 WHERE id = :id
                 """;
-        return jdbi.withHandle(handle -> handle.createUpdate(sql)
-                .bind("status", status)
-                .bind("reason", cancellationReason)
-                .bind("id", orderId)
-                .execute()) > 0;
+        try {
+            return jdbi.withHandle(handle -> handle.createUpdate(sql)
+                    .bind("status", status)
+                    .bind("reason", cancellationReason)
+                    .bind("id", orderId)
+                    .execute()) > 0;
+        } catch (Exception e) {
+            // Fallback nếu có lỗi xảy ra trong quá trình cập nhật với lý do hủy
+            String sqlFallback = "UPDATE orders SET status = :status, updated_at = NOW() WHERE id = :id";
+            try {
+                return jdbi.withHandle(handle -> handle.createUpdate(sqlFallback)
+                        .bind("status", status)
+                        .bind("id", orderId)
+                        .execute()) > 0;
+            } catch (Exception ex) {
+                    e.printStackTrace();
+                return false;
+            }
+        }
     }
 }
