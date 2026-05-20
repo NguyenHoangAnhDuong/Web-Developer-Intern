@@ -67,6 +67,17 @@ public class UserService {
         return ok ? "Đổi mật khẩu thành công" : "Đổi mật khẩu thất bại";
     }
 
+    // Admin/nhân viên reset mật khẩu hộ khách hàng (không cần mật khẩu cũ)
+    public String resetPasswordByAdmin(int userId, String newPass) {
+        if (newPass == null || newPass.isBlank())
+            return "Mật khẩu mới không được để trống!";
+        if (!PASSWORD_PATTERN.matcher(newPass).matches())
+            return "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!";
+        String hashed = BCrypt.hashpw(newPass, BCrypt.gensalt());
+        boolean ok = userDao.updatePassword(userId, hashed);
+        return ok ? "Cập nhật mật khẩu thành công" : "Cập nhật mật khẩu thất bại";
+    }
+
     // Đăng ký (hash password)
     public boolean register(User user) {
         String hash = BCrypt.hashpw(user.getPassword(), BCrypt.gensalt());
@@ -127,31 +138,32 @@ public class UserService {
     }
 
     // Đăng nhập qua provider (Facebook/Google...).
+    // Lưu liên kết social ở bảng user_social_accounts (1 user có thể link nhiều provider).
     // Flow:
-    //   1) Đã từng đăng nhập bằng provider này (provider + provider_id khớp) -> đăng nhập luôn.
+    //   1) Đã liên kết provider này trước đó (sa.provider + sa.provider_user_id khớp) -> đăng nhập luôn.
     //   2) Email từ provider đã tồn tại trong hệ thống -> đăng nhập vào account đó
-    //      và liên kết provider để lần sau đăng nhập trực tiếp ở bước 1.
-    //   3) Chưa có account -> tạo mới.
+    //      và ghi 1 row vào user_social_accounts để lần sau đi nhánh 1.
+    //   3) Chưa có account -> tạo user mới rồi link.
     public User loginOrRegisterSocial(User u) {
-        // 1. Tài khoản đã liên kết provider trước đó
+        // 1. Đã liên kết provider trước đó
         User existed = userDao.loginByProvider(u.getProvider(), u.getProviderId());
         if (existed != null) {
             return existed;
         }
 
-        // 2. Email tồn tại trong hệ thống -> đăng nhập vào account hiện có
         String email = u.getEmail();
+
+        // 2. Email tồn tại trong hệ thống -> đăng nhập vào account hiện có
         if (email != null && !email.isBlank()) {
             Optional<User> byEmailOpt = userDao.findByEmail(email);
             if (byEmailOpt.isPresent()) {
                 User byEmail = byEmailOpt.get();
-                // Tài khoản đã bị khóa thì không cho đăng nhập
                 if (byEmail.getStatus() != 1) {
                     return null;
                 }
-                userDao.linkSocialProvider(byEmail.getId(), u.getProvider(), u.getProviderId(), u.getAvatar());
-                User refreshed = userDao.loginByProvider(u.getProvider(), u.getProviderId());
-                return refreshed != null ? refreshed : byEmail;
+                userDao.linkSocialAccount(byEmail.getId(), u.getProvider(), u.getProviderId(), email);
+                userDao.updateAvatarIfEmpty(byEmail.getId(), u.getAvatar());
+                return byEmail;
             }
         }
 
@@ -164,7 +176,8 @@ public class UserService {
             suffix++;
         }
         u.setUsername(finalUsername);
-        userDao.insertSocialUser(u);
+        int newUserId = userDao.insertSocialUser(u);
+        userDao.linkSocialAccount(newUserId, u.getProvider(), u.getProviderId(), email);
         return userDao.loginByProvider(u.getProvider(), u.getProviderId());
     }
 }

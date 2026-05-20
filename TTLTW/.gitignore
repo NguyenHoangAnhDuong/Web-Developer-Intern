@@ -39,9 +39,16 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Env files ###
+.env
+.env.local
+
 /pom.xml
 src/main/resources/config.properties
 src/main/resources/db.properties
 src/main/resources/application.properties
 src/main/resources/email.properties
 src/main/resources/redis.properties
+src/main/webapp/WEB-INF/web.xml
+TTLTW_war.war

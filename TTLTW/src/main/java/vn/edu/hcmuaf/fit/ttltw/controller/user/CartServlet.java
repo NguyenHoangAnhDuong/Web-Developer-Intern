@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import vn.edu.hcmuaf.fit.ttltw.dao.ShippingDao;
 import vn.edu.hcmuaf.fit.ttltw.model.Address;
 import vn.edu.hcmuaf.fit.ttltw.model.ShippingZoneFees;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
@@ -22,7 +21,8 @@ import java.util.Map;
 public class CartServlet extends HttpServlet {
     private final CartService cartService = new CartServiceImpl();
     private final OrderService orderService = new OrderService();
-    private final ShippingDao shippingDao = new ShippingDao();
+    private final AddressService addressService = new AddressService();
+    private final ShippingService shippingService = new ShippingService();
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -95,21 +95,18 @@ public class CartServlet extends HttpServlet {
         // Lấy địa chỉ mặc định của người dùng
         Address defaultAddress = orderService.getDefaultAddress(userId);
         request.setAttribute("defaultAddress", defaultAddress);
+                request.setAttribute("addresses", addressService.getAll(userId));
 
-       // lấy danh sách đơn vị vận chuyển từ DB
+      // lấy danh sách đơn vị vận chuyển từ API
         if (defaultAddress != null) {
-            String province = extractProvince(defaultAddress.getAddress());
-
-            // Lấy danh sách phí dựa trên tỉnh của địa chỉ
-            List<ShippingZoneFees> shippingOptions = shippingDao.getListFeesByProvince(province);
-            request.setAttribute("shippingOptions", shippingOptions);
-
-            System.out.println("DEBUG - Tỉnh của User: [" + province + "]");
-
+            List<Map<String, Object>> shippingCarriers = shippingService.getShippingCarriers();
+            List<ShippingZoneFees> shippingOptions = shippingService.getShippingServices(defaultAddress.getAddress(), 0, 0);
+            List<Map<String, Object>> shippingMethods = combineShippingMethods(shippingCarriers, shippingOptions);
+            request.setAttribute("shippingMethods", shippingMethods);
 
             // thiết lập phí mặc định ban đầu là phí của phương thức đầu tiên
-            double initialShippingFee = (shippingOptions != null && !shippingOptions.isEmpty())
-                    ? shippingOptions.get(0).getBaseFee().doubleValue()
+            double initialShippingFee = (shippingMethods != null && !shippingMethods.isEmpty())
+                    ? (shippingMethods.get(0).get("fee") != null ? ((Number) shippingMethods.get(0).get("fee")).doubleValue() : 30000.0)
                     : 30000.0;
             finalShippingFee = initialShippingFee;
         } else {
@@ -125,6 +122,69 @@ public class CartServlet extends HttpServlet {
 
         request.getRequestDispatcher("/views/user/checkout.jsp")
                 .forward(request, response);
+    }
+
+    private List<Map<String, Object>> combineShippingMethods(List<Map<String, Object>> carriers, List<ShippingZoneFees> options) {
+        List<Map<String, Object>> methods = new ArrayList<>();
+        if (carriers == null || carriers.isEmpty()) {
+            return methods;
+        }
+        ShippingZoneFees fallbackOption = null;
+        if (options != null && !options.isEmpty()) {
+            for (ShippingZoneFees opt : options) {
+                if (opt.getShippingMethod() != null && opt.getShippingMethod().contains("tiêu chuẩn")) {
+                    fallbackOption = opt;
+                    break;
+                }
+            }
+        }
+
+        for (Map<String, Object> carrier : carriers) {
+            Map<String, Object> method = new java.util.LinkedHashMap<>();
+            method.put("id", carrier.get("id"));
+            method.put("name", carrier.get("name"));
+            method.put("code", carrier.get("code"));
+
+            ShippingZoneFees matched = findMatchingOption(carrier, options);
+            if (matched != null) {
+                method.put("fee", matched.getBaseFee());
+                method.put("estimatedDays", matched.getEstimatedDays());
+            } else if (fallbackOption != null) {
+
+                method.put("fee", fallbackOption.getBaseFee());
+                method.put("estimatedDays", fallbackOption.getEstimatedDays());
+            } else {
+                method.put("fee", null);
+                method.put("estimatedDays", "");
+            }
+
+            methods.add(method);
+        }
+
+        return methods;
+    }
+
+    private ShippingZoneFees findMatchingOption(Map<String, Object> carrier, List<ShippingZoneFees> options) {
+        if (carrier == null || options == null || options.isEmpty()) {
+            return null;
+        }
+
+        Object carrierNameObj = carrier.get("name");
+        Object carrierCodeObj = carrier.get("code");
+        String carrierName = carrierNameObj != null ? carrierNameObj.toString().trim() : "";
+        String carrierCode = carrierCodeObj != null ? carrierCodeObj.toString().trim() : "";
+
+        for (ShippingZoneFees option : options) {
+            String optionName = option.getShippingMethod() != null ? option.getShippingMethod().trim() : "";
+            if (!carrierName.isEmpty() && optionName.equalsIgnoreCase(carrierName)) {
+                return option;
+            }
+            if (!carrierCode.isEmpty() && optionName.equalsIgnoreCase(carrierCode)) {
+                return option;
+            }
+        }
+
+        return null;
     }
 
     // Hiển thị trang giỏ hàng
@@ -206,31 +266,5 @@ public class CartServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         doGet(request, response);
-    }
-
-    private String extractProvince(String fullAddress) {
-        if (fullAddress == null || fullAddress.isBlank()) {
-            return "";
-        }
-
-        String candidate = fullAddress.trim();
-        if (candidate.contains(",")) {
-            String[] parts = candidate.split(",");
-            candidate = parts[parts.length - 1].trim();
-        }
-
-        return normalizeProvince(candidate);
-    }
-
-    private String normalizeProvince(String province) {
-        if (province == null) {
-            return "";
-        }
-
-        String result = province.trim();
-        result = result.replaceFirst("(?i)^thanh pho\\s+", "");
-        result = result.replaceFirst("(?i)^tp\\.?\\s*", "");
-        result = result.replaceFirst("(?i)^tinh\\s+", "");
-        return result.trim();
     }
 }

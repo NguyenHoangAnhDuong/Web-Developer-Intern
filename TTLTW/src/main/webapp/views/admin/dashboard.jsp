@@ -23,6 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+<%@ include file="/views/includes/toast.jsp" %>
 <script>
     const revenueByDaysData = [
         <c:forEach var="item" items="${revenueByDays}" varStatus="status">
@@ -120,21 +121,33 @@
                         <div id="chart-cart" class="chart-card card">
                             <div class="filter-container">
                                 <div class="filter-time">
-                                    <button class="filter-btn ${days == 7 ? 'active' : ''}"
+                                    <button class="filter-btn ${empty startDate && days == 7 ? 'active' : ''}"
                                             onclick="location.href='${pageContext.request.contextPath}/admin/dashboard?days=7'">
                                         7 ngày
                                     </button>
-                                    <button class="filter-btn ${days == 30 || empty days ? 'active' : ''}"
+                                    <button class="filter-btn ${empty startDate && (days == 30 || empty days) ? 'active' : ''}"
                                             onclick="location.href='${pageContext.request.contextPath}/admin/dashboard?days=30'">
                                         30 ngày
                                     </button>
-                                    <button class="filter-btn ${days == 90 ? 'active' : ''}"
+                                    <button class="filter-btn ${empty startDate && days == 90 ? 'active' : ''}"
                                             onclick="location.href='${pageContext.request.contextPath}/admin/dashboard?days=90'">
                                         90 ngày
                                     </button>
                                 </div>
+                                <div class="date-filter">
+                                    <form action="${pageContext.request.contextPath}/admin/dashboard" method="GET" class="date-form">
+                                        <label for="startDate">Từ ngày:</label>
+                                        <input type="date" id="startDate" name="startDate" value="${startDate}" required>
+                                        <label for="endDate">Đến ngày:</label>
+                                        <input type="date" id="endDate" name="endDate" value="${endDate}" required>
+                                        <button type="submit" class="filter-btn ${not empty startDate ? 'active' : ''}">Lọc</button>
+                                    </form>
+                                </div>
                             </div>
-                            <strong>Doanh thu theo ngày (${days != null ? days : 30} ngày)</strong>
+                            <strong>Doanh thu theo ngày <c:choose>
+                                <c:when test="${not empty startDate && not empty endDate}">(${startDate} - ${endDate})</c:when>
+                                <c:otherwise>(${days != null ? days : 30} ngày)</c:otherwise>
+                            </c:choose></strong>
                             <canvas id="salesLine" width="400" height="200"></canvas>
                         </div>
 

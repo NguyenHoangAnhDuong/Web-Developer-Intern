@@ -60,5 +60,34 @@ public class FeedbackDao {
                 .bind(3, feedback.getComment())
                 .execute()) > 0;
     }
-
+    public List<Feedback> getAllFeedbacks() {
+        String sql = """
+                SELECT f.id,
+                       f.product_id   AS productId,
+                       f.user_id      AS userId,
+                       u.username     AS username,
+                       p.name         AS productName,
+                       f.rating,
+                       f.comment,
+                       f.status,
+                       f.created_at   AS createdAt,
+                       f.updated_at   AS updatedAt
+                FROM feedbacks f
+                JOIN users    u ON f.user_id      = u.id
+                JOIN products p ON f.product_id   = p.id
+                ORDER BY f.created_at DESC
+                """;
+        return DBConnect.getJdbi().withHandle(h ->
+                h.createQuery(sql).mapToBean(Feedback.class).list());
+    }
+    public void updateStatus(int id, int status) {
+        String sql = "UPDATE feedbacks SET status = ?, updated_at = NOW() WHERE id = ?";
+        DBConnect.getJdbi().withHandle(h ->
+                h.createUpdate(sql).bind(0, status).bind(1, id).execute());
+    }
+    public void deleteFeedback(int id) {
+        String sql = "DELETE FROM feedbacks WHERE id = ?";
+        DBConnect.getJdbi().withHandle(h ->
+                h.createUpdate(sql).bind(0, id).execute());
+    }
 }

@@ -47,7 +47,18 @@ public class DashboardDaoImpl implements DashboardDao {
     }
 
     @Override
-    public List<Map<String, Object>> getRevenueByCategory() {
+    public List<Map<String, Object>> getRevenueByDateRange(String startDate, String endDate) {
+        String sql = """
+                SELECT DATE(created_at) AS date, COALESCE(SUM(total_amount), 0) AS revenue
+                FROM orders
+                WHERE DATE(created_at) BETWEEN ? AND ?
+                GROUP BY DATE(created_at)
+                ORDER BY date
+                """;
+        return jdbi.withHandle(h -> h.createQuery(sql).bind(0, startDate).bind(1, endDate).mapToMap().list());
+    }
+    @Override
+    public List<Map<String, Object>> getRevenueByCategory(String startDate, String endDate) {
         String sql = """
                 SELECT c.name AS category, COALESCE(SUM(od.quantity * od.price), 0) AS revenue
                 FROM categories c
@@ -56,15 +67,15 @@ public class DashboardDaoImpl implements DashboardDao {
                 LEFT JOIN variant_colors vc ON pv.id = vc.variant_id
                 LEFT JOIN order_details od ON vc.id = od.variant_id
                 LEFT JOIN orders o ON od.order_id = o.id
-                WHERE o.created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+                WHERE DATE(o.created_at) BETWEEN ? AND ?
                 GROUP BY c.id, c.name
                 ORDER BY revenue DESC
                 """;
-        return jdbi.withHandle(h -> h.createQuery(sql).mapToMap().list());
+        return jdbi.withHandle(h -> h.createQuery(sql).bind(0, startDate).bind(1, endDate).mapToMap().list());
     }
 
     @Override
-    public List<Map<String, Object>> getTopProducts() {
+    public List<Map<String, Object>> getTopProducts(String startDate, String endDate) {
         String sql = """
                 SELECT p.name AS product, SUM(od.quantity) AS sold
                 FROM products p
@@ -72,12 +83,12 @@ public class DashboardDaoImpl implements DashboardDao {
                 JOIN variant_colors vc ON pv.id = vc.variant_id
                 JOIN order_details od ON vc.id = od.variant_id
                 JOIN orders o ON od.order_id = o.id
-                WHERE o.created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+                WHERE DATE(o.created_at) BETWEEN ? AND ?
                 GROUP BY p.id, p.name
                 ORDER BY sold DESC
                 LIMIT 10
                 """;
-        return jdbi.withHandle(h -> h.createQuery(sql).mapToMap().list());
+        return jdbi.withHandle(h -> h.createQuery(sql).bind(0, startDate).bind(1, endDate).mapToMap().list());
     }
 
     @Override

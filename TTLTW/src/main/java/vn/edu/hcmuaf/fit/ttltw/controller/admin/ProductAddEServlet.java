@@ -7,6 +7,7 @@ import jakarta.servlet.http.*;
 import vn.edu.hcmuaf.fit.ttltw.model.*;
 import vn.edu.hcmuaf.fit.ttltw.service.*;
 import vn.edu.hcmuaf.fit.ttltw.utils.FileUploadUtil;
+import vn.edu.hcmuaf.fit.ttltw.utils.PermissionUtil;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -27,10 +28,18 @@ public class ProductAddEServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        if (!PermissionUtil.has(request, "product.create")) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Không có quyền thêm sản phẩm");
+            return;
+        }
         request.getRequestDispatcher("/views/admin/addProductAdmin.jsp"
         ).forward(request, response);
     }
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        if (!PermissionUtil.has(request, "product.create")) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Không có quyền thêm sản phẩm");
+            return;
+        }
         request.setCharacterEncoding("UTF-8");
 
         try {

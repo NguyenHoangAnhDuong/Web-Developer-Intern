@@ -2,6 +2,11 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <fmt:setLocale value="vi_VN"/>
+<c:set var="isSuper" value="${sessionScope.roleName == 'super_admin'}" />
+<c:set var="perms" value="${sessionScope.permissions}" />
+<c:set var="canCreateVoucher" value="${isSuper || (perms != null && perms.contains('voucher.create'))}" />
+<c:set var="canUpdateVoucher" value="${isSuper || (perms != null && perms.contains('voucher.update'))}" />
+<c:set var="canDeleteVoucher" value="${isSuper || (perms != null && perms.contains('voucher.delete'))}" />
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -52,7 +57,9 @@
                         <button type="submit" style="display: none;"></button>
                     </form>
                 </div>
-                <button type="button" class="btn-add" id="btnOpenModal">+ Thêm Khuyến mãi</button>
+                <c:if test="${canCreateVoucher}">
+                    <button type="button" class="btn-add" id="btnOpenModal">+ Thêm Khuyến mãi</button>
+                </c:if>
 
             </div>
 
@@ -132,23 +139,25 @@
 
                                 <!-- Thao tác -->
                                 <td>
-                                    <form method="post"
-                                          action="${pageContext.request.contextPath}/admin/vouchers"
-                                          style="display:inline;">
-                                        <input type="hidden" name="action" value="toggle">
-                                        <input type="hidden" name="id" value="${voucher.id}">
-                                        <button type="submit" class="btn-toggle" title="${voucher.status == 1 ? 'Tắt' : 'Bật'}">
-                                            <i class="fas ${voucher.status == 1 ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
-                                        </button>
-                                    </form>
+                                    <c:if test="${canUpdateVoucher}">
+                                        <form method="post"
+                                              action="${pageContext.request.contextPath}/admin/vouchers"
+                                              style="display:inline;">
+                                            <input type="hidden" name="action" value="toggle">
+                                            <input type="hidden" name="id" value="${voucher.id}">
+                                            <button type="submit" class="btn-toggle" title="${voucher.status == 1 ? 'Tắt' : 'Bật'}">
+                                                <i class="fas ${voucher.status == 1 ? 'fa-toggle-on' : 'fa-toggle-off'}"></i>
+                                            </button>
+                                        </form>
 
-                                    <button
-                                            class="btn-edit"
-                                            onclick="editRow(this)"
-                                            data-id="${voucher.id}"
-                                            title="Sửa">
-                                        <i class="fas fa-pen-to-square"></i>
-                                    </button>
+                                        <button
+                                                class="btn-edit"
+                                                onclick="editRow(this)"
+                                                data-id="${voucher.id}"
+                                                title="Sửa">
+                                            <i class="fas fa-pen-to-square"></i>
+                                        </button>
+                                    </c:if>
 
                                 </td>
                             </tr>

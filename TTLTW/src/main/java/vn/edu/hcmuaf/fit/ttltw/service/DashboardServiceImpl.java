@@ -37,13 +37,18 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     @Override
-    public List<Map<String, Object>> getRevenueByCategory() {
-        return dashboardDao.getRevenueByCategory();
+    public List<Map<String, Object>> getRevenueByDateRange(String startDate, String endDate) {
+        return dashboardDao.getRevenueByDateRange(startDate, endDate);
     }
 
     @Override
-    public List<Map<String, Object>> getTopProducts() {
-        return dashboardDao.getTopProducts();
+    public List<Map<String, Object>> getRevenueByCategory(String startDate, String endDate) {
+        return dashboardDao.getRevenueByCategory(startDate, endDate);
+    }
+
+    @Override
+    public List<Map<String, Object>> getTopProducts(String startDate, String endDate) {
+        return dashboardDao.getTopProducts(startDate, endDate);
     }
 
     @Override

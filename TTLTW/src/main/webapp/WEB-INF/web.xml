@@ -3,18 +3,49 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
+
+    <!--
+        Các giá trị OAuth được nạp từ file .env tại project root bởi
+        vn.edu.hcmuaf.fit.ttltw.listener.EnvConfigListener (đăng ký qua @WebListener).
+        Listener đẩy vào ServletContext attribute cùng tên (vd. "facebook.clientId").
+        Param-value bên dưới chỉ dùng làm fallback khi .env không có key tương ứng.
+
+        Mapping key:
+          facebook.clientId      ← FACEBOOK_CLIENT_ID
+          facebook.clientSecret  ← FACEBOOK_CLIENT_SECRET
+          facebook.redirectUri   ← FACEBOOK_REDIRECT_URI
+          google.clientId        ← GOOGLE_CLIENT_ID
+          google.clientSecret    ← GOOGLE_CLIENT_SECRET
+          google.redirectUri     ← GOOGLE_REDIRECT_URI
+    -->
+
     <context-param>
         <param-name>facebook.clientId</param-name>
-        <param-value>1304205441123354</param-value>
+        <param-value></param-value>
     </context-param>
 
     <context-param>
         <param-name>facebook.clientSecret</param-name>
-        <param-value>85d75c5932195f3d59dc0e744926a231</param-value>
+        <param-value></param-value>
     </context-param>
 
     <context-param>
         <param-name>facebook.redirectUri</param-name>
-        <param-value>http://localhost:8080/WebDynamic_war/login-facebook-callback</param-value>
+        <param-value></param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>google.clientId</param-name>
+        <param-value></param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>google.clientSecret</param-name>
+        <param-value></param-value>
+    </context-param>
+
+    <context-param>
+        <param-name>google.redirectUri</param-name>
+        <param-value></param-value>
     </context-param>
 </web-app>

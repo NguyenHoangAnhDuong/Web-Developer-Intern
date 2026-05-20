@@ -4,6 +4,9 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 
 <c:set var="isAjax" value="${param.ajax == 'true'}"/>
+<c:set var="isSuper" value="${sessionScope.roleName == 'super_admin'}" />
+<c:set var="perms" value="${sessionScope.permissions}" />
+<c:set var="canUpdateOrder" value="${isSuper || (perms != null && perms.contains('order.update'))}" />
 
 <c:if test="${!isAjax}">
     <!DOCTYPE html>
@@ -20,6 +23,7 @@
         <link rel="stylesheet" href="${pageContext.request.contextPath}/asset/css/sidebarAdmin.css">
     </head>
     <body>
+    <%@ include file="/views/includes/toast.jsp" %>
 
     <script>
         const contextPath = '${pageContext.request.contextPath}';
@@ -71,14 +75,14 @@
 <c:choose>
     <c:when test="${not empty orders}">
         <c:forEach var="item" items="${orders}">
-            <tr>
+            <tr class="order-row" data-order-id="${item.order.id}" style="cursor: pointer;">
                 <td>DH${item.order.id}</td>
                 <!-- Lấy tên khách từ Map -->
                 <td>${item.customerName}</td>
                 <td>${item.customerPhone}</td>
                 <td>${item.order.createdAt}</td>
                 <td>
-                    <select class="status-select status-${item.order.status}" data-id="${item.order.id}">
+                    <select class="status-select status-${item.order.status}" data-id="${item.order.id}" ${canUpdateOrder ? '' : 'disabled'}>
                         <option value="1" ${item.order.status == 1 ? 'selected' : ''}>Đang lên đơn</option>
                         <option value="2" ${item.order.status == 2 ? 'selected' : ''}>Đang giao</option>
                         <option value="3" ${item.order.status == 3 ? 'selected' : ''}>Đã giao</option>
@@ -114,6 +118,102 @@
 
     </div>
     </main>
+    </div>
+
+    <div id="orderDetailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Chi Tiết Đơn Hàng #<span id="modalOrderId"></span></h2>
+                <button class="modal-close" onclick="closeOrderDetailModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="order-detail-section">
+                    <h3>Thông Tin Khách Hàng</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Tên khách:</span>
+                        <span class="detail-value" id="customerNameDetail"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Số điện thoại:</span>
+                        <span class="detail-value" id="customerPhoneDetail"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Địa chỉ:</span>
+                        <span class="detail-value" id="customerAddressDetail"></span>
+                    </div>
+                </div>
+                <div class="order-detail-section">
+                    <h3>Thông Tin Đơn Hàng</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Ngày đặt:</span>
+                        <span class="detail-value" id="orderDateDetail"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Trạng thái:</span>
+                        <span class="detail-value" id="orderStatusDetail"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Thanh toán:</span>
+                        <span class="detail-value" id="paymentMethodDetail"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Ghi chú:</span>
+                        <span class="detail-value" id="orderNoteDetail"></span>
+                    </div>
+                    <div class="detail-row" id="cancellationReasonRow" style="display:none;">
+                        <span class="detail-label">Lý do hủy:</span>
+                        <span class="detail-value" id="cancellationReasonDetail"></span>
+                    </div>
+                </div>
+                <div class="order-detail-section">
+                    <h3>Sản Phẩm</h3>
+                    <div class="order-items" id="orderItemsDetail"></div>
+                </div>
+                <div class="order-detail-section">
+                    <h3>Tóm Tắt Thanh Toán</h3>
+                    <div class="detail-row">
+                        <span class="detail-label">Tiền hàng:</span>
+                        <span class="detail-value" id="subtotalDetail"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Chiết khấu:</span>
+                        <span class="detail-value" id="discountDetail"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Phí vận chuyển:</span>
+                        <span class="detail-value" id="shippingFeeDetail"></span>
+                    </div>
+                    <div class="detail-row" style="border-top: 2px solid #f0f0f0; padding-top: 10px; margin-top: 10px;">
+                        <span class="detail-label" style="font-size: 16px; font-weight: 700;">Tổng cộng:</span>
+                        <span class="detail-value highlight" style="font-size: 16px;" id="totalDetail"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeOrderDetailModal()">Đóng</button>
+                <button class="btn-cancel-order" id="cancelOrderBtn" onclick="openCancelReasonModal()" style="display:none;">Hủy Đơn Hàng</button>
+            </div>
+        </div>
+    </div>
+    <div id="cancelReasonModal" class="modal cancel-reason-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Hủy Đơn Hàng #<span id="cancelOrderId"></span></h2>
+                <button class="modal-close" onclick="closeCancelReasonModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="cancellationReasonInput">Lý do hủy đơn hàng <span style="color: #dc2626;">*</span></label>
+                    <textarea id="cancellationReasonInput" placeholder="Nhập lý do hủy đơn hàng..." maxlength="500"></textarea>
+                    <div class="char-count"><span id="charCount">0</span>/500</div>
+                </div>
+                <p style="color: #666; font-size: 13px; margin-bottom: 0;">Lý do hủy sẽ giúp chúng tôi cải thiện dịch vụ. Vui lòng cung cấp thông tin chi tiết.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeCancelReasonModal()">Quay Lại</button>
+                <button class="btn-cancel-order" id="confirmCancelBtn" onclick="confirmCancelOrder()">Xác Nhận Hủy</button>
+            </div>
+        </div>
     </div>
     <div id="toast" class="toast"></div>
 

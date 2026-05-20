@@ -63,6 +63,12 @@ public class LoginServlet extends HttpServlet {
             request.getRequestDispatcher("/views/user/login.jsp").forward(request, response);
             return;
         }
+        if (user.getStatus() != 1) {
+            request.setAttribute("error", "Tài khoản đã bị khóa, vui lòng liên hệ quản trị viên.");
+            request.setAttribute("inputValue", input);
+            request.getRequestDispatcher("/views/user/login.jsp").forward(request, response);
+            return;
+        }
         HttpSession session = request.getSession();
         session.setAttribute("user", user);
         session.setAttribute("role", user.getRolesId());

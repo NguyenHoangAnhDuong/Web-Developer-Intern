@@ -147,12 +147,13 @@ public interface ProductDao {
 
         List<Map<String, Object>> findRelatedBySameBrand(
                         int brandId,
+                        int categoryId,
                         int excludeProductId,
                         int limit);
 
         // Lấy sản phẩm bán chạy / mới nhất để bù khi chưa đủ
         List<Map<String, Object>> findFallbackRelatedProducts(
-                        int excludeProductId,
+                        int categoryId,
                         List<Integer> excludeIds,
                         int limit);
 

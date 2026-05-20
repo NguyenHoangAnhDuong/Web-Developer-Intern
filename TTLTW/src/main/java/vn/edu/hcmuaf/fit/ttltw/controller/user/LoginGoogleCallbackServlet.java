@@ -3,17 +3,17 @@ package vn.edu.hcmuaf.fit.ttltw.controller.user;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,92 +21,79 @@ import jakarta.servlet.http.HttpSession;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
 import vn.edu.hcmuaf.fit.ttltw.service.UserService;
 
-@WebServlet("/login-facebook-callback")
-public class LoginFacebookCallbackServlet extends HttpServlet {
+@WebServlet("/login-google-callback")
+public class LoginGoogleCallbackServlet extends HttpServlet {
     private final UserService userService = new UserService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String CLIENT_ID = (String) getServletContext().getAttribute("facebook.clientId");
-        String CLIENT_SECRET = (String) getServletContext().getAttribute("facebook.clientSecret");
-        String REDIRECT_URI = (String) getServletContext().getAttribute("facebook.redirectUri");
+        String clientId = (String) getServletContext().getAttribute("google.clientId");
+        String clientSecret = (String) getServletContext().getAttribute("google.clientSecret");
+        String redirectUri = (String) getServletContext().getAttribute("google.redirectUri");
 
         String code = request.getParameter("code");
         if (code == null || code.isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/login?error=Facebook login failed");
+            response.sendRedirect(request.getContextPath() + "/login?error=Google login failed");
             return;
         }
-        try {
-            // Lấy access_token
-            String tokenUrl = "https://graph.facebook.com/v18.0/oauth/access_token"
-                    + "?client_id=" + CLIENT_ID
-                    + "&redirect_uri=" + URLEncoder.encode(REDIRECT_URI, StandardCharsets.UTF_8)
-                    + "&client_secret=" + CLIENT_SECRET
-                    + "&code=" + code;
 
-            String tokenResponse = sendGet(tokenUrl);
+        try {
+            // 1. Đổi authorization code lấy access_token
+            String tokenUrl = "https://oauth2.googleapis.com/token";
+            String tokenParams = "code=" + code
+                    + "&client_id=" + clientId
+                    + "&client_secret=" + clientSecret
+                    + "&redirect_uri=" + redirectUri
+                    + "&grant_type=authorization_code";
+
+            String tokenResponse = sendPost(tokenUrl, tokenParams);
             JsonObject tokenJson = JsonParser.parseString(tokenResponse).getAsJsonObject();
             String accessToken = tokenJson.get("access_token").getAsString();
 
-            // Lấy thông tin user (bao gồm email — đã xin quyền 'email' ở bước authorize)
-            String infoUrl = "https://graph.facebook.com/me"
-                    + "?fields=id,name,email,picture.type(large)"
-                    + "&access_token=" + accessToken;
-
+            // 2. Lấy thông tin user từ Google
+            String infoUrl = "https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + accessToken;
             String infoResponse = sendGet(infoUrl);
             JsonObject info = JsonParser.parseString(infoResponse).getAsJsonObject();
 
-            String fbId = info.get("id").getAsString();
-            String name = info.has("name") ? info.get("name").getAsString() : "Facebook User";
+            String googleId = info.get("id").getAsString();
+            String email = info.has("email") ? info.get("email").getAsString() : null;
+            String name = info.has("name") ? info.get("name").getAsString() : "Google User";
+            String avatar = info.has("picture") ? info.get("picture").getAsString() : null;
 
-            // Email là bắt buộc cho flow đăng nhập/đăng ký theo email.
-            // Người dùng có thể từ chối cấp quyền email khi authorize — khi đó Graph API không trả về field 'email'.
-            String email = (info.has("email") && !info.get("email").isJsonNull())
-                    ? info.get("email").getAsString()
-                    : null;
-            if (email == null || email.isBlank()) {
+            if (email == null || email.isEmpty()) {
                 response.sendRedirect(request.getContextPath()
-                        + "/login?error=" + URLEncoder.encode(
-                                "Bạn cần cấp quyền truy cập email để đăng nhập bằng Facebook",
-                                StandardCharsets.UTF_8));
+                        + "/login?error=Không lấy được email từ Google");
                 return;
             }
 
-            String avatar = null;
-            if (info.has("picture")) {
-                avatar = info.getAsJsonObject("picture")
-                        .getAsJsonObject("data")
-                        .get("url").getAsString();
-            }
-
-            // Sinh username gợi ý cho trường hợp tạo account mới (UserService sẽ tự dedupe nếu trùng)
+            // 3. Tạo username từ tên (bỏ dấu + thêm 4 số cuối googleId)
             String baseUsername = removeDiacritics(name)
                     .toLowerCase()
                     .replaceAll("[^a-z0-9]", "");
             if (baseUsername.isEmpty()) {
-                baseUsername = "fbuser";
+                baseUsername = "gguser";
             }
-            String username = baseUsername + fbId.substring(Math.max(0, fbId.length() - 4));
+            String username = baseUsername + googleId.substring(googleId.length() - Math.min(4, googleId.length()));
 
-            // Đẩy thông tin từ Facebook sang service để quyết định login hay register
+            // 4. Tạo User object cho Google. provider/providerId được set vào User
+            // để UserService.loginOrRegisterSocial truyền sang DAO; record thật được lưu
+            // ở bảng user_social_accounts (1 user có thể link nhiều provider).
             User u = new User();
             u.setUsername(username);
             u.setEmail(email);
             u.setFirstName(name);
             u.setAvatar(avatar);
-            u.setRolesId(2);     // Mặc định là khách hàng
-            u.setStatus(1);      // Hoạt động
-            u.setProvider("facebook");
-            u.setProviderId(fbId);
+            u.setRolesId(2);        // Mặc định là khách hàng
+            u.setStatus(1);         // Hoạt động
+            u.setProvider("google");
+            u.setProviderId(googleId);
 
+            // 5. Kiểm tra email tồn tại → đăng nhập; chưa có → tạo mới
             User user = userService.loginOrRegisterSocial(u);
 
             if (user == null) {
-                response.sendRedirect(request.getContextPath()
-                        + "/login?error=" + URLEncoder.encode(
-                                "Tài khoản tương ứng với email Facebook đã bị khóa hoặc đăng nhập thất bại",
-                                StandardCharsets.UTF_8));
+                response.sendRedirect(request.getContextPath() + "/login?error=Google login failed");
                 return;
             }
 
@@ -131,9 +118,11 @@ public class LoginFacebookCallbackServlet extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/login");
                 return;
             }
+
             session.setAttribute("user", user);
             session.setAttribute("role", user.getRolesId());
 
+            // 6. Xử lý redirect URL
             int role = user.getRolesId();
             String contextPath = request.getContextPath();
             String redirectUrl = null;
@@ -142,7 +131,6 @@ public class LoginFacebookCallbackServlet extends HttpServlet {
             String savedRedirectUrl = (String) session.getAttribute("redirectUrl");
             if (savedRedirectUrl != null) {
                 session.removeAttribute("redirectUrl");
-
                 String pathWithoutQuery = savedRedirectUrl.split("\\?")[0];
                 boolean isValid = true;
 
@@ -152,21 +140,19 @@ public class LoginFacebookCallbackServlet extends HttpServlet {
                         || pathWithoutQuery.startsWith("/user/"))) {
                     isValid = false;
                 }
-
                 if (role == 1 && pathWithoutQuery.startsWith("/admin/")) {
                     isValid = false;
                 }
-
                 if (isValid) {
                     redirectUrl = savedRedirectUrl;
                 }
             }
-                // Ưu tiên 2: trang trước khi vào login
+
+            // Ưu tiên 2: trang trước khi vào login
             if (redirectUrl == null) {
                 String loginRedirectUrl = (String) session.getAttribute("loginRedirectUrl");
                 if (loginRedirectUrl != null) {
                     session.removeAttribute("loginRedirectUrl");
-
                     String pathWithoutQuery = loginRedirectUrl.split("\\?")[0];
                     boolean isValid = true;
 
@@ -176,34 +162,60 @@ public class LoginFacebookCallbackServlet extends HttpServlet {
                             || pathWithoutQuery.startsWith("/user/"))) {
                         isValid = false;
                     }
-
                     if (role == 1 && pathWithoutQuery.startsWith("/admin/")) {
                         isValid = false;
                     }
-
                     if (pathWithoutQuery.equals("/login") || pathWithoutQuery.equals("/logout")) {
                         isValid = false;
                     }
-
                     if (isValid) {
                         redirectUrl = loginRedirectUrl;
                     }
                 }
             }
+
             // Mặc định
             if (redirectUrl == null) {
-                redirectUrl = "/home"; // vì role luôn là 2 rồi
+                redirectUrl = "/home";
             }
-            // Đảm bảo redirectUrl không chứa contextPath
+
             if (redirectUrl.startsWith(request.getContextPath())) {
                 redirectUrl = redirectUrl.substring(request.getContextPath().length());
             }
+
             response.sendRedirect(contextPath + redirectUrl);
+
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/login?error=Facebook login error");
+            response.sendRedirect(request.getContextPath() + "/login?error=Google login error");
         }
     }
+
+    // Google token endpoint yêu cầu POST
+    private String sendPost(String urlStr, String params) throws Exception {
+        URL url = new URL(urlStr);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        conn.setDoOutput(true);
+        conn.setConnectTimeout(15000);
+        conn.setReadTimeout(15000);
+
+        try (OutputStream os = conn.getOutputStream()) {
+            os.write(params.getBytes(StandardCharsets.UTF_8));
+        }
+
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            sb.append(line);
+        }
+        reader.close();
+        return sb.toString();
+    }
+
     private String sendGet(String urlStr) throws Exception {
         URL url = new URL(urlStr);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -213,7 +225,6 @@ public class LoginFacebookCallbackServlet extends HttpServlet {
 
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
-
         StringBuilder sb = new StringBuilder();
         String line;
         while ((line = reader.readLine()) != null) {
@@ -222,6 +233,7 @@ public class LoginFacebookCallbackServlet extends HttpServlet {
         reader.close();
         return sb.toString();
     }
+
     private String removeDiacritics(String input) {
         String temp = Normalizer.normalize(input, Normalizer.Form.NFD);
         return temp.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");

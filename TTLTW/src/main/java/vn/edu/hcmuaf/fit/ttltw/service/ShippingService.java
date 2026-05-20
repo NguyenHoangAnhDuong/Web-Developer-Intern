@@ -1,9 +1,13 @@
 package vn.edu.hcmuaf.fit.ttltw.service;
 
 import vn.edu.hcmuaf.fit.ttltw.dao.ShippingDao;
+import vn.edu.hcmuaf.fit.ttltw.model.ShippingZoneFees;
+
+import java.util.List;
+import java.util.Map;
 
 public class ShippingService {
-    private ShippingDao shippingDao = new ShippingDao();
+    private final ShippingDao shippingDao = new ShippingDao();
     private final SuperAIService superAI = new SuperAIService();
     // cập nhập thông tin vẫn chuyển của đơn hàng
     public boolean updateTrackingInfo(int orderId, String tracking, String partner) {
@@ -29,5 +33,13 @@ public class ShippingService {
         }
 
         return tracking;
+    }
+
+    public List<Map<String, Object>> getShippingCarriers() {
+        return superAI.getShippingCarriers();
+    }
+
+    public List<ShippingZoneFees> getShippingServices(String fullAddress, long weight, long value) {
+        return superAI.getShippingFeeOptions(fullAddress, weight, value);
     }
 }

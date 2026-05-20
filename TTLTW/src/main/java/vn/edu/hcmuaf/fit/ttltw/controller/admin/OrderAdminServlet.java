@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import vn.edu.hcmuaf.fit.ttltw.service.OrderService;
+import com.google.gson.Gson;
+import vn.edu.hcmuaf.fit.ttltw.utils.PermissionUtil;
 
 import java.io.IOException;
 import java.util.List;
@@ -24,9 +26,22 @@ public class OrderAdminServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
+        String getOrderDetails = req.getParameter("getOrderDetails");
+        if ("true".equals(getOrderDetails)) {
+            int orderId = Integer.parseInt(req.getParameter("orderId"));
+            Map<String, Object> orderDetails = orderService.getOrderDetailsForAdmin(orderId);
+            resp.setContentType("application/json;charset=UTF-8");
+            Gson gson = new Gson();
+            resp.getWriter().print(gson.toJson(orderDetails));
+            return;
+        }
+        if (!PermissionUtil.has(req, "order.view")) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Không có quyền xem đơn hàng");
+            return;
+        }
+
         String keyword = req.getParameter("keyword");
         String statusFilterRaw = req.getParameter("statusFilter");
-        // String ajax = req.getParameter("ajax");
 
         Integer statusFilter = null;
         if (statusFilterRaw != null && !statusFilterRaw.isEmpty()) {
@@ -47,31 +62,49 @@ public class OrderAdminServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
 
-        int orderId = Integer.parseInt(req.getParameter("orderId"));
-        int newStatus = Integer.parseInt(req.getParameter("status"));
-
-        System.out.println(" cập nhập đơn hàng ID: " + orderId + ", Status: " + newStatus);
-
-        Map<String, Object> result =
-                orderService.updateStatus(orderId, newStatus);
-
-        resp.setContentType("application/json;charset=UTF-8");
-
-        boolean success = (boolean) result.get("success");
-        String message = (String) result.get("message");
-
-        if (!success) {
-            System.err.println("Failed to update order " + orderId + ": " + message);
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        } else {
-            System.out.println("order " + orderId + " updated successfully");
+        if (!PermissionUtil.has(req, "order.update")) {
+            resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            resp.setContentType("application/json; charset=UTF-8");
+            resp.getWriter().write("{\"success\":false,\"message\":\"Không có quyền cập nhật đơn hàng\"}");
+            return;
         }
 
-        resp.getWriter().print(String.format(
-                "{\"success\": %s, \"message\": \"%s\"}",
-                success,
-                message.replace("\"", "\\\"")
-        ));
+        int orderId = Integer.parseInt(req.getParameter("orderId"));
+        String action = req.getParameter("action");
+        resp.setContentType("application/json;charset=UTF-8");
+        if ("cancelOrder".equals(action)) {
+            // Hủy đơn hàng với lý do
+            String cancellationReason = req.getParameter("cancellationReason");
+            Map<String, Object> result = orderService.cancelOrderWithReason(orderId, cancellationReason);
+            boolean success = (boolean) result.get("success");
+            String message = (String) result.get("message");
+            if (!success) {
+                System.err.println("Failed to cancel order " + orderId + ": " + message);
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            }
+            resp.getWriter().print(String.format(
+                    "{\"success\": %s, \"message\": \"%s\"}",
+                    success,
+                    message.replace("\"", "\\\"")
+            ));
+        } else {
+            // Thay đổi trạng thái đơn hàng
+            int newStatus = Integer.parseInt(req.getParameter("status"));
+            Map<String, Object> result = orderService.updateStatus(orderId, newStatus);
+
+            boolean success = (boolean) result.get("success");
+            String message = (String) result.get("message");
+
+            if (!success) {
+                System.err.println("Failed to update order " + orderId + ": " + message);
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            }
+            resp.getWriter().print(String.format(
+                    "{\"success\": %s, \"message\": \"%s\"}",
+                    success,
+                    message.replace("\"", "\\\"")
+            ));
+        }
     }
 }
 

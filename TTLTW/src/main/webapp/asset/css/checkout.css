@@ -40,6 +40,28 @@ section {
     text-decoration: underline;
 }
 
+.selected-address p {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.change-address-btn,
+.change-address-link {
+    border: none;
+    background: transparent !important;
+    color: #007bff;
+    cursor: pointer;
+    padding: 0;
+    font-size: 12px;
+}
+
+.change-address-btn:hover,
+.change-address-link:hover {
+    border: none;
+}
+
 .default {
     background: #eee;
     padding: 3px 8px;
@@ -77,6 +99,145 @@ section {
 
 .hidden {
     display: none;
+}
+
+.address-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    z-index: 1100;
+    padding: 20px;
+    align-items: center;
+    justify-content: center;
+}
+
+.address-modal.open {
+    display: flex;
+}
+
+.address-modal-content {
+    width: min(760px, 100%);
+    max-height: min(80vh, 720px);
+    overflow: hidden;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.25);
+    display: flex;
+    flex-direction: column;
+}
+
+.address-modal-header {
+    padding: 20px 24px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #eef2f7;
+}
+
+.address-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #111827;
+}
+
+.address-modal-close {
+    border: none;
+    background: #f3f4f6 !important;
+    color: #111827;
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 22px;
+    line-height: 1;
+}
+
+.address-modal-body {
+    padding: 16px 20px 20px;
+    overflow-y: auto;
+    display: grid;
+    gap: 12px;
+}
+
+.address-option {
+    width: 100%;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.address-option:hover {
+    border-color: #4aa3b3;
+    box-shadow: 0 10px 28px rgba(74, 163, 179, 0.12);
+    transform: translateY(-1px);
+}
+
+.address-option.active {
+    border-color: var(--color-button);
+    box-shadow: 0 10px 28px rgba(34, 139, 230, 0.14);
+}
+
+.address-option-main {
+    min-width: 0;
+    flex: 1;
+}
+
+.address-option-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.address-option-row strong {
+    font-size: 15px;
+    color: #111827;
+}
+
+.address-option-row span,
+.address-option-main p {
+    margin: 0;
+    color: #4b5563;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.address-option-badge {
+    flex-shrink: 0;
+    align-self: center;
+    background: #e8f8f8;
+    color: #1f7a87;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.address-option-badge.muted {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
+.address-modal-footer {
+    padding: 14px 20px 20px;
+    border-top: 1px solid #eef2f7;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.add-address-link {
+    color: #2563eb;
+    font-weight: 600;
+    font-size: 14px;
 }
 .products .title {
     font-size: 20px;
@@ -270,6 +431,39 @@ section {
     text-align: center;
 }
 
+/* Highlight applied voucher */
+.voucher.active {
+    border: 2px solid var(--color-button);
+    box-shadow: 0 8px 20px rgba(34, 139, 230, 0.18);
+    transform: translateY(-6px);
+}
+
+.voucher .applied-badge {
+    display: none;
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: var(--color-button);
+    color: #fff;
+    font-weight: 700;
+    border-radius: 50px;
+    padding: 4px 10px;
+    font-size: 13px;
+}
+
+.voucher.active .applied-badge {
+    display: inline-block;
+}
+
+.voucher.active .voucher-right button {
+    background: #6b7280;
+    cursor: default;
+}
+
+.voucher.active .voucher-right button:disabled {
+    opacity: 0.65;
+}
+
 .badge {
     position: absolute;
     top: 8px;
@@ -396,3 +590,29 @@ section {
     font-weight: bold;
     color: #ee4d2d;
 }
+
+.shipping-option-wrap.shipping-option-hidden {
+    display: none;
+}
+.shipping-toggle-btn {
+    margin-top: 12px;
+    border: none;
+    background: transparent;
+    color: #2563eb;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 14px;
+    padding: 4px 0;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: transparent;
+    transition: text-decoration-color 0.2s ease, color 0.2s ease;
+}
+
+.shipping-toggle-btn:hover {
+    text-decoration-color: #1d4ed8;
+    background-color: transparent !important;
+    border: none !important;
+}
+
+

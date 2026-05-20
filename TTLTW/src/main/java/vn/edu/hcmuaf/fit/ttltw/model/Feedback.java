@@ -2,11 +2,13 @@ package vn.edu.hcmuaf.fit.ttltw.model;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Feedback implements Serializable {
 
     private int id;
     private int productId;
+    private String productName;
     private int userId;
     private int orderId;
     private int rating;
@@ -53,7 +55,12 @@ public class Feedback implements Serializable {
     public void setProductId(int productId) {
         this.productId = productId;
     }
-
+    public String getProductName() {
+        return productName;
+    }
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
     public int getUserId() {
         return userId;
     }
@@ -114,5 +121,27 @@ public class Feedback implements Serializable {
     }
     public void setUsername(String username) {
         this.username = username;
+    }
+    @SuppressWarnings("unused")
+    public String getStatusLabel() {
+        return switch (status) {
+            case 1  -> "show";
+            case 0  -> "hide";
+            case 2  -> "pending";
+            default -> "unknown";
+        };
+    }
+    @SuppressWarnings("unused")
+    public String getUserInitial() {
+        if (username != null && !username.isEmpty()) {
+            return String.valueOf(username.charAt(0)).toUpperCase();
+        }
+        return "U";
+    }
+    @SuppressWarnings("unused")
+    public String getCreatedAtFormatted() {
+        if (createdAt == null) return "";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        return createdAt.format(formatter);
     }
 }

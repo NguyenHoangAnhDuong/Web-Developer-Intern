@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import vn.edu.hcmuaf.fit.ttltw.dao.UserDao;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
 import vn.edu.hcmuaf.fit.ttltw.service.UserService;
+import vn.edu.hcmuaf.fit.ttltw.utils.PermissionUtil;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -28,6 +29,11 @@ public class AdminCustomerDetailServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+
+        if (!PermissionUtil.has(req, "customer.view")) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Không có quyền xem chi tiết khách hàng");
+            return;
+        }
 
         String idParam = req.getParameter("id");
         if (idParam == null) {
@@ -56,6 +62,13 @@ public class AdminCustomerDetailServlet extends HttpServlet {
             req.setAttribute("savedSuccess", true);
         }
 
+        String pwdResult = req.getParameter("pwd");
+        if ("1".equals(pwdResult)) {
+            req.setAttribute("passwordResetSuccess", true);
+        } else if ("0".equals(pwdResult)) {
+            req.setAttribute("passwordResetError", req.getParameter("msg"));
+        }
+
         RequestDispatcher rd = req.getRequestDispatcher("/views/admin/customerDetail.jsp");
         rd.forward(req, resp);
     }
@@ -64,7 +77,35 @@ public class AdminCustomerDetailServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        int id = Integer.parseInt(req.getParameter("id"));
+        req.setCharacterEncoding("UTF-8");
+        int id;
+        try {
+            id = Integer.parseInt(req.getParameter("id"));
+        } catch (NumberFormatException e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "ID không hợp lệ");
+            return;
+        }
+        String action = req.getParameter("action");
+
+        if ("resetPassword".equals(action)) {
+            if (!PermissionUtil.has(req, "customer.reset_password")) {
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Không có quyền đặt lại mật khẩu");
+                return;
+            }
+            String newPassword = req.getParameter("newPassword");
+            String result = userService.resetPasswordByAdmin(id, newPassword);
+            boolean ok = "Cập nhật mật khẩu thành công".equals(result);
+            String redirect = req.getContextPath() + "/admin/customers/detail?id=" + id
+                    + (ok ? "&pwd=1"
+                          : "&pwd=0&msg=" + java.net.URLEncoder.encode(result, java.nio.charset.StandardCharsets.UTF_8));
+            resp.sendRedirect(redirect);
+            return;
+        }
+
+        if (!PermissionUtil.has(req, "customer.update")) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Không có quyền cập nhật khách hàng");
+            return;
+        }
         String firstName = req.getParameter("firstName");
         String lastName = req.getParameter("lastName");
         String email = req.getParameter("email");

@@ -13,14 +13,17 @@ public class OrderService {
     private final OrderDao orderDao;
     private final AddressDao addressDao;
     private final PaymentTypesDao paymentTypesDao;
+    private final OrderDetailDao orderDetailDao;
     private final VoucherAdminDao voucherDao = new VoucherAdminDaoImpl();
     private final SuperAIService superAIService = new SuperAIService();
     private final ShippingService shippingService = new ShippingService();
     private final ShippingDao shippingDao = new ShippingDao();
+
     public OrderService() {
         this.orderDao = new OrderDao();
         this.addressDao = new AddressDao();
         this.paymentTypesDao = new PaymentTypesDao();
+        this.orderDetailDao = new OrderDetailDao();
     }
 
     public List<Order> getUserOrders(int userId) {
@@ -34,14 +37,14 @@ public class OrderService {
     public Optional<Order> getOrderById(int orderId) {
         return orderDao.getOrderById(orderId);
     }
-
-    public int createOrder(Order order) {
-        return orderDao.createOrder(order);
-    }
-
-    public boolean updateOrderStatus(int orderId, int status) {
-        return orderDao.updateOrderStatus(orderId, status);
-    }
+//
+//    public int createOrder(Order order) {
+//        return orderDao.createOrder(order);
+//    }
+//
+//    public boolean updateOrderStatus(int orderId, int status) {
+//        return orderDao.updateOrderStatus(orderId, status);
+//    }
 
     public boolean cancelOrder(int orderId, int userId) {
         return orderDao.cancelOrder(orderId, userId);
@@ -177,7 +180,7 @@ public class OrderService {
                 );
                 if (tracking != null) {
                     shippingDao.updateTrackingInfo(orderId, tracking, "SuperShip");
-                    System.out.println("✅ Saved tracking: " + tracking);
+                    System.out.println("Saved tracking: " + tracking);
                 }
 
                 if (tracking == null || tracking.trim().isEmpty()) {
@@ -198,10 +201,36 @@ public class OrderService {
                 }
 
             } catch (Exception e) {
-                System.err.println(" OrderService   Exception calling SuperAI (network issue?): " + e.getMessage());
+                System.err.println(" OrderService   Exception calling SuperAI  : " + e.getMessage());
                 e.printStackTrace();
             }
+        } else if (newStatus == 4 && (current == 2 || current == 1 || current == 14)) {
+            try {
+                tracking = order.getTrackingNumber();
+                if (tracking == null || tracking.trim().isEmpty()) {
+                    tracking = shippingDao.getTrackingByOrderId(orderId);
+                }
+
+                if (tracking != null && !tracking.trim().isEmpty()) {
+                    boolean cancelSuccess = superAIService.cancelOrder(tracking);
+                    if (!cancelSuccess) {
+                        result.put("success", false);
+                        result.put("message", "Hủy ở đơn vị vận chuyển thất bại, chưa cập nhật DB.");
+                        return result;
+                    }
+                    apiCalled = true;
+                } else {
+                    System.out.println(" không có mã tracking code  " + orderId );
+                }
+            } catch (Exception e) {
+                System.err.println( e.getMessage());
+                e.printStackTrace();
+                result.put("success", false);
+                result.put("message", "Lỗi gọi API hủy đơn vận chuyển.");
+                return result;
+            }
         }
+
 
         // mới cập nhật trạng thái đơn hàng trong DB
         if (!orderDao.updateStatus(orderId, newStatus)) {
@@ -214,7 +243,7 @@ public class OrderService {
         System.out.println(" OrderService  Order " + orderId + " status updated to " + getStatusName(newStatus));
         result.put("success", true);
         result.put("tracking", tracking); // Trả về tracking để Admin thấy nếu cần
-        
+
         if (newStatus == 2 && !apiCalled) {
             result.put("message", "Cập nhật thành công.  Lỗi gọi API vận chuyển, cần cập nhật mã vận đơn sau.");
         } else {
@@ -224,7 +253,7 @@ public class OrderService {
     }
 
     public int processOrder(int userId, int addressId, String paymentMethod, String voucherCode,
-            Map<Integer, Integer> cart, int paymentStatus,String buyerNote, double shippingFee) {
+                            Map<Integer, Integer> cart, int paymentStatus, String buyerNote, double shippingFee) {
         double subtotal = 0;
         for (Map.Entry<Integer, Integer> entry : cart.entrySet()) {
             Map<String, Object> product = orderDao.getProductForCart(entry.getKey());
@@ -294,7 +323,6 @@ public class OrderService {
         return voucherDao.getActiveVouchers();
     }
 
-
     // tách việc gọi API vận chuyển ra chạy nền
     // không block request user
     // API ship có thể chậm / lỗi
@@ -317,4 +345,74 @@ public class OrderService {
         }).start();
     }
 
+    public String getTrackingByOrderId(int orderId) {
+        return shippingDao.getTrackingByOrderId(orderId);
+    }
+    public boolean updateStatusOnly(int orderId, int newStatus) {
+        return orderDao.updateStatus(orderId, newStatus);
+    }
+    public Map<String, Object> getOrderDetailsForAdmin(int orderId) {
+        Map<String, Object> result = new HashMap<>();
+        Optional<Order> optOrder = orderDao.getOrderById(orderId);
+        if (optOrder.isEmpty()) {
+            result.put("success", false);
+            result.put("message", "Đơn hàng không tồn tại");
+            return result;
+        }
+        Order order = optOrder.get();
+        Address address = getOrderAddress(order.getAddressId());
+        // Lấy chi tiết đơn hàng
+        List<OrderDetail> orderDetails = orderDetailDao.getOrderDetailsByOrderId(orderId);
+        
+        List<Map<String, Object>> items = new java.util.ArrayList<>();
+        for (OrderDetail detail : orderDetails) {
+            Map<String, String> productInfo = orderDetailDao.getProductInfoByVariantId(detail.getVariantId());
+            Map<String, Object> item = new HashMap<>();
+            item.put("productName", productInfo.getOrDefault("productName", "N/A"));
+            item.put("variantName", productInfo.getOrDefault("variantName", ""));
+            item.put("colorName", productInfo.getOrDefault("colorName", ""));
+            item.put("quantity", detail.getQuantity());
+            item.put("price", detail.getPrice());
+            item.put("totalMoney", detail.getTotalMoney());
+            items.add(item);
+        }
+        result.put("success", true);
+        result.put("order", order);
+        result.put("address", address);
+        result.put("items", items);
+        result.put("statusName", getStatusName(order.getStatus()));
+        result.put("statusClass", getStatusClass(order.getStatus()));
+        return result;
+    }
+    public Map<String, Object> cancelOrderWithReason(int orderId, String cancellationReason) {
+        Map<String, Object> result = new HashMap<>();
+        Optional<Order> opt = orderDao.getOrderById(orderId);
+        if (opt.isEmpty()) {
+            result.put("success", false);
+            result.put("message", "Đơn hàng không tồn tại");
+            return result;
+        }
+        Order order = opt.get();
+        int currentStatus = order.getStatus();
+        // Kiểm tra trạng thái - chỉ có thể hủy các đơn hàng ở trạng thái 1 hoặc 2
+        if (currentStatus != 1 && currentStatus != 2) {
+            result.put("success", false);
+            result.put("message", "Không thể hủy đơn hàng ở trạng thái " + getStatusName(currentStatus));
+            return result;
+        }
+        if (cancellationReason == null || cancellationReason.trim().isEmpty()) {
+            result.put("success", false);
+            result.put("message", "Vui lòng nhập lý do hủy đơn hàng");
+            return result;
+        }
+        // Cập nhật status sang 4 (hủy) và lưu lý do hủy
+        if (!orderDao.cancelOrderWithReason(orderId, 4, cancellationReason)) {
+            result.put("success", false);
+            result.put("message", "Lỗi DB: Không thể hủy đơn hàng");
+            return result;
+        }
+        result.put("success", true);
+        result.put("message", "Hủy đơn hàng thành công");
+        return result;
+    }
 }
