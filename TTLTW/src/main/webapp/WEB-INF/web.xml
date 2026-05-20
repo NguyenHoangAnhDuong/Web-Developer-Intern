@@ -5,12 +5,12 @@
          version="6.0">
     <context-param>
         <param-name>facebook.clientId</param-name>
-        <param-value>862638006740751</param-value>
+        <param-value>1304205441123354</param-value>
     </context-param>
 
     <context-param>
         <param-name>facebook.clientSecret</param-name>
-        <param-value>92f83ec0cab7ab8372af08d12541a73e</param-value>
+        <param-value>85d75c5932195f3d59dc0e744926a231</param-value>
     </context-param>
 
     <context-param>

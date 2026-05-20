@@ -126,14 +126,44 @@ public class UserService {
         return userDao.loginByProvider(provider, providerId);
     }
 
-    // Kiểm tra đã tồn tại user chưa
-    // Chưa thì thêm user mới
+    // Đăng nhập qua provider (Facebook/Google...).
+    // Flow:
+    //   1) Đã từng đăng nhập bằng provider này (provider + provider_id khớp) -> đăng nhập luôn.
+    //   2) Email từ provider đã tồn tại trong hệ thống -> đăng nhập vào account đó
+    //      và liên kết provider để lần sau đăng nhập trực tiếp ở bước 1.
+    //   3) Chưa có account -> tạo mới.
     public User loginOrRegisterSocial(User u) {
+        // 1. Tài khoản đã liên kết provider trước đó
         User existed = userDao.loginByProvider(u.getProvider(), u.getProviderId());
         if (existed != null) {
             return existed;
         }
 
+        // 2. Email tồn tại trong hệ thống -> đăng nhập vào account hiện có
+        String email = u.getEmail();
+        if (email != null && !email.isBlank()) {
+            Optional<User> byEmailOpt = userDao.findByEmail(email);
+            if (byEmailOpt.isPresent()) {
+                User byEmail = byEmailOpt.get();
+                // Tài khoản đã bị khóa thì không cho đăng nhập
+                if (byEmail.getStatus() != 1) {
+                    return null;
+                }
+                userDao.linkSocialProvider(byEmail.getId(), u.getProvider(), u.getProviderId(), u.getAvatar());
+                User refreshed = userDao.loginByProvider(u.getProvider(), u.getProviderId());
+                return refreshed != null ? refreshed : byEmail;
+            }
+        }
+
+        // 3. Tạo tài khoản mới — đảm bảo username không trùng
+        String baseUsername = u.getUsername();
+        String finalUsername = baseUsername;
+        int suffix = 1;
+        while (userDao.checkExistUsername(finalUsername)) {
+            finalUsername = baseUsername + suffix;
+            suffix++;
+        }
+        u.setUsername(finalUsername);
         userDao.insertSocialUser(u);
         return userDao.loginByProvider(u.getProvider(), u.getProviderId());
     }

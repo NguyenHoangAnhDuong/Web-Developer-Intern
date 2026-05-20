@@ -284,6 +284,41 @@ public class UserDao {
                 .orElse(null));
     }
 
+    // Tìm user theo email (dùng cho luồng đăng nhập qua provider khi email đã tồn tại trong hệ thống)
+    public Optional<User> findByEmail(String email) {
+        String sql = """
+                    SELECT id, username, first_name AS firstName, last_name AS lastName, avatar, email,
+                           roles_id AS rolesId, status, provider, provider_id AS providerId,
+                           created_at AS createdAt, updated_at AS updatedAt
+                    FROM users
+                    WHERE email = :email
+                    LIMIT 1
+                """;
+        return DBConnect.getJdbi().withHandle(handle -> handle.createQuery(sql)
+                .bind("email", email)
+                .mapToBean(User.class)
+                .findOne());
+    }
+
+    // Liên kết tài khoản hiện hữu với provider (FB/Google...) khi user đăng nhập social lần đầu
+    // bằng email trùng với account đã có. Avatar chỉ được set nếu user chưa có avatar.
+    public boolean linkSocialProvider(int userId, String provider, String providerId, String avatar) {
+        String sql = """
+                    UPDATE users
+                    SET provider = :p,
+                        provider_id = :pid,
+                        avatar = COALESCE(NULLIF(avatar, ''), :av),
+                        updated_at = NOW()
+                    WHERE id = :id
+                """;
+        return DBConnect.getJdbi().withHandle(h -> h.createUpdate(sql)
+                .bind("p", provider)
+                .bind("pid", providerId)
+                .bind("av", avatar)
+                .bind("id", userId)
+                .execute()) > 0;
+    }
+
     // Thêm người dùng đăng nhập bằng bên thứ 3
     public void insertSocialUser(User u) {
         String sql = """
