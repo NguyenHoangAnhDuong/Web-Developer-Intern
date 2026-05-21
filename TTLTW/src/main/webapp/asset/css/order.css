@@ -198,3 +198,7 @@ body {
   color: var(--color-button);
   border-bottom: 3px solid var(--color-button);
 }
+.status.pending {
+    background: #eef2ff;
+    color: #4f46e5;
+}

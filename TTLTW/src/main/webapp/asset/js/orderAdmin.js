@@ -5,6 +5,12 @@ let currentOrderIdForCancel = null;
 function bindStatusChange() {
     document.querySelectorAll('.status-select').forEach(select => {
         updateStatusColor(select);
+
+        if (select.value === '3' || select.value === '4') {
+            select.disabled = true;
+            return;
+        }
+
         select.addEventListener('change', function () {
             const orderId = this.dataset.id;
             const status = this.value;
@@ -81,6 +87,11 @@ function showToast(message, success) {
 
 function updateStatusColor(select) {
     switch (select.value) {
+        case '0':
+            select.style.backgroundColor = '#eef2ff';
+            select.style.color = '#4f46e5';
+            select.style.borderColor = '#4f46e5';
+            break;
         case '1':
             select.style.backgroundColor = '#fef3c7';
             select.style.color = '#f59e0b';
@@ -169,7 +180,7 @@ function populateOrderDetailModal(data) {
     document.getElementById('shippingFeeDetail').textContent = formatCurrency(order.feeShipping) + ' ₫';
     document.getElementById('totalDetail').textContent = formatCurrency(order.totalAmount) + ' ₫';
     const cancelBtn = document.getElementById('cancelOrderBtn');
-    if (order.status === 1 || order.status === 2) {
+    if (order.status === 0 || order.status === 1) {
         cancelBtn.style.display = 'block';
         currentOrderIdForCancel = order.id;
     } else {
