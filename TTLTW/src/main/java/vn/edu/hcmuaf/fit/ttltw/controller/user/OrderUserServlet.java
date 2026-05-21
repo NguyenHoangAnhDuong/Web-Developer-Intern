@@ -183,7 +183,7 @@ public class OrderUserServlet extends HttpServlet {
                 response.getWriter().print("{\"success\":true,\"message\":\"Hủy đơn hàng thành công\"}");
             } else {
                 response.getWriter().print(
-                        "{\"success\":false,\"message\":\"Không thể hủy đơn hàng. Chỉ có thể hủy đơn hàng đang ở trạng thái 'Đang lên đơn'\"}");
+                    "{\"success\":false,\"message\":\"Không thể hủy đơn hàng. Chỉ có thể hủy đơn hàng ở trạng thái 'Chờ xác nhận' hoặc 'Đang lên đơn'\"}");
             }
 
         } catch (NumberFormatException e) {
@@ -212,7 +212,7 @@ public class OrderUserServlet extends HttpServlet {
                     if (success) {
                         response.getWriter().print("{\"success\":true,\"message\":\"Hủy đơn hàng thành công\"}");
                     } else {
-                        response.getWriter().print("{\"success\":false,\"message\":\"Không thể hủy đơn hàng\"}");
+                        response.getWriter().print("{\"success\":false,\"message\":\"Không thể hủy đơn hàng. Chỉ có thể hủy đơn hàng ở trạng thái 'Chờ xác nhận' hoặc 'Đang lên đơn'\"}");
                     }
                 } else {
                     response.getWriter().print("{\"success\":false,\"message\":\"Đơn hàng không thuộc về bạn\"}");
