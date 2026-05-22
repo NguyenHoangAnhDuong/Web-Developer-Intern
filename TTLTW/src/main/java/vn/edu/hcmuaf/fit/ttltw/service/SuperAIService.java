@@ -38,6 +38,7 @@ public class SuperAIService {
     private static long DEFAULT_WEIGHT = 500L;
     private static long DEFAULT_VALUE = 0L;
     private static boolean MOCK_MODE = false;
+    private String lastCancelErrorMessage = null;
 
     static {
         try (InputStream input = SuperAIService.class.getClassLoader().getResourceAsStream("config.properties")) {
@@ -87,10 +88,7 @@ public class SuperAIService {
         }
     }
 
-    //tách địa chỉ
-//    public String[] parseAddressPublic(String fullAddress) {
-//        return parseAddress(fullAddress);
-//    }
+
 
     // lấy danh sách đơn vị vận chuyển từ superAI
     public List<Map<String, Object>> getShippingCarriers() {
@@ -199,9 +197,6 @@ public class SuperAIService {
         return options;
     }
 
-    //    public List<ShippingZoneFees> getShippingServices(String fullAddress, long weight, long value) {
-//        return getShippingFeeOptions(fullAddress, weight > 0 ? weight : DEFAULT_WEIGHT, value > 0 ? value : DEFAULT_VALUE);
-//    }
 // Tạo một đơn hàng
     public String createRealOrder(int orderId, String name, String phone, String fullAddress, double amount) {
         if (MOCK_MODE) {
@@ -339,17 +334,23 @@ public class SuperAIService {
 
     // hủy đơn hàng
     public boolean cancelOrder(String trackingCode) {
+        lastCancelErrorMessage = null;
         try {
             Map<String, Object> body = new HashMap<>();
             body.put("code", trackingCode);
             String json = new Gson().toJson(body);
-
-
             JsonObject response = fetchJsonFromUrl(CANCEL_URL, json);
+            if (response != null) {
+                System.out.println( trackingCode + " -> " + response.toString());
+            }
+
             if (response == null) {
-                System.err.println("cancel API returned null response for code=" + trackingCode);
+                lastCancelErrorMessage = "API hủy đơn hàng không phản hồi";
+                System.err.println( trackingCode);
                 return false;
             }
+
+            String rawResponse = response.toString();
 
             if (response.has("error") && response.get("error").isJsonPrimitive()) {
                 boolean ok = !response.get("error").getAsBoolean();
@@ -357,17 +358,42 @@ public class SuperAIService {
                     String message = response.has("message") && !response.get("message").isJsonNull()
                             ? response.get("message").getAsString()
                             : "Unknown cancel error";
-                    System.err.println("cancel API reported error. message=" + message + ", code=" + trackingCode);
+
+                    String carrierCode = null;
+                    if (response.has("code") && !response.get("code").isJsonNull()) {
+                        try { carrierCode = response.get("code").getAsString(); } catch (Exception ignored) {}
+                    }
+                    if (carrierCode == null && response.has("data") && response.get("data").isJsonObject()) {
+                        JsonObject data = response.getAsJsonObject("data");
+                        if (data.has("code") && !data.get("code").isJsonNull()) {
+                            try { carrierCode = data.get("code").getAsString(); } catch (Exception ignored) {}
+                        }
+                    }
+
+                    String composed = message + (carrierCode != null ?   " "+ carrierCode   : " | raw:" + rawResponse);
+                    lastCancelErrorMessage = composed;
+                    System.err.println( composed + ", " + trackingCode);
                 }
                 return ok;
+            }
+
+            if (response.has("message") && !response.get("message").isJsonNull()) {
+                String msg = response.get("message").getAsString();
+                if (msg != null && !msg.trim().isEmpty()) {
+                    lastCancelErrorMessage = msg + " | raw:" + rawResponse;
+                }
             }
 
             return true;
 
         } catch (Exception e) {
+            lastCancelErrorMessage = e.getMessage();
             e.printStackTrace();
             return false;
         }
+    }
+    public String getLastCancelErrorMessage() {
+        return lastCancelErrorMessage;
     }
 
     // gửi yêu cầu Get
@@ -411,8 +437,6 @@ public class SuperAIService {
                         requestBuilder.header("Content-Type", "application/json; charset=UTF-8")
                                 .POST(HttpRequest.BodyPublishers.ofString(requestBody, StandardCharsets.UTF_8));
                     }
-
-                    String method = requestBody == null ? "GET" : "POST";
 
                     HttpResponse<String> response = client.send(
                             requestBuilder.build(),

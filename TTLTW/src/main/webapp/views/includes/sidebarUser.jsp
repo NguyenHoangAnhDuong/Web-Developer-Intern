@@ -49,9 +49,9 @@
                     <a href="${pageContext.request.contextPath}/user/profile" id="menuProfile">Hồ Sơ</a>
                 </li>
 
-                <li class="menu-item <%= "bank".equals(activeMenu) ? "active" : "" %>">
-                    <a href="${pageContext.request.contextPath}/user/payment" id="menuBank">Ngân Hàng</a>
-                </li>
+<%--                <li class="menu-item <%= "bank".equals(activeMenu) ? "active" : "" %>">--%>
+<%--                    <a href="${pageContext.request.contextPath}/user/payment" id="menuBank">Ngân Hàng</a>--%>
+<%--                </li>--%>
 
                 <li class="menu-item <%= "address".equals(activeMenu) ? "active" : "" %>">
                     <a href="${pageContext.request.contextPath}/user/addresses" id="menuAddress">Địa Chỉ</a>

@@ -49,7 +49,7 @@
             <% for (Map<String, Object> item : items) { %>
             <article class="item">
                 <div class="thumb" aria-hidden="true">
-                    <img src="${pageContext.request.contextPath}/assert/img/product/<%= item.get("imagePath") %>"
+                    <img src="<%= item.get("imagePath") %>"
                          alt="<%= item.get("productName") %>"
                          style="width:82px;height:82px;border-radius:8px;object-fit:cover"/>
                 </div>
@@ -127,8 +127,6 @@
             <div class="address">
                 <div id="rec-name"><strong><%= address.get("address") %></strong> • <span class="muted"
                                                                                           id="rec-phone"><%= address.get("phoneNumber") %></span></div>
-                <div id="ship-address" class="muted"><%= address.get("address") %></div>
-                <div id="ship-phone" class="muted"><%= address.get("phoneNumber") %></div>
             </div>
         </div>
     </aside>

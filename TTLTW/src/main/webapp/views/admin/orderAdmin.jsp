@@ -47,6 +47,7 @@
         <div class="filter-options">
             <select id="statusFilter" class="filter-select">
                 <option value="">Tất cả trạng thái</option>
+                <option value="0">Chờ xác nhận</option>
                 <option value="1">Đang lên đơn</option>
                 <option value="2">Đang giao</option>
                 <option value="3">Đã giao</option>
@@ -83,6 +84,7 @@
                 <td>${item.order.createdAt}</td>
                 <td>
                     <select class="status-select status-${item.order.status}" data-id="${item.order.id}" ${canUpdateOrder ? '' : 'disabled'}>
+                        <option value="0" ${item.order.status == 0 ? 'selected' : ''}>Chờ xác nhận</option>
                         <option value="1" ${item.order.status == 1 ? 'selected' : ''}>Đang lên đơn</option>
                         <option value="2" ${item.order.status == 2 ? 'selected' : ''}>Đang giao</option>
                         <option value="3" ${item.order.status == 3 ? 'selected' : ''}>Đã giao</option>
