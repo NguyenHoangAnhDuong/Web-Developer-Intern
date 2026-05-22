@@ -34,6 +34,11 @@ public class RedisService {
     private static String pendingUserKey(String email)    { return "pending_user:" + email; }
     private static String productKey(int id)              { return "product:" + id; }
     private static String productListKey(String suffix)   { return "products:" + suffix; }
+    private static String resetOtpKey(String email)       { return "reset_otp:" + email; }
+    private static String resetTokenKey(String token)     { return "reset_token:" + token; }
+
+    // TTL cho reset token (sau khi OTP đã verify) — 10 phút, đủ để user nhập mật khẩu mới.
+    private static final int TTL_RESET_TOKEN_SECONDS = 600;
 
 
     //Lưu OTP cho email, tự hết hạn sau 5 phút.
@@ -80,7 +85,51 @@ public class RedisService {
         }
     }
 
-    
+    // ============================================================
+    // OTP cho luồng quên mật khẩu — tách key riêng (`reset_otp:`) để
+    // không xung đột với OTP đăng ký (cùng email có thể đang chờ
+    // verify register).
+    // ============================================================
+
+    public static void saveResetOtp(String email, String otp) {
+        try (Jedis jedis = RedisConnect.getConnection()) {
+            jedis.setex(resetOtpKey(email), RedisConnect.getTtlOtp(), otp);
+        }
+    }
+
+    public static String getResetOtp(String email) {
+        try (Jedis jedis = RedisConnect.getConnection()) {
+            return jedis.get(resetOtpKey(email));
+        }
+    }
+
+    public static void deleteResetOtp(String email) {
+        try (Jedis jedis = RedisConnect.getConnection()) {
+            jedis.del(resetOtpKey(email));
+        }
+    }
+
+    // Token cấp sau khi OTP đã verify — vé một lần để user vào bước
+    // nhập mật khẩu mới. Xoá ngay sau khi password được cập nhật.
+    public static void saveResetToken(String token, String email) {
+        try (Jedis jedis = RedisConnect.getConnection()) {
+            jedis.setex(resetTokenKey(token), TTL_RESET_TOKEN_SECONDS, email);
+        }
+    }
+
+    public static String getResetTokenEmail(String token) {
+        try (Jedis jedis = RedisConnect.getConnection()) {
+            return jedis.get(resetTokenKey(token));
+        }
+    }
+
+    public static void deleteResetToken(String token) {
+        try (Jedis jedis = RedisConnect.getConnection()) {
+            jedis.del(resetTokenKey(token));
+        }
+    }
+
+
     public static void cacheProduct(Product product) {
         try (Jedis jedis = RedisConnect.getConnection()) {
             jedis.setex(productKey(product.getId()),
