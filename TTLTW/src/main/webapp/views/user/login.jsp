@@ -53,8 +53,8 @@
 
                             <div class="form-group actions">
                                 <button type="submit" id="btn-login" class="btn">Đăng nhập</button>
-                                <a href="forgorpassword.html" id="link-forgot-password" class="text-right">Quên mật
-                                    khẩu?</a>
+                                <a href="${pageContext.request.contextPath}/forgot-password"
+                                   id="link-forgot-password" class="text-right">Quên mật khẩu?</a>
                             </div>
 
                             <div class="form-group social">
