@@ -19,18 +19,21 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
+import vn.edu.hcmuaf.fit.ttltw.service.LoginAuditService;
+import vn.edu.hcmuaf.fit.ttltw.service.LoginResult;
 import vn.edu.hcmuaf.fit.ttltw.service.UserService;
 
 @WebServlet("/login-facebook-callback")
 public class LoginFacebookCallbackServlet extends HttpServlet {
     private final UserService userService = new UserService();
+    private final LoginAuditService auditService = new LoginAuditService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String CLIENT_ID = getServletContext().getInitParameter("facebook.clientId");
-        String CLIENT_SECRET = getServletContext().getInitParameter("facebook.clientSecret");
-        String REDIRECT_URI = getServletContext().getInitParameter("facebook.redirectUri");
+        String CLIENT_ID = (String) getServletContext().getAttribute("facebook.clientId");
+        String CLIENT_SECRET = (String) getServletContext().getAttribute("facebook.clientSecret");
+        String REDIRECT_URI = (String) getServletContext().getAttribute("facebook.redirectUri");
 
         String code = request.getParameter("code");
         if (code == null || code.isEmpty()) {
@@ -49,7 +52,7 @@ public class LoginFacebookCallbackServlet extends HttpServlet {
             JsonObject tokenJson = JsonParser.parseString(tokenResponse).getAsJsonObject();
             String accessToken = tokenJson.get("access_token").getAsString();
 
-            // Lấy thông tin user
+            // Lấy thông tin user (bao gồm email — đã xin quyền 'email' ở bước authorize)
             String infoUrl = "https://graph.facebook.com/me"
                     + "?fields=id,name,email,picture.type(large)"
                     + "&access_token=" + accessToken;
@@ -59,7 +62,19 @@ public class LoginFacebookCallbackServlet extends HttpServlet {
 
             String fbId = info.get("id").getAsString();
             String name = info.has("name") ? info.get("name").getAsString() : "Facebook User";
-            String fakeEmail = "fb_" + fbId + "@facebook.local";
+
+            // Email là bắt buộc cho flow đăng nhập/đăng ký theo email.
+            // Người dùng có thể từ chối cấp quyền email khi authorize — khi đó Graph API không trả về field 'email'.
+            String email = (info.has("email") && !info.get("email").isJsonNull())
+                    ? info.get("email").getAsString()
+                    : null;
+            if (email == null || email.isBlank()) {
+                response.sendRedirect(request.getContextPath()
+                        + "/login?error=" + URLEncoder.encode(
+                                "Bạn cần cấp quyền truy cập email để đăng nhập bằng Facebook",
+                                StandardCharsets.UTF_8));
+                return;
+            }
 
             String avatar = null;
             if (info.has("picture")) {
@@ -68,46 +83,53 @@ public class LoginFacebookCallbackServlet extends HttpServlet {
                         .get("url").getAsString();
             }
 
-            // Hàm bỏ dấu + chuẩn hóa
+            // Sinh username gợi ý cho trường hợp tạo account mới (UserService sẽ tự dedupe nếu trùng)
             String baseUsername = removeDiacritics(name)
                     .toLowerCase()
-                    .replaceAll("[^a-z0-9]", ""); // bỏ ký tự lạ & khoảng trắng
-
-            // tránh rỗng
+                    .replaceAll("[^a-z0-9]", "");
             if (baseUsername.isEmpty()) {
                 baseUsername = "fbuser";
             }
+            String username = baseUsername + fbId.substring(Math.max(0, fbId.length() - 4));
 
-            // gắn thêm 4 số cuối của fbId để tránh trùng
-            String username = baseUsername + fbId.substring(fbId.length() - 4);
-
-            // 3. Tạo User từ Facebook (không set provider/providerId — lưu ở user_social_accounts)
+            // Đẩy thông tin từ Facebook sang service để quyết định login hay register
             User u = new User();
             u.setUsername(username);
-            u.setEmail(fakeEmail);
+            u.setEmail(email);
             u.setFirstName(name);
             u.setAvatar(avatar);
             u.setRolesId(2);     // Mặc định là khách hàng
             u.setStatus(1);      // Hoạt động
+            u.setProvider("facebook");
+            u.setProviderId(fbId);
 
-            User user = userService.loginOrRegisterSocial(u, "facebook", fbId, fakeEmail);
+            LoginResult result = userService.loginOrRegisterSocial(u);
+            auditService.log(request, email, LoginAuditService.CHANNEL_FACEBOOK, result);
 
-            if (user == null) {
-                response.sendRedirect(request.getContextPath() + "/login?error=Facebook login failed");
-                return;
+            switch (result.getStatus()) {
+                case ACCOUNT_LOCKED -> {
+                    redirectWithToast(request, response,
+                            "Tài khoản đã bị khóa tạm thời do đăng nhập sai quá nhiều lần. Vui lòng thử lại sau "
+                                    + LoginServlet.formatDuration(result.getLockSecondsRemaining()) + ".");
+                    return;
+                }
+                case ACCOUNT_INACTIVE -> {
+                    redirectWithToast(request, response,
+                            "Tài khoản đã bị khóa, vui lòng liên hệ quản trị viên.");
+                    return;
+                }
+                case SOCIAL_LOGIN_FAILED, INVALID_CREDENTIALS -> {
+                    response.sendRedirect(request.getContextPath()
+                            + "/login?error=" + URLEncoder.encode(
+                                    "Đăng nhập Facebook thất bại, vui lòng thử lại",
+                                    StandardCharsets.UTF_8));
+                    return;
+                }
+                default -> { /* SUCCESS — đi tiếp */ }
             }
+            User user = result.getUser();
 
             HttpSession session = request.getSession();
-
-            // Tài khoản bị khóa → chặn ở mọi kênh đăng nhập
-            if (user.getStatus() != 1) {
-                session.invalidate();
-                HttpSession newSession = request.getSession(true);
-                newSession.setAttribute("toastMessage", "Tài khoản đã bị khóa, vui lòng liên hệ quản trị viên.");
-                newSession.setAttribute("toastType", "error");
-                response.sendRedirect(request.getContextPath() + "/login");
-                return;
-            }
 
             // Chỉ cho phép khách hàng (role == 2)
             if (user.getRolesId() != 2) {
@@ -191,6 +213,17 @@ public class LoginFacebookCallbackServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login?error=Facebook login error");
         }
     }
+    // Invalidate session hiện tại rồi gắn toast vào session mới để hiển thị tại /login.
+    private void redirectWithToast(HttpServletRequest request, HttpServletResponse response, String message)
+            throws IOException {
+        HttpSession current = request.getSession(false);
+        if (current != null) current.invalidate();
+        HttpSession fresh = request.getSession(true);
+        fresh.setAttribute("toastMessage", message);
+        fresh.setAttribute("toastType", "error");
+        response.sendRedirect(request.getContextPath() + "/login");
+    }
+
     private String sendGet(String urlStr) throws Exception {
         URL url = new URL(urlStr);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();

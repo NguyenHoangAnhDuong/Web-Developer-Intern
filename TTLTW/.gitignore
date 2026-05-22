@@ -39,6 +39,11 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Env files ###
+.env
+.env.local
+
 /pom.xml
 src/main/resources/config.properties
 src/main/resources/db.properties

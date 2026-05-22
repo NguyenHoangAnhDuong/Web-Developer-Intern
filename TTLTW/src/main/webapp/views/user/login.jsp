@@ -24,12 +24,14 @@
 
                         <form id="login-form" action="login" method="post">
 
-                            <!-- THÔNG BÁO LỖI -->
-                            <div id="login-message" class="login-message ${error != null ? 'show error' : ''}">
-                                <c:if test="${not empty error}">
-                                    <i class="fa fa-warning"></i> ${error}
+                            <!-- THÔNG BÁO LỖI: ưu tiên request attribute (set bởi controller),
+                                 fallback sang query param (từ OAuth callback redirect ?error=...).
+                                 Dùng c:out để escape HTML, tránh XSS qua query string. -->
+                            <c:set var="errMsg" value="${not empty error ? error : param.error}" />
+                            <div id="login-message" class="login-message ${not empty errMsg ? 'show error' : ''}">
+                                <c:if test="${not empty errMsg}">
+                                    <i class="fa fa-warning"></i> <c:out value="${errMsg}" />
                                 </c:if>
-                                <i class="fa fa-warning"></i> ${message}
                             </div>
 
 

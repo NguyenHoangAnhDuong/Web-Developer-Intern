@@ -18,19 +18,24 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.net.URLEncoder;
+
 import vn.edu.hcmuaf.fit.ttltw.model.User;
+import vn.edu.hcmuaf.fit.ttltw.service.LoginAuditService;
+import vn.edu.hcmuaf.fit.ttltw.service.LoginResult;
 import vn.edu.hcmuaf.fit.ttltw.service.UserService;
 
 @WebServlet("/login-google-callback")
 public class LoginGoogleCallbackServlet extends HttpServlet {
     private final UserService userService = new UserService();
+    private final LoginAuditService auditService = new LoginAuditService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String clientId = getServletContext().getInitParameter("google.clientId");
-        String clientSecret = getServletContext().getInitParameter("google.clientSecret");
-        String redirectUri = getServletContext().getInitParameter("google.redirectUri");
+        String clientId = (String) getServletContext().getAttribute("google.clientId");
+        String clientSecret = (String) getServletContext().getAttribute("google.clientSecret");
+        String redirectUri = (String) getServletContext().getAttribute("google.redirectUri");
 
         String code = request.getParameter("code");
         if (code == null || code.isEmpty()) {
@@ -76,7 +81,9 @@ public class LoginGoogleCallbackServlet extends HttpServlet {
             }
             String username = baseUsername + googleId.substring(googleId.length() - Math.min(4, googleId.length()));
 
-            // 4. Tạo User object cho Google (không set provider/providerId — lưu ở user_social_accounts)
+            // 4. Tạo User object cho Google. provider/providerId được set vào User
+            // để UserService.loginOrRegisterSocial truyền sang DAO; record thật được lưu
+            // ở bảng user_social_accounts (1 user có thể link nhiều provider).
             User u = new User();
             u.setUsername(username);
             u.setEmail(email);
@@ -84,26 +91,37 @@ public class LoginGoogleCallbackServlet extends HttpServlet {
             u.setAvatar(avatar);
             u.setRolesId(2);        // Mặc định là khách hàng
             u.setStatus(1);         // Hoạt động
+            u.setProvider("google");
+            u.setProviderId(googleId);
 
             // 5. Kiểm tra email tồn tại → đăng nhập; chưa có → tạo mới
-            User user = userService.loginOrRegisterByGoogle(u, googleId, email);
+            LoginResult result = userService.loginOrRegisterSocial(u);
+            auditService.log(request, email, LoginAuditService.CHANNEL_GOOGLE, result);
 
-            if (user == null) {
-                response.sendRedirect(request.getContextPath() + "/login?error=Google login failed");
-                return;
+            switch (result.getStatus()) {
+                case ACCOUNT_LOCKED -> {
+                    redirectWithToast(request, response,
+                            "Tài khoản đã bị khóa tạm thời do đăng nhập sai quá nhiều lần. Vui lòng thử lại sau "
+                                    + LoginServlet.formatDuration(result.getLockSecondsRemaining()) + ".");
+                    return;
+                }
+                case ACCOUNT_INACTIVE -> {
+                    redirectWithToast(request, response,
+                            "Tài khoản đã bị khóa, vui lòng liên hệ quản trị viên.");
+                    return;
+                }
+                case SOCIAL_LOGIN_FAILED, INVALID_CREDENTIALS -> {
+                    response.sendRedirect(request.getContextPath()
+                            + "/login?error=" + URLEncoder.encode(
+                                    "Đăng nhập Google thất bại, vui lòng thử lại",
+                                    StandardCharsets.UTF_8));
+                    return;
+                }
+                default -> { /* SUCCESS — đi tiếp */ }
             }
+            User user = result.getUser();
 
             HttpSession session = request.getSession();
-
-            // Tài khoản bị khóa → chặn ở mọi kênh đăng nhập
-            if (user.getStatus() != 1) {
-                session.invalidate();
-                HttpSession newSession = request.getSession(true);
-                newSession.setAttribute("toastMessage", "Tài khoản đã bị khóa, vui lòng liên hệ quản trị viên.");
-                newSession.setAttribute("toastType", "error");
-                response.sendRedirect(request.getContextPath() + "/login");
-                return;
-            }
 
             // Chỉ cho phép khách hàng (role == 2)
             if (user.getRolesId() != 2) {
@@ -185,6 +203,17 @@ public class LoginGoogleCallbackServlet extends HttpServlet {
             e.printStackTrace();
             response.sendRedirect(request.getContextPath() + "/login?error=Google login error");
         }
+    }
+
+    // Invalidate session hiện tại rồi gắn toast vào session mới để hiển thị tại /login.
+    private void redirectWithToast(HttpServletRequest request, HttpServletResponse response, String message)
+            throws IOException {
+        HttpSession current = request.getSession(false);
+        if (current != null) current.invalidate();
+        HttpSession fresh = request.getSession(true);
+        fresh.setAttribute("toastMessage", message);
+        fresh.setAttribute("toastType", "error");
+        response.sendRedirect(request.getContextPath() + "/login");
     }
 
     // Google token endpoint yêu cầu POST

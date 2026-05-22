@@ -13,9 +13,9 @@ public class LoginFacebookServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        String CLIENT_ID = getServletContext().getInitParameter("facebook.clientId");
-        String CLIENT_SECRET = getServletContext().getInitParameter("facebook.clientSecret");
-        String REDIRECT_URI = getServletContext().getInitParameter("facebook.redirectUri");
+        String CLIENT_ID = (String) getServletContext().getAttribute("facebook.clientId");
+        String CLIENT_SECRET = (String) getServletContext().getAttribute("facebook.clientSecret");
+        String REDIRECT_URI = (String) getServletContext().getAttribute("facebook.redirectUri");
 
         String url = "https://www.facebook.com/v18.0/dialog/oauth"
                 + "?client_id=" + CLIENT_ID

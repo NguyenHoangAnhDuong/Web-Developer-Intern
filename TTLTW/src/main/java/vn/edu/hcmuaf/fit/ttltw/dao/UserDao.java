@@ -243,6 +243,8 @@ public class UserDao {
             sql = """
                         SELECT id, username, first_name AS firstName, last_name AS lastName, avatar, email,
                                roles_id AS rolesId, status, password,
+                               failed_login_attempts AS failedLoginAttempts,
+                               locked_until AS lockedUntil,
                                created_at AS createdAt, updated_at AS updatedAt
                         FROM users
                         WHERE email = :input
@@ -252,6 +254,8 @@ public class UserDao {
             sql = """
                         SELECT id, username, first_name AS firstName, last_name AS lastName, avatar, email,
                                roles_id AS rolesId, status, password,
+                               failed_login_attempts AS failedLoginAttempts,
+                               locked_until AS lockedUntil,
                                created_at AS createdAt, updated_at AS updatedAt
                         FROM users
                         WHERE username = :input
@@ -266,30 +270,51 @@ public class UserDao {
                 .orElse(null));
     }
 
-    // Tìm user theo email (không filter status — caller tự kiểm tra để hiển thị
-    // message phù hợp khi tài khoản bị khóa)
-    public User findByEmail(String email) {
+    // Tìm user theo email (dùng cho luồng đăng nhập qua provider khi email đã tồn tại trong hệ thống).
+    // Không filter status — caller tự kiểm tra để hiển thị message phù hợp khi tài khoản bị khóa.
+    public Optional<User> findByEmail(String email) {
         String sql = """
-                SELECT id, username, first_name AS firstName, last_name AS lastName, avatar, email,
-                       roles_id AS rolesId, status,
-                       created_at AS createdAt, updated_at AS updatedAt
-                FROM users
-                WHERE email = :email
-                LIMIT 1
+                    SELECT id, username, first_name AS firstName, last_name AS lastName, avatar, email,
+                           roles_id AS rolesId, status,
+                           failed_login_attempts AS failedLoginAttempts,
+                           locked_until AS lockedUntil,
+                           created_at AS createdAt, updated_at AS updatedAt
+                    FROM users
+                    WHERE email = :email
+                    LIMIT 1
                 """;
         return DBConnect.getJdbi().withHandle(handle -> handle.createQuery(sql)
                 .bind("email", email)
                 .mapToBean(User.class)
-                .findOne()
-                .orElse(null));
+                .findOne());
     }
 
-    // Tìm user qua bảng user_social_accounts (đăng nhập bên thứ 3)
-    // Không filter status — caller tự kiểm tra để chặn tài khoản bị khóa với message rõ ràng
-    public User findByProvider(String provider, String providerUserId) {
+    // Set avatar cho user nếu user chưa có avatar (dùng khi liên kết provider lần đầu
+    // để mượn ảnh đại diện từ FB/Google mà không ghi đè avatar người dùng đã tự upload).
+    public boolean updateAvatarIfEmpty(int userId, String avatar) {
+        if (avatar == null || avatar.isBlank()) return false;
+        String sql = """
+                    UPDATE users
+                    SET avatar = :av,
+                        updated_at = NOW()
+                    WHERE id = :id AND (avatar IS NULL OR avatar = '')
+                """;
+        return DBConnect.getJdbi().withHandle(h -> h.createUpdate(sql)
+                .bind("av", avatar)
+                .bind("id", userId)
+                .execute()) > 0;
+    }
+
+    // Đăng nhập qua provider — tra cứu trong bảng user_social_accounts để lấy user gốc.
+    // KHÔNG filter status / lock — caller (service) tự inspect và quyết định message phù hợp.
+    // Giữ consistency với findByEmail và tránh fallback ngoài ý muốn sang nhánh "tạo user mới"
+    // khi user đã linked nhưng đang bị disable.
+    public User loginByProvider(String provider, String providerUserId) {
         String sql = """
                 SELECT u.id, u.username, u.first_name AS firstName, u.last_name AS lastName,
                        u.avatar, u.email, u.roles_id AS rolesId, u.status,
+                       u.failed_login_attempts AS failedLoginAttempts,
+                       u.locked_until AS lockedUntil,
                        u.created_at AS createdAt, u.updated_at AS updatedAt
                 FROM user_social_accounts sa
                 JOIN users u ON u.id = sa.user_id
@@ -397,6 +422,63 @@ public class UserDao {
         String sql = "UPDATE users SET roles_id = :rid, status = :st WHERE id = :id";
         return DBConnect.getJdbi().withHandle(h -> h.createUpdate(sql)
                 .bind("rid", rolesId).bind("st", status).bind("id", id).execute()) > 0;
+    }
+
+    // =========================================================
+    // Account lockout — đếm số lần đăng nhập sai và khóa tạm thời
+    // =========================================================
+
+    // Tăng failed_login_attempts thêm 1. Nếu sau khi tăng đạt ngưỡng thì set locked_until = NOW() + lockMinutes.
+    // Trả về tổng số lần sai sau khi tăng (để caller biết còn bao nhiêu lần trước khi bị khóa).
+    //
+    // Bước 1 xóa lock + zero counter nếu lock cũ vừa hết hạn — nếu không, lần sai đầu tiên sau
+    // chu kỳ khóa sẽ tăng counter (đang là maxAttempts) lên maxAttempts+1, vượt ngưỡng và bị
+    // khóa lại ngay lập tức. Hai statement chạy trong cùng transaction để đảm bảo nguyên tử.
+    public int incrementFailedAttempts(int userId, int maxAttempts, int lockMinutes) {
+        return DBConnect.getJdbi().inTransaction(handle -> {
+            handle.createUpdate("""
+                            UPDATE users
+                            SET failed_login_attempts = 0,
+                                locked_until = NULL
+                            WHERE id = :id
+                              AND locked_until IS NOT NULL
+                              AND locked_until <= NOW()
+                            """)
+                    .bind("id", userId)
+                    .execute();
+
+            handle.createUpdate("""
+                            UPDATE users
+                            SET failed_login_attempts = failed_login_attempts + 1,
+                                locked_until = CASE
+                                    WHEN failed_login_attempts + 1 >= :maxAttempts
+                                        THEN DATE_ADD(NOW(), INTERVAL :lockMinutes MINUTE)
+                                    ELSE locked_until
+                                END
+                            WHERE id = :id
+                            """)
+                    .bind("id", userId)
+                    .bind("maxAttempts", maxAttempts)
+                    .bind("lockMinutes", lockMinutes)
+                    .execute();
+
+            return handle.createQuery("SELECT failed_login_attempts FROM users WHERE id = :id")
+                    .bind("id", userId)
+                    .mapTo(Integer.class)
+                    .findOne()
+                    .orElse(0);
+        });
+    }
+
+    // Reset counter + bỏ khóa khi đăng nhập thành công.
+    public void resetFailedAttempts(int userId) {
+        DBConnect.getJdbi().useHandle(h -> h.createUpdate("""
+                        UPDATE users
+                        SET failed_login_attempts = 0, locked_until = NULL
+                        WHERE id = :id
+                        """)
+                .bind("id", userId)
+                .execute());
     }
 
     public boolean checkPassword(int userId, String oldPass) {
