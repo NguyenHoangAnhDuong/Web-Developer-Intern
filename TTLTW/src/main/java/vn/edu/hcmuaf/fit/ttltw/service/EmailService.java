@@ -41,19 +41,6 @@ public class EmailService {
     }
 
     public static void sendOtp(String toEmail, String otp) throws MessagingException, UnsupportedEncodingException {
-        send(toEmail,
-             "Mã xác thực đăng ký tài khoản - " + fromName,
-             buildOtpTemplate(otp, "Bạn vừa yêu cầu đăng ký tài khoản tại <strong>TTLTW Store</strong>.<br>Vui lòng nhập mã OTP bên dưới để hoàn tất:"));
-    }
-
-    public static void sendResetOtp(String toEmail, String otp) throws MessagingException, UnsupportedEncodingException {
-        send(toEmail,
-             "Mã xác thực đặt lại mật khẩu - " + fromName,
-             buildOtpTemplate(otp, "Bạn vừa yêu cầu đặt lại mật khẩu cho tài khoản <strong>TTLTW Store</strong>.<br>Vui lòng nhập mã OTP bên dưới để tiếp tục:"));
-    }
-
-    private static void send(String toEmail, String subject, String htmlBody)
-            throws MessagingException, UnsupportedEncodingException {
         Properties smtpProps = new Properties();
         smtpProps.put("mail.smtp.auth",            "true");
         smtpProps.put("mail.smtp.starttls.enable", "true");
@@ -70,13 +57,13 @@ public class EmailService {
         Message message = new MimeMessage(session);
         message.setFrom(new InternetAddress(username, fromName, "UTF-8"));
         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
-        message.setSubject(subject);
-        message.setContent(htmlBody, "text/html; charset=UTF-8");
+        message.setSubject("Mã xác thực đăng ký tài khoản - " + fromName);
+        message.setContent(buildOtpTemplate(otp), "text/html; charset=UTF-8");
 
         Transport.send(message);
     }
 
-    private static String buildOtpTemplate(String otp, String intro) {
+    private static String buildOtpTemplate(String otp) {
         return """
                 <!DOCTYPE html>
                 <html>
@@ -108,8 +95,8 @@ public class EmailService {
                     <div class="header"><h1>TTLTW Store</h1></div>
                     <div class="body">
                       <p>Xin chào,</p>
-                      <p>""" + intro + """
-                      </p>
+                      <p>Bạn vừa yêu cầu đăng ký tài khoản tại <strong>TTLTW Store</strong>.<br>
+                         Vui lòng nhập mã OTP bên dưới để hoàn tất:</p>
                       <div class="otp-box">
                         <div class="otp-code">""" + otp + """
                         </div>
