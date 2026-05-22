@@ -31,7 +31,6 @@
     <!-- SIDEBAR -->
     <jsp:include page="/views/includes/sidebarUser.jsp"/>
 
-    <!-- ================== MAIN CONTENT ================== -->
     <div class="orders-section">
         <h2>Đơn Mua Của Tôi</h2>
 
@@ -40,6 +39,9 @@
             <button class="tab <%= (currentStatus == null || "all".equals(currentStatus)) ? "active" : "" %>"
                     data-status="all"
                     onclick="location.href='<%= request.getContextPath() %>/user/order?status=all'">Tất cả</button>
+            <button class="tab <%= "0".equals(currentStatus) ? "active" : "" %>"
+                    data-status="pending"
+                    onclick="location.href='<%= request.getContextPath() %>/user/order?status=0'"> Chờ xác nhận </button>
             <button class="tab <%= "1".equals(currentStatus) ? "active" : "" %>"
                     data-status="prepare"
                     onclick="location.href='<%= request.getContextPath() %>/user/order?status=1'">Đang lên đơn</button>
@@ -85,7 +87,7 @@
                     <% for (Map<String, Object> item : items) { %>
                     <a href="<%= request.getContextPath() %>/user/order-detail?orderId=<%= orderId %>">
                         <div class="order-info">
-                            <img src="${pageContext.request.contextPath}/assert/img/product/<%= item.get("imagePath") %>"
+                            <img src="<%= item.get("imagePath") %>"
                                  alt="<%= item.get("productName") %>">
                             <div class="order-detail">
                                 <h3><%= item.get("productName") %> <%= item.get("variantName") %></h3>
@@ -102,7 +104,7 @@
                 %>
                 <a href="<%= request.getContextPath() %>/user/order-detail?orderId=<%= orderId %>">
                     <div class="order-info">
-                        <img src="${pageContext.request.contextPath}/assert/img/product/<%= item.get("imagePath") %>"
+                        <img src="<%= item.get("imagePath") %>"
                              alt="<%= item.get("productName") %>">
                         <div class="order-detail">
                             <h3><%= item.get("productName") %> <%= item.get("variantName") %></h3>
@@ -122,7 +124,7 @@
               <i class="<%= statusIcon %>"></i> <%= statusName %>
             </span>
                         <div class="actions">
-                            <% if (status == 1) { %>
+                            <% if (status == 0 || status == 1) { %>
                             <button class="btn repurchase" onclick="cancelOrder(<%= orderId %>)">Hủy</button>
                             <% } else if (status == 3) { %>
                             <button class="btn review" onclick="location.href='<%= request.getContextPath() %>/review?productId=<%= !items.isEmpty() ? items.get(0).get("productId") : 0 %>'">Đánh giá</button>

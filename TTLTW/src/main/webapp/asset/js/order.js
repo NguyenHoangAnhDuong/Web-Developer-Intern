@@ -8,7 +8,7 @@ function cancelOrder(orderId) {
         if (!confirmed) return;
         
         const contextPath = document.body.getAttribute('data-context-path') || '';
-        fetch(contextPath + '/user/order', {
+        fetch(contextPath + '/api/order/cancel', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -17,9 +17,9 @@ function cancelOrder(orderId) {
         })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
+                if (data.success || data.status === 'success') {
                     setTimeout(() => {
-                        showToast('Hủy đơn hàng thành công!', 'success', 3000);
+                        showToast(data.message || 'Hủy đơn hàng thành công!', 'success', 3000);
                         setTimeout(() => location.reload(), 1500);
                     }, 300);
                 } else {
