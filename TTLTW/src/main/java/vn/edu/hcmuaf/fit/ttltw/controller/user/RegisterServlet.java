@@ -2,6 +2,9 @@ package vn.edu.hcmuaf.fit.ttltw.controller.user;
 
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -33,53 +36,72 @@ public class RegisterServlet extends HttpServlet {
 
         request.setCharacterEncoding("UTF-8");
 
-        String fname    = request.getParameter("fname").trim();
-        String lname    = request.getParameter("lname").trim();
-        String email    = request.getParameter("email").trim();
-        String username = request.getParameter("username").trim();
-        String password = request.getParameter("password");
-        String confirm  = request.getParameter("confirm");
+        String fname    = nullToEmpty(request.getParameter("fname")).trim();
+        String lname    = nullToEmpty(request.getParameter("lname")).trim();
+        String email    = nullToEmpty(request.getParameter("email")).trim();
+        String username = nullToEmpty(request.getParameter("username")).trim();
+        String password = nullToEmpty(request.getParameter("password"));
+        String confirm  = nullToEmpty(request.getParameter("confirm"));
+        boolean acceptTerms = "on".equalsIgnoreCase(request.getParameter("terms"))
+                || "true".equalsIgnoreCase(request.getParameter("terms"));
 
-        // Kiểm tra rỗng
-        if (fname.isEmpty() || lname.isEmpty() || email.isEmpty()
-                || username.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
-            forwardWithError(request, response, "Vui lòng điền đầy đủ tất cả các trường!");
-            return;
+        // Map lỗi theo từng field — JSP sẽ render inline dưới input tương ứng.
+        Map<String, String> errors = new LinkedHashMap<>();
+
+        if (fname.isEmpty()) {
+            errors.put("fname", "Vui lòng nhập họ.");
+        } else if (fname.length() > 50) {
+            errors.put("fname", "Họ không được vượt quá 50 ký tự.");
         }
 
-        // Kiểm tra định dạng email
-        if (!isValidEmail(email)) {
-            forwardWithError(request, response, "Email không hợp lệ!");
-            return;
+        if (lname.isEmpty()) {
+            errors.put("lname", "Vui lòng nhập tên.");
+        } else if (lname.length() > 50) {
+            errors.put("lname", "Tên không được vượt quá 50 ký tự.");
         }
 
-        // Kiểm tra username
-        if (!isValidUsername(username)) {
-            forwardWithError(request, response, "Username chỉ được chứa chữ cái, số và dấu gạch dưới!");
-            return;
+        if (email.isEmpty()) {
+            errors.put("email", "Vui lòng nhập email.");
+        } else if (!isValidEmail(email)) {
+            errors.put("email", "Email không đúng định dạng.");
         }
 
-        // Kiểm tra mật khẩu khớp
-        if (!password.equals(confirm)) {
-            forwardWithError(request, response, "Mật khẩu xác nhận không khớp!");
-            return;
+        if (username.isEmpty()) {
+            errors.put("username", "Vui lòng nhập tên đăng nhập.");
+        } else if (username.length() < 4 || username.length() > 30) {
+            errors.put("username", "Tên đăng nhập phải từ 4 đến 30 ký tự.");
+        } else if (!isValidUsername(username)) {
+            errors.put("username", "Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới.");
         }
 
-        // Kiểm tra độ mạnh mật khẩu
-        if (!isStrongPassword(password)) {
-            forwardWithError(request, response, "Mật khẩu phải ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!");
-            return;
+        if (password.isEmpty()) {
+            errors.put("password", "Vui lòng nhập mật khẩu.");
+        } else if (!isStrongPassword(password)) {
+            errors.put("password",
+                    "Mật khẩu tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt (@$!%*?&).");
         }
 
-        // Kiểm tra username đã tồn tại chưa
-        if (userDao.checkExistUsername(username)) {
-            forwardWithError(request, response, "Tên đăng nhập \"" + username + "\" đã được sử dụng!");
-            return;
+        if (confirm.isEmpty()) {
+            errors.put("confirm", "Vui lòng xác nhận mật khẩu.");
+        } else if (!password.isEmpty() && !password.equals(confirm)) {
+            errors.put("confirm", "Mật khẩu xác nhận không khớp.");
         }
 
-        // Kiểm tra email đã tồn tại chưa
-        if (userDao.checkExistEmail(email)) {
-            forwardWithError(request, response, "Email \"" + email + "\" đã được đăng ký!");
+        if (!acceptTerms) {
+            errors.put("terms", "Bạn cần đồng ý với điều khoản dịch vụ để tiếp tục.");
+        }
+
+        // Chỉ truy DB khi các kiểm tra cú pháp đã pass — tránh query không cần thiết.
+        if (!errors.containsKey("username") && userDao.checkExistUsername(username)) {
+            errors.put("username", "Tên đăng nhập \"" + username + "\" đã được sử dụng.");
+        }
+        if (!errors.containsKey("email") && userDao.checkExistEmail(email)) {
+            errors.put("email", "Email \"" + email + "\" đã được đăng ký.");
+        }
+
+        if (!errors.isEmpty()) {
+            forwardWithErrors(request, response, errors,
+                    fname, lname, email, username);
             return;
         }
 
@@ -100,24 +122,32 @@ public class RegisterServlet extends HttpServlet {
         try {
             EmailService.sendOtp(email, otp);
         } catch (Exception e) {
-            // Dọn dẹp Redis nếu gửi mail thất bại
             RedisService.deletePendingUser(email);
             RedisService.deleteOtp(email);
-            forwardWithError(request, response, "Không thể gửi email xác thực. Vui lòng thử lại!");
+            Map<String, String> mailErr = new HashMap<>();
+            mailErr.put("general", "Không thể gửi email xác thực. Vui lòng thử lại.");
+            forwardWithErrors(request, response, mailErr, fname, lname, email, username);
             return;
         }
 
-        // Lưu email vào session để VerifyOtpServlet sử dụng
         HttpSession session = request.getSession();
         session.setAttribute("pending_email", email);
-
         response.sendRedirect(request.getContextPath() + "/verify-otp");
     }
 
-
-    private void forwardWithError(HttpServletRequest request, HttpServletResponse response, String message)
+    private void forwardWithErrors(HttpServletRequest request, HttpServletResponse response,
+                                   Map<String, String> errors,
+                                   String fname, String lname, String email, String username)
             throws ServletException, IOException {
-        request.setAttribute("error", message);
+        // Giữ lại giá trị đã nhập (trừ password) để user không phải gõ lại
+        Map<String, String> form = new HashMap<>();
+        form.put("fname", fname);
+        form.put("lname", lname);
+        form.put("email", email);
+        form.put("username", username);
+
+        request.setAttribute("errors", errors);
+        request.setAttribute("form", form);
         request.getRequestDispatcher("/views/user/register.jsp").forward(request, response);
     }
 
@@ -126,8 +156,12 @@ public class RegisterServlet extends HttpServlet {
         return String.valueOf(code);
     }
 
+    private String nullToEmpty(String s) {
+        return s == null ? "" : s;
+    }
+
     private boolean isValidEmail(String email) {
-        return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$");
+        return email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
     }
 
     private boolean isValidUsername(String username) {

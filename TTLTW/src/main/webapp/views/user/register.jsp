@@ -15,60 +15,89 @@
 </head>
 <body>
 <div id="register-form">
-    <form action="register"  method="post"class="form-regis">
+    <form action="register" method="post" class="form-regis" novalidate>
         <h2>Đăng ký tài khoản</h2>
+
+        <c:if test="${not empty errors.general}">
+            <div class="error-message general-error">${errors.general}</div>
+        </c:if>
+
         <div class="row">
-            <div class="input-group">
+            <div class="input-group ${not empty errors.fname ? 'has-error' : ''}">
                 <label for="fname">Họ</label>
-                <input type="text" id="fname" name="fname" required>
+                <input type="text" id="fname" name="fname"
+                       value="<c:out value='${form.fname}'/>" required>
+                <div class="field-error" data-for="fname">
+                    <c:if test="${not empty errors.fname}">${errors.fname}</c:if>
+                </div>
             </div>
-            <div class="input-group">
+            <div class="input-group ${not empty errors.lname ? 'has-error' : ''}">
                 <label for="lname">Tên</label>
-                <input type="text" id="lname" name="lname" required>
+                <input type="text" id="lname" name="lname"
+                       value="<c:out value='${form.lname}'/>" required>
+                <div class="field-error" data-for="lname">
+                    <c:if test="${not empty errors.lname}">${errors.lname}</c:if>
+                </div>
             </div>
         </div>
 
-        <div class="input-group">
+        <div class="input-group ${not empty errors.email ? 'has-error' : ''}">
             <label for="email">Email</label>
-            <input type="email" id="email" name="email" required>
+            <input type="email" id="email" name="email"
+                   value="<c:out value='${form.email}'/>" required>
+            <div class="field-error" data-for="email">
+                <c:if test="${not empty errors.email}">${errors.email}</c:if>
+            </div>
         </div>
 
         <div class="row">
-            <div class="input-group">
+            <div class="input-group ${not empty errors.username ? 'has-error' : ''}">
                 <label for="username">Tên đăng nhập</label>
-                <input type="text" id="username" name="username" required>
+                <input type="text" id="username" name="username"
+                       value="<c:out value='${form.username}'/>" required>
+                <div class="field-error" data-for="username">
+                    <c:if test="${not empty errors.username}">${errors.username}</c:if>
+                </div>
             </div>
         </div>
 
         <div class="row">
-            <div class="input-group">
+            <div class="input-group ${not empty errors.password ? 'has-error' : ''}">
                 <label for="password">Mật khẩu</label>
-                <input type="password"
-                       id="password"
-                       name="password" required
-                >
-                <i onclick="changeTypePass()" class="fa-regular fa-eye"></i>
-                <i onclick="changeTypePass()" class="fa-regular fa-eye-slash"></i>
+                <div class="pw-wrap">
+                    <input type="password" id="password" name="password" required>
+                    <i onclick="changeTypePass()" class="fa-regular fa-eye"></i>
+                    <i onclick="changeTypePass()" class="fa-regular fa-eye-slash"></i>
+                </div>
+                <div class="field-error" data-for="password">
+                    <c:if test="${not empty errors.password}">${errors.password}</c:if>
+                </div>
             </div>
-            <div class="input-group">
+            <div class="input-group ${not empty errors.confirm ? 'has-error' : ''}">
                 <label for="confirm">Xác nhận mật khẩu</label>
-                <input type="password" id="confirm" name="confirm" required>
-                <i class="fa-regular fa-eye" onclick="changeTypeConfPass()"></i>
-                <i class="fa-regular fa-eye-slash" onclick="changeTypeConfPass()"></i>
+                <div class="pw-wrap">
+                    <input type="password" id="confirm" name="confirm" required>
+                    <i class="fa-regular fa-eye" onclick="changeTypeConfPass()"></i>
+                    <i class="fa-regular fa-eye-slash" onclick="changeTypeConfPass()"></i>
+                </div>
+                <div class="field-error" data-for="confirm">
+                    <c:if test="${not empty errors.confirm}">${errors.confirm}</c:if>
+                </div>
             </div>
         </div>
 
-        <div class="terms">
+        <div class="terms ${not empty errors.terms ? 'has-error' : ''}">
             <label>
-                <input type="checkbox" required>
+                <input type="checkbox" name="terms" required>
                 Tôi đồng ý với <a href="#">Điều khoản dịch vụ</a> và <a href="#">Chính sách bảo mật</a>.
             </label>
+            <div class="field-error" data-for="terms">
+                <c:if test="${not empty errors.terms}">${errors.terms}</c:if>
+            </div>
         </div>
 
         <button type="submit">Tạo tài khoản</button>
-        <div class="error-message" id="error-message">
-            <c:if test="${not empty error}">${error}</c:if>
-        </div>
+
         <div class="links">
             Đã có tài khoản? <a href="login">Đăng nhập</a>
         </div>
