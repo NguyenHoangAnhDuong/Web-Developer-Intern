@@ -10,10 +10,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Đọc file .env tại project root (hoặc theo system property "env.file").
- * Ưu tiên: System property → OS env → .env file.
- */
 public final class EnvLoader {
 
     private static final Map<String, String> CACHE = loadOnce();
@@ -24,8 +20,12 @@ public final class EnvLoader {
         Map<String, String> map = new HashMap<>();
         Path path = resolveEnvPath();
         if (path == null || !Files.isRegularFile(path)) {
+            System.err.println("[EnvLoader] No .env found. Looked from user.dir="
+                    + System.getProperty("user.dir")
+                    + " (walking up), catalina.base, catalina.home, and classpath.");
             return Collections.unmodifiableMap(map);
         }
+        System.out.println("[EnvLoader] Loading env from " + path.toAbsolutePath());
         try (BufferedReader br = new BufferedReader(
                 new InputStreamReader(Files.newInputStream(path), StandardCharsets.UTF_8))) {
             String line;
@@ -54,14 +54,38 @@ public final class EnvLoader {
         if (override != null && !override.isBlank()) {
             return Path.of(override);
         }
-        Path cwd = Path.of(System.getProperty("user.dir"), ".env");
-        if (Files.isRegularFile(cwd)) return cwd;
-        String catalinaBase = System.getProperty("catalina.base");
-        if (catalinaBase != null) {
-            Path tomcat = Path.of(catalinaBase, ".env");
-            if (Files.isRegularFile(tomcat)) return tomcat;
+        // 1) user.dir hiện tại
+        Path cwd = Path.of(System.getProperty("user.dir"));
+        Path direct = cwd.resolve(".env");
+        if (Files.isRegularFile(direct)) return direct;
+
+        // 2) Đi ngược lên cây thư mục từ user.dir (Tomcat có thể start từ bin/ hoặc workdir lệch)
+        Path dir = cwd;
+        for (int i = 0; i < 6 && dir != null; i++) {
+            Path candidate = dir.resolve(".env");
+            if (Files.isRegularFile(candidate)) return candidate;
+            dir = dir.getParent();
         }
-        return cwd;
+
+        // 3) catalina.base / catalina.home
+        for (String prop : new String[] { "catalina.base", "catalina.home" }) {
+            String base = System.getProperty(prop);
+            if (base != null) {
+                Path p = Path.of(base, ".env");
+                if (Files.isRegularFile(p)) return p;
+            }
+        }
+
+        // 4) Classpath (WEB-INF/classes/.env) — fallback nếu user đặt .env vào resources
+        try {
+            java.net.URL res = EnvLoader.class.getClassLoader().getResource(".env");
+            if (res != null) {
+                return Path.of(res.toURI());
+            }
+        } catch (Exception ignored) {
+        }
+
+        return direct; // không tồn tại, để loadOnce() bỏ qua
     }
 
     /** Lấy giá trị theo thứ tự: -D system property → OS env → .env file. */
