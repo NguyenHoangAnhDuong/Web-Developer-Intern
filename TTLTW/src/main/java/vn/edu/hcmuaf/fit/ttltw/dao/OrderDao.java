@@ -71,7 +71,7 @@ public class OrderDao {
     }
 
     public boolean cancelOrder(int orderId, int userId) {
-        String sql = "UPDATE orders SET status = 4 WHERE id = ? AND user_id = ? AND status = 1";
+        String sql = "UPDATE orders SET status = 4 WHERE id = ? AND user_id = ? AND (status = 0 OR status = 1)";
         return jdbi.withHandle(handle -> handle.createUpdate(sql)
                 .bind(0, orderId)
                 .bind(1, userId)
@@ -79,7 +79,7 @@ public class OrderDao {
     }
 
     public List<Order> getExpiredOrdersForAutoCancel(int minutes) {
-        String sql = "SELECT * FROM orders WHERE status = 1 AND payment_type_id = 2 AND created_at < NOW() - interval :minutes MINUTE";
+        String sql = "SELECT * FROM orders WHERE status = 0 AND payment_type_id = 2 AND created_at < NOW() - interval :minutes MINUTE";
         return jdbi.withHandle(handle -> handle.createQuery(sql)
                 .bind("minutes", minutes)
                 .mapToBean(Order.class)
@@ -270,7 +270,7 @@ public class OrderDao {
     }
 
     public void cancelExpiredOrders(int minutes) {
-        String sql = "UPDATE orders SET status = 4 WHERE status = 1 AND payment_type_id = 2 AND created_at < NOW() - interval :minutes MINUTE";
+        String sql = "UPDATE orders SET status = 4 WHERE status = 0 AND payment_type_id = 2 AND created_at < NOW() - interval :minutes MINUTE";
         jdbi.withHandle(handle -> handle.createUpdate(sql)
                 .bind("minutes", minutes)
                 .execute());

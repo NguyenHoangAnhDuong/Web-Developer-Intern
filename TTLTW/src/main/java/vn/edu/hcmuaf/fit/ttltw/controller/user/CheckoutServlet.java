@@ -98,7 +98,7 @@ public class CheckoutServlet extends HttpServlet {
                 throw new Exception("Không có sản phẩm được chọn");
              }
                 // xác định trạng thái thanh toán
-                int paymentStatus = "bank".equalsIgnoreCase(paymentMethod) ? 2 : 1;
+                int paymentStatus = "bank".equalsIgnoreCase(paymentMethod) ? 0 : 1;
 
                 // gọi xử lý đặt hàng
                 int orderId = orderService.processOrder(user.getId(), addressId, paymentMethod, voucherCode,
@@ -113,31 +113,28 @@ public class CheckoutServlet extends HttpServlet {
                         String vnpUrl = VnPayConfig.createPaymentUrl(orderId, finalTotal, request);
 
                         // tự động hủy đơn hàng sau 15s nếu không thanh toán
-                        new Thread(() -> {
-                            try {
-                                Thread.sleep(15000); // 15 seconds
-                                var opt = orderService.getOrderById(orderId);
-                                if (opt.isPresent()) {
-                                    var order = opt.get();
-                                    if (order.getStatus() == 1 && order.getPaymentTypeId() == 2) {
-                                        // Cancel với lý do chưa thanh toán sau 15s
-                                        orderService.cancelOrderWithReason(orderId, "Auto-cancel: VNPay 15s ");
-                                        System.out.println("Order " + orderId + " auto-cancelled ");
-                                    }
-                                }
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }).start();
+//                        new Thread(() -> {
+//                            try {
+//                                Thread.sleep(30000); // 30 seconds
+//                                var opt = orderService.getOrderById(orderId);
+//                                if (opt.isPresent()) {
+//                                    var order = opt.get();
+//                                    if (order.getStatus() == 1 && order.getPaymentTypeId() == 2) {
+//                                        // Cancel với lý do chưa thanh toán sau 15s
+//                                        orderService.cancelOrderWithReason(orderId, "Auto-cancel: VNPay 15s ");
+//                                        System.out.println("Order " + orderId + " auto-cancelled ");
+//                                    }
+//                                }
+//                            } catch (InterruptedException e) {
+//                                Thread.currentThread().interrupt();
+//                            } catch (Exception e) {
+//                                e.printStackTrace();
+//                            }
+//                        }).start();
 
                         response.sendRedirect(vnpUrl);
-                        return;
-                    } else {
-                            orderService.handleShippingAsync(orderId, fullName, phone, fullAddress, finalTotal);
-                        }
-                        session.setAttribute("toastMessage", "Đặt hàng thành công!");
+                        return;}
+                    session.setAttribute("toastMessage", "Đặt hàng thành công!");
                         session.setAttribute("toastType", "success");
                         response.sendRedirect(request.getContextPath() + "/user/order-detail?orderId=" + orderId);
 

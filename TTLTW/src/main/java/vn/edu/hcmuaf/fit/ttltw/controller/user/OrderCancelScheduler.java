@@ -23,7 +23,7 @@ public class OrderCancelScheduler implements ServletContextListener {
             try {
                 OrderDao orderDao = new OrderDao();
                 SuperAIService superAIService = new SuperAIService();
-                // hủy các đơn status=1 quá 3 phút chưa thanh toán
+                // hủy các đơn status=0  chờ xác nhận  quá 3 phút chưa thanh toán
                 List<Order> expiredOrders = orderDao.getExpiredOrdersForAutoCancel(1);
                 for (Order order : expiredOrders) {
                     String trackingCode = order.getTrackingNumber();
