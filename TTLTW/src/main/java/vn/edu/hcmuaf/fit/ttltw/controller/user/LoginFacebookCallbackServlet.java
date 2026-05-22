@@ -28,9 +28,9 @@ public class LoginFacebookCallbackServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String CLIENT_ID = getServletContext().getInitParameter("facebook.clientId");
-        String CLIENT_SECRET = getServletContext().getInitParameter("facebook.clientSecret");
-        String REDIRECT_URI = getServletContext().getInitParameter("facebook.redirectUri");
+        String CLIENT_ID = (String) getServletContext().getAttribute("facebook.clientId");
+        String CLIENT_SECRET = (String) getServletContext().getAttribute("facebook.clientSecret");
+        String REDIRECT_URI = (String) getServletContext().getAttribute("facebook.redirectUri");
 
         String code = request.getParameter("code");
         if (code == null || code.isEmpty()) {
@@ -49,7 +49,7 @@ public class LoginFacebookCallbackServlet extends HttpServlet {
             JsonObject tokenJson = JsonParser.parseString(tokenResponse).getAsJsonObject();
             String accessToken = tokenJson.get("access_token").getAsString();
 
-            // Lấy thông tin user
+            // Lấy thông tin user (bao gồm email — đã xin quyền 'email' ở bước authorize)
             String infoUrl = "https://graph.facebook.com/me"
                     + "?fields=id,name,email,picture.type(large)"
                     + "&access_token=" + accessToken;
@@ -59,7 +59,19 @@ public class LoginFacebookCallbackServlet extends HttpServlet {
 
             String fbId = info.get("id").getAsString();
             String name = info.has("name") ? info.get("name").getAsString() : "Facebook User";
-            String fakeEmail = "fb_" + fbId + "@facebook.local";
+
+            // Email là bắt buộc cho flow đăng nhập/đăng ký theo email.
+            // Người dùng có thể từ chối cấp quyền email khi authorize — khi đó Graph API không trả về field 'email'.
+            String email = (info.has("email") && !info.get("email").isJsonNull())
+                    ? info.get("email").getAsString()
+                    : null;
+            if (email == null || email.isBlank()) {
+                response.sendRedirect(request.getContextPath()
+                        + "/login?error=" + URLEncoder.encode(
+                                "Bạn cần cấp quyền truy cập email để đăng nhập bằng Facebook",
+                                StandardCharsets.UTF_8));
+                return;
+            }
 
             String avatar = null;
             if (info.has("picture")) {
@@ -68,32 +80,33 @@ public class LoginFacebookCallbackServlet extends HttpServlet {
                         .get("url").getAsString();
             }
 
-            // Hàm bỏ dấu + chuẩn hóa
+            // Sinh username gợi ý cho trường hợp tạo account mới (UserService sẽ tự dedupe nếu trùng)
             String baseUsername = removeDiacritics(name)
                     .toLowerCase()
-                    .replaceAll("[^a-z0-9]", ""); // bỏ ký tự lạ & khoảng trắng
-
-            // tránh rỗng
+                    .replaceAll("[^a-z0-9]", "");
             if (baseUsername.isEmpty()) {
                 baseUsername = "fbuser";
             }
+            String username = baseUsername + fbId.substring(Math.max(0, fbId.length() - 4));
 
-            // gắn thêm 4 số cuối của fbId để tránh trùng
-            String username = baseUsername + fbId.substring(fbId.length() - 4);
-
-            // 3. Tạo User từ Facebook (không set provider/providerId — lưu ở user_social_accounts)
+            // Đẩy thông tin từ Facebook sang service để quyết định login hay register
             User u = new User();
             u.setUsername(username);
-            u.setEmail(fakeEmail);
+            u.setEmail(email);
             u.setFirstName(name);
             u.setAvatar(avatar);
             u.setRolesId(2);     // Mặc định là khách hàng
             u.setStatus(1);      // Hoạt động
+            u.setProvider("facebook");
+            u.setProviderId(fbId);
 
-            User user = userService.loginOrRegisterSocial(u, "facebook", fbId, fakeEmail);
+            User user = userService.loginOrRegisterSocial(u);
 
             if (user == null) {
-                response.sendRedirect(request.getContextPath() + "/login?error=Facebook login failed");
+                response.sendRedirect(request.getContextPath()
+                        + "/login?error=" + URLEncoder.encode(
+                                "Tài khoản tương ứng với email Facebook đã bị khóa hoặc đăng nhập thất bại",
+                                StandardCharsets.UTF_8));
                 return;
             }
 

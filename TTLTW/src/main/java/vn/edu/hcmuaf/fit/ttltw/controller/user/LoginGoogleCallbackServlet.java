@@ -28,9 +28,9 @@ public class LoginGoogleCallbackServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String clientId = getServletContext().getInitParameter("google.clientId");
-        String clientSecret = getServletContext().getInitParameter("google.clientSecret");
-        String redirectUri = getServletContext().getInitParameter("google.redirectUri");
+        String clientId = (String) getServletContext().getAttribute("google.clientId");
+        String clientSecret = (String) getServletContext().getAttribute("google.clientSecret");
+        String redirectUri = (String) getServletContext().getAttribute("google.redirectUri");
 
         String code = request.getParameter("code");
         if (code == null || code.isEmpty()) {
@@ -76,7 +76,9 @@ public class LoginGoogleCallbackServlet extends HttpServlet {
             }
             String username = baseUsername + googleId.substring(googleId.length() - Math.min(4, googleId.length()));
 
-            // 4. Tạo User object cho Google (không set provider/providerId — lưu ở user_social_accounts)
+            // 4. Tạo User object cho Google. provider/providerId được set vào User
+            // để UserService.loginOrRegisterSocial truyền sang DAO; record thật được lưu
+            // ở bảng user_social_accounts (1 user có thể link nhiều provider).
             User u = new User();
             u.setUsername(username);
             u.setEmail(email);
@@ -84,9 +86,11 @@ public class LoginGoogleCallbackServlet extends HttpServlet {
             u.setAvatar(avatar);
             u.setRolesId(2);        // Mặc định là khách hàng
             u.setStatus(1);         // Hoạt động
+            u.setProvider("google");
+            u.setProviderId(googleId);
 
             // 5. Kiểm tra email tồn tại → đăng nhập; chưa có → tạo mới
-            User user = userService.loginOrRegisterByGoogle(u, googleId, email);
+            User user = userService.loginOrRegisterSocial(u);
 
             if (user == null) {
                 response.sendRedirect(request.getContextPath() + "/login?error=Google login failed");

@@ -266,27 +266,42 @@ public class UserDao {
                 .orElse(null));
     }
 
-    // Tìm user theo email (không filter status — caller tự kiểm tra để hiển thị
-    // message phù hợp khi tài khoản bị khóa)
-    public User findByEmail(String email) {
+    // Tìm user theo email (dùng cho luồng đăng nhập qua provider khi email đã tồn tại trong hệ thống).
+    // Không filter status — caller tự kiểm tra để hiển thị message phù hợp khi tài khoản bị khóa.
+    public Optional<User> findByEmail(String email) {
         String sql = """
-                SELECT id, username, first_name AS firstName, last_name AS lastName, avatar, email,
-                       roles_id AS rolesId, status,
-                       created_at AS createdAt, updated_at AS updatedAt
-                FROM users
-                WHERE email = :email
-                LIMIT 1
+                    SELECT id, username, first_name AS firstName, last_name AS lastName, avatar, email,
+                           roles_id AS rolesId, status,
+                           created_at AS createdAt, updated_at AS updatedAt
+                    FROM users
+                    WHERE email = :email
+                    LIMIT 1
                 """;
         return DBConnect.getJdbi().withHandle(handle -> handle.createQuery(sql)
                 .bind("email", email)
                 .mapToBean(User.class)
-                .findOne()
-                .orElse(null));
+                .findOne());
     }
 
-    // Tìm user qua bảng user_social_accounts (đăng nhập bên thứ 3)
-    // Không filter status — caller tự kiểm tra để chặn tài khoản bị khóa với message rõ ràng
-    public User findByProvider(String provider, String providerUserId) {
+    // Set avatar cho user nếu user chưa có avatar (dùng khi liên kết provider lần đầu
+    // để mượn ảnh đại diện từ FB/Google mà không ghi đè avatar người dùng đã tự upload).
+    public boolean updateAvatarIfEmpty(int userId, String avatar) {
+        if (avatar == null || avatar.isBlank()) return false;
+        String sql = """
+                    UPDATE users
+                    SET avatar = :av,
+                        updated_at = NOW()
+                    WHERE id = :id AND (avatar IS NULL OR avatar = '')
+                """;
+        return DBConnect.getJdbi().withHandle(h -> h.createUpdate(sql)
+                .bind("av", avatar)
+                .bind("id", userId)
+                .execute()) > 0;
+    }
+
+    // Đăng nhập qua provider — tra cứu trong bảng user_social_accounts để lấy user gốc.
+    // Chỉ trả về user còn active (status = 1).
+    public User loginByProvider(String provider, String providerUserId) {
         String sql = """
                 SELECT u.id, u.username, u.first_name AS firstName, u.last_name AS lastName,
                        u.avatar, u.email, u.roles_id AS rolesId, u.status,
@@ -294,6 +309,7 @@ public class UserDao {
                 FROM user_social_accounts sa
                 JOIN users u ON u.id = sa.user_id
                 WHERE sa.provider = :provider AND sa.provider_user_id = :providerUserId
+                  AND u.status = 1
                 LIMIT 1
                 """;
         return DBConnect.getJdbi().withHandle(handle -> handle.createQuery(sql)

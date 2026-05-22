@@ -133,39 +133,51 @@ public class UserService {
         return user;
     }
 
-    // Đăng nhập hoặc đăng ký qua mạng xã hội (Facebook)
-    public User loginOrRegisterSocial(User u, String provider, String providerUserId, String providerEmail) {
-        // 1. Tìm theo provider + providerUserId trong user_social_accounts
-        User existed = userDao.findByProvider(provider, providerUserId);
-        if (existed != null) {
-            return existed;
-        }
-
-        // 2. Chưa có → tạo user mới + liên kết social account
-        int userId = userDao.insertSocialUser(u);
-        userDao.linkSocialAccount(userId, provider, providerUserId, providerEmail);
-        return userDao.findById(userId).orElse(null);
+    public User loginByProvider(String provider, String providerId) {
+        return userDao.loginByProvider(provider, providerId);
     }
 
-    // Đăng nhập bằng Google: kiểm tra email đã tồn tại trong hệ thống chưa
-    // Nếu có → liên kết Google account; nếu chưa → tạo mới
-    public User loginOrRegisterByGoogle(User googleUser, String googleId, String email) {
-        // 1. Tìm theo provider + googleId (đã đăng nhập Google trước đó)
-        User existed = userDao.findByProvider("google", googleId);
+    // Đăng nhập qua provider (Facebook/Google...).
+    // Lưu liên kết social ở bảng user_social_accounts (1 user có thể link nhiều provider).
+    // Flow:
+    //   1) Đã liên kết provider này trước đó (sa.provider + sa.provider_user_id khớp) -> đăng nhập luôn.
+    //   2) Email từ provider đã tồn tại trong hệ thống -> đăng nhập vào account đó
+    //      và ghi 1 row vào user_social_accounts để lần sau đi nhánh 1.
+    //   3) Chưa có account -> tạo user mới rồi link.
+    public User loginOrRegisterSocial(User u) {
+        // 1. Đã liên kết provider trước đó
+        User existed = userDao.loginByProvider(u.getProvider(), u.getProviderId());
         if (existed != null) {
             return existed;
         }
 
-        // 2. Tìm theo email đã có trong hệ thống → liên kết Google account
-        existed = userDao.findByEmail(email);
-        if (existed != null) {
-            userDao.linkSocialAccount(existed.getId(), "google", googleId, email);
-            return existed;
+        String email = u.getEmail();
+
+        // 2. Email tồn tại trong hệ thống -> đăng nhập vào account hiện có
+        if (email != null && !email.isBlank()) {
+            Optional<User> byEmailOpt = userDao.findByEmail(email);
+            if (byEmailOpt.isPresent()) {
+                User byEmail = byEmailOpt.get();
+                if (byEmail.getStatus() != 1) {
+                    return null;
+                }
+                userDao.linkSocialAccount(byEmail.getId(), u.getProvider(), u.getProviderId(), email);
+                userDao.updateAvatarIfEmpty(byEmail.getId(), u.getAvatar());
+                return byEmail;
+            }
         }
 
-        // 3. Chưa có → tạo tài khoản mới + liên kết
-        int userId = userDao.insertSocialUser(googleUser);
-        userDao.linkSocialAccount(userId, "google", googleId, email);
-        return userDao.findById(userId).orElse(null);
+        // 3. Tạo tài khoản mới — đảm bảo username không trùng
+        String baseUsername = u.getUsername();
+        String finalUsername = baseUsername;
+        int suffix = 1;
+        while (userDao.checkExistUsername(finalUsername)) {
+            finalUsername = baseUsername + suffix;
+            suffix++;
+        }
+        u.setUsername(finalUsername);
+        int newUserId = userDao.insertSocialUser(u);
+        userDao.linkSocialAccount(newUserId, u.getProvider(), u.getProviderId(), email);
+        return userDao.loginByProvider(u.getProvider(), u.getProviderId());
     }
 }

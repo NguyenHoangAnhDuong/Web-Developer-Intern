@@ -14,8 +14,8 @@ public class LoginGoogleServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        String clientId = getServletContext().getInitParameter("google.clientId");
-        String redirectUri = getServletContext().getInitParameter("google.redirectUri");
+        String clientId = (String) getServletContext().getAttribute("google.clientId");
+        String redirectUri = (String) getServletContext().getAttribute("google.redirectUri");
 
         String url = "https://accounts.google.com/o/oauth2/v2/auth"
                 + "?client_id=" + clientId
