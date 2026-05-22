@@ -11,6 +11,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
+import vn.edu.hcmuaf.fit.ttltw.service.LoginAuditService;
+import vn.edu.hcmuaf.fit.ttltw.service.LoginResult;
 import vn.edu.hcmuaf.fit.ttltw.service.UserService;
 import vn.edu.hcmuaf.fit.ttltw.utils.PermissionUtil;
 
@@ -19,6 +21,7 @@ import vn.edu.hcmuaf.fit.ttltw.utils.PermissionUtil;
 public class LoginServlet extends HttpServlet {
 
     private UserService userService = new UserService();
+    private final LoginAuditService auditService = new LoginAuditService();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -55,20 +58,37 @@ public class LoginServlet extends HttpServlet {
         String input = request.getParameter("input");
         String password = request.getParameter("password");
 
-        User user = userService.login(input, password);
+        LoginResult result = userService.login(input, password);
+        auditService.log(request, input, LoginAuditService.CHANNEL_PASSWORD, result);
 
-        if (user == null) {
-            request.setAttribute("error", "Sai tài khoản hoặc mật khẩu!");
-            request.setAttribute("inputValue", input);
-            request.getRequestDispatcher("/views/user/login.jsp").forward(request, response);
-            return;
+        switch (result.getStatus()) {
+            case INVALID_CREDENTIALS -> {
+                String msg = "Sai tài khoản hoặc mật khẩu!";
+                if (result.getRemainingAttempts() > 0 && result.getRemainingAttempts() < UserService.MAX_FAILED_ATTEMPTS) {
+                    msg += " Bạn còn " + result.getRemainingAttempts() + " lần thử trước khi tài khoản bị khóa tạm thời.";
+                }
+                request.setAttribute("error", msg);
+                request.setAttribute("inputValue", input);
+                request.getRequestDispatcher("/views/user/login.jsp").forward(request, response);
+                return;
+            }
+            case ACCOUNT_LOCKED -> {
+                request.setAttribute("error",
+                        "Tài khoản đã bị khóa tạm thời do đăng nhập sai quá nhiều lần. Vui lòng thử lại sau "
+                                + formatDuration(result.getLockSecondsRemaining()) + ".");
+                request.setAttribute("inputValue", input);
+                request.getRequestDispatcher("/views/user/login.jsp").forward(request, response);
+                return;
+            }
+            case ACCOUNT_INACTIVE -> {
+                request.setAttribute("error", "Tài khoản đã bị khóa, vui lòng liên hệ quản trị viên.");
+                request.setAttribute("inputValue", input);
+                request.getRequestDispatcher("/views/user/login.jsp").forward(request, response);
+                return;
+            }
+            default -> { /* SUCCESS — đi tiếp */ }
         }
-        if (user.getStatus() != 1) {
-            request.setAttribute("error", "Tài khoản đã bị khóa, vui lòng liên hệ quản trị viên.");
-            request.setAttribute("inputValue", input);
-            request.getRequestDispatcher("/views/user/login.jsp").forward(request, response);
-            return;
-        }
+        User user = result.getUser();
         HttpSession session = request.getSession();
         session.setAttribute("user", user);
         session.setAttribute("role", user.getRolesId());
@@ -137,6 +157,16 @@ public class LoginServlet extends HttpServlet {
             }
         }
         return found;
+    }
+
+    // Hiển thị thời lượng khóa thân thiện: "5 phút 12 giây" / "47 giây".
+    static String formatDuration(long seconds) {
+        if (seconds <= 0) return "vài giây";
+        long minutes = seconds / 60;
+        long remainder = seconds % 60;
+        if (minutes <= 0) return remainder + " giây";
+        if (remainder == 0) return minutes + " phút";
+        return minutes + " phút " + remainder + " giây";
     }
 
     private String extractRelativePath(String url, String contextPath) {

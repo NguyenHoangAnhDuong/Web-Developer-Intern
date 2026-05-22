@@ -13,6 +13,8 @@ public class User implements Serializable {
     private String email;
     private int rolesId = 2; // Mặc định là khách hàng
     private int status;
+    private int failedLoginAttempts;
+    private Timestamp lockedUntil;
     private String provider;
     private String providerId;
     private Timestamp createdAt;
@@ -55,6 +57,12 @@ public class User implements Serializable {
 
     public int getStatus() { return status; }
     public void setStatus(int status) { this.status = status; }
+
+    public int getFailedLoginAttempts() { return failedLoginAttempts; }
+    public void setFailedLoginAttempts(int failedLoginAttempts) { this.failedLoginAttempts = failedLoginAttempts; }
+
+    public Timestamp getLockedUntil() { return lockedUntil; }
+    public void setLockedUntil(Timestamp lockedUntil) { this.lockedUntil = lockedUntil; }
 
     public String getProvider() { return provider; }
     public void setProvider(String provider) { this.provider = provider; }
