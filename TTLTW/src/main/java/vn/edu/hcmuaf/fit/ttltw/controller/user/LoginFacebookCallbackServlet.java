@@ -35,6 +35,18 @@ public class LoginFacebookCallbackServlet extends HttpServlet {
         String CLIENT_SECRET = (String) getServletContext().getAttribute("facebook.clientSecret");
         String REDIRECT_URI = (String) getServletContext().getAttribute("facebook.redirectUri");
 
+        if (CLIENT_ID == null || CLIENT_ID.isBlank()
+                || CLIENT_SECRET == null || CLIENT_SECRET.isBlank()
+                || REDIRECT_URI == null || REDIRECT_URI.isBlank()) {
+            getServletContext().log(
+                    "[LoginFacebookCallbackServlet] Thiếu cấu hình Facebook OAuth — không thể đổi code lấy token.");
+            response.sendRedirect(request.getContextPath()
+                    + "/login?error=" + URLEncoder.encode(
+                            "Đăng nhập Facebook chưa được cấu hình. Vui lòng liên hệ quản trị viên.",
+                            StandardCharsets.UTF_8));
+            return;
+        }
+
         String code = request.getParameter("code");
         if (code == null || code.isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/login?error=Facebook login failed");
@@ -77,10 +89,14 @@ public class LoginFacebookCallbackServlet extends HttpServlet {
             }
 
             String avatar = null;
-            if (info.has("picture")) {
-                avatar = info.getAsJsonObject("picture")
-                        .getAsJsonObject("data")
-                        .get("url").getAsString();
+            if (info.has("picture") && info.get("picture").isJsonObject()) {
+                JsonObject pic = info.getAsJsonObject("picture");
+                if (pic.has("data") && pic.get("data").isJsonObject()) {
+                    JsonObject data = pic.getAsJsonObject("data");
+                    if (data.has("url") && !data.get("url").isJsonNull()) {
+                        avatar = data.get("url").getAsString();
+                    }
+                }
             }
 
             // Sinh username gợi ý cho trường hợp tạo account mới (UserService sẽ tự dedupe nếu trùng)

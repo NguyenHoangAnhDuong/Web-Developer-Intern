@@ -7,20 +7,35 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 @WebServlet("/login-facebook")
 public class LoginFacebookServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
-        String CLIENT_ID = (String) getServletContext().getAttribute("facebook.clientId");
-        String CLIENT_SECRET = (String) getServletContext().getAttribute("facebook.clientSecret");
-        String REDIRECT_URI = (String) getServletContext().getAttribute("facebook.redirectUri");
+        String clientId = (String) getServletContext().getAttribute("facebook.clientId");
+        String redirectUri = (String) getServletContext().getAttribute("facebook.redirectUri");
+
+        if (clientId == null || clientId.isBlank()
+                || redirectUri == null || redirectUri.isBlank()) {
+            getServletContext().log(
+                    "[LoginFacebookServlet] Thiếu cấu hình Facebook OAuth. "
+                            + "Kiểm tra .env có FACEBOOK_CLIENT_ID và FACEBOOK_REDIRECT_URI. "
+                            + "clientIdPresent=" + (clientId != null && !clientId.isBlank())
+                            + ", redirectUriPresent=" + (redirectUri != null && !redirectUri.isBlank()));
+            resp.sendRedirect(req.getContextPath()
+                    + "/login?error=" + URLEncoder.encode(
+                            "Đăng nhập Facebook chưa được cấu hình. Vui lòng liên hệ quản trị viên.",
+                            StandardCharsets.UTF_8));
+            return;
+        }
 
         String url = "https://www.facebook.com/v18.0/dialog/oauth"
-                + "?client_id=" + CLIENT_ID
-                + "&redirect_uri=" + URLEncoder.encode(REDIRECT_URI, "UTF-8")
-                + "&scope=email,public_profile";
+                + "?client_id=" + URLEncoder.encode(clientId, StandardCharsets.UTF_8)
+                + "&redirect_uri=" + URLEncoder.encode(redirectUri, StandardCharsets.UTF_8)
+                + "&response_type=code"
+                + "&scope=" + URLEncoder.encode("email,public_profile", StandardCharsets.UTF_8);
 
         resp.sendRedirect(url);
     }
