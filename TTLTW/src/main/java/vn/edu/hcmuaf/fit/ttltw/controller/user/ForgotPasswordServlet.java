@@ -10,8 +10,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import vn.edu.hcmuaf.fit.ttltw.dao.UserDao;
+import vn.edu.hcmuaf.fit.ttltw.service.CacheService;
 import vn.edu.hcmuaf.fit.ttltw.service.EmailService;
-import vn.edu.hcmuaf.fit.ttltw.service.RedisService;
 
 @WebServlet(name = "ForgotPasswordServlet", value = "/forgot-password")
 public class ForgotPasswordServlet extends HttpServlet {
@@ -48,12 +48,12 @@ public class ForgotPasswordServlet extends HttpServlet {
         }
 
         String otp = generateOtp();
-        RedisService.saveResetOtp(email, otp);
+        CacheService.saveResetOtp(email, otp);
 
         try {
             EmailService.sendResetOtp(email, otp);
         } catch (Exception e) {
-            RedisService.deleteResetOtp(email);
+            CacheService.deleteResetOtp(email);
             forwardWithError(request, response, email,
                     "Không thể gửi email xác thực. Vui lòng thử lại.");
             return;

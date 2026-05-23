@@ -10,8 +10,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import vn.edu.hcmuaf.fit.ttltw.service.CacheService;
 import vn.edu.hcmuaf.fit.ttltw.service.EmailService;
-import vn.edu.hcmuaf.fit.ttltw.service.RedisService;
 
 @WebServlet(name = "VerifyResetOtpServlet", value = "/verify-reset-otp")
 public class VerifyResetOtpServlet extends HttpServlet {
@@ -49,7 +49,7 @@ public class VerifyResetOtpServlet extends HttpServlet {
         // Gửi lại OTP
         if ("resend".equals(action)) {
             String newOtp = generateOtp();
-            RedisService.saveResetOtp(email, newOtp);
+            CacheService.saveResetOtp(email, newOtp);
 
             try {
                 EmailService.sendResetOtp(email, newOtp);
@@ -66,7 +66,7 @@ public class VerifyResetOtpServlet extends HttpServlet {
 
         // Xác thực OTP
         String inputOtp  = request.getParameter("otp");
-        String storedOtp = RedisService.getResetOtp(email);
+        String storedOtp = CacheService.getResetOtp(email);
 
         if (storedOtp == null) {
             forwardWithError(request, response, email, "Mã OTP đã hết hạn. Nhấn \"Gửi lại\" để nhận mã mới!");
@@ -79,9 +79,9 @@ public class VerifyResetOtpServlet extends HttpServlet {
         }
 
         // OTP hợp lệ — cấp reset token (TTL 10 phút) cho bước nhập mật khẩu mới.
-        RedisService.deleteResetOtp(email);
+        CacheService.deleteResetOtp(email);
         String resetToken = UUID.randomUUID().toString();
-        RedisService.saveResetToken(resetToken, email);
+        CacheService.saveResetToken(resetToken, email);
         session.setAttribute("reset_token", resetToken);
 
         response.sendRedirect(request.getContextPath() + "/reset-password");
