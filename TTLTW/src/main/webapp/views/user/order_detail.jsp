@@ -7,8 +7,20 @@
 <%
     // Lấy dữ liệu đã format từ servlet
     Map<String, Object> orderData = (Map<String, Object>) request.getAttribute("orderData");
+    if (orderData == null) {
+        orderData = new java.util.HashMap<String, Object>();
+    }
+    request.setAttribute("orderData", orderData);
     List<Map<String, Object>> items = (List<Map<String, Object>>) request.getAttribute("items");
+    if (items == null) {
+        items = new java.util.ArrayList<Map<String, Object>>();
+    }
+    request.setAttribute("items", items);
     Map<String, String> address = (Map<String, String>) request.getAttribute("address");
+    if (address == null) {
+        address = new java.util.HashMap<String, String>();
+    }
+    request.setAttribute("address", address);
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -93,7 +105,7 @@
                 <% int status = (Integer) orderData.get("status");
                     int orderId = (Integer) orderData.get("id");
                 %>
-                <% if (status == 1) { %>
+                <% if (status == 0 || status == 1) { %>
                 <button id="btn-request-cancel" class="btn-ghost" data-order-id="<%= orderId %>" onclick="cancelOrder(this.getAttribute('data-order-id'))">Yêu cầu hủy</button>
                 <% } else if (status == 3 || status == 4) { %>
                 <button class="btn-ghost" data-order-id="<%= orderId %>" onclick="repurchaseOrder(this.getAttribute('data-order-id'))">Mua lại</button>
@@ -111,7 +123,11 @@
             <div class="small">Phương thức thanh toán</div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
                 <div>
-                    <div id="payment-method"><%= orderData.get("paymentMethodName") %></div>
+                    <%
+                        String paymentMethodName = (String) orderData.get("paymentMethodName");
+                        if (paymentMethodName == null || paymentMethodName.isEmpty()) paymentMethodName = "—";
+                    %>
+                    <div id="payment-method"><%= paymentMethodName %></div>
                 </div>
             </div>
             <div class="shipping-detail" style="margin-top:18px">

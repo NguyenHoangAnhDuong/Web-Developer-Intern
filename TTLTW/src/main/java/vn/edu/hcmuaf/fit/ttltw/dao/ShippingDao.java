@@ -30,13 +30,13 @@ public class ShippingDao {
 
 
     // tìm đơn hàng theo ID
-//    public Optional<Order> findOrderById(int id) {
-//        String sql = "SELECT id, tracking_number, partner_name, status FROM orders WHERE id = :id LIMIT 1";
-//        return jdbi.withHandle(handle -> handle.createQuery(sql)
-//                .bind("id", id)
-//                .mapToBean(Order.class)
-//                .findOne());
-//    }
+    public Optional<Order> findOrderById(int id) {
+        String sql = "SELECT id, tracking_number, partner_name, status FROM orders WHERE id = :id LIMIT 1";
+        return jdbi.withHandle(handle -> handle.createQuery(sql)
+                .bind("id", id)
+                .mapToBean(Order.class)
+                .findOne());
+    }
 
 // lưu mã vận chuyển khi gọi API thành công
     public boolean updateTrackingInfo(int orderId, String tracking, String partner) {

@@ -121,7 +121,10 @@ public class OrderDetailServlet extends HttpServlet {
             // Thông tin thanh toán
             String paymentStatusText;
             String paymentStatusClass;
-            if (paymentType != null && paymentType.getId() == 2) {
+            boolean isPaid = (paymentType != null && paymentType.getId() == 2) // chuyển khoản
+                    || (order.getStatus() == 3); // COD đã giao = đã thu tiền
+
+            if (isPaid) {
                 paymentStatusText = "Đã thanh toán";
                 paymentStatusClass = "status-paid";
             } else {
