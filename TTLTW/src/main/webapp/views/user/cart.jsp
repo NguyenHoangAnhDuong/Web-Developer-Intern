@@ -18,6 +18,9 @@
 <main class="cart-wrap">
     <div class="container">
         <h2 class="cart-title">Giỏ Hàng Của Bạn</h2>
+        <div class="cart-actions">
+            <button id="clearSelectedBtn" class="clear-selected-btn" type="button" disabled>Xóa tất cả</button>
+        </div>
 
         <div class="table-cart">
             <table>

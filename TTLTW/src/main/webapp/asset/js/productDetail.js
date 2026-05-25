@@ -147,4 +147,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 1000);
     }
     initDefault();
+    (function(){
+        const specLink = document.querySelector('.spec-link');
+        if(!specLink) return;
+        specLink.addEventListener('click', function(e){
+            e.preventDefault();
+            const target = document.getElementById('tech-specs');
+            if(target){
+                target.scrollIntoView({behavior: 'smooth', block: 'start'});
+                history.replaceState(null, null, '#tech-specs');
+            }
+        });
+    })();
 });
