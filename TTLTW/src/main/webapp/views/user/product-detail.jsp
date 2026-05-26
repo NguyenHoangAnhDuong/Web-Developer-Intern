@@ -27,9 +27,9 @@
     <!--header chi tiết sản phẩm-->
     <div class="container-header">
         <div class="breadcrumb">
-            <a href="#">Điện thoại</a>
+            <a href="${pageContext.request.contextPath}/listproduct?categoryId=${product.category.id}">${product.category.name}</a>
             <span>›</span>
-            <a href="#"> ${product.name}</a>
+            <a href="${pageContext.request.contextPath}/product-detail?id=${product.id}">${product.name}</a>
         </div>
         <h1 class="product-title">
             ${product.name}
@@ -47,7 +47,7 @@
                          </c:otherwise>
                     </c:choose>
 </span>
-            <a href="#" class="spec-link">Thông số</a>
+            <a href="#tech-specs" class="spec-link">Thông số</a>
         </h1>
     </div>
     <!--        main nội dung-->
@@ -98,7 +98,7 @@
                 </div>
             </div>
             <!--  Thông số kỹ thuật -->
-            <div class="tech-specs">
+            <div id="tech-specs" class="tech-specs">
                 <h3 class="specs-title">Cấu hình &amp; Bộ nhớ</h3>
                 <table class="specs-table">
                     <c:forEach items="${techSpecs}" var="spec">
@@ -382,7 +382,7 @@
         <div id="product-list" class="product-list">
             <c:forEach items="${relatedProducts}" var="product">
                 <div class="product-card">
-                    <a href="product-detail?id=${product.id}">
+                    <a href="${pageContext.request.contextPath}/product-detail?id=${product.id}">
                         <div class="product-img">
                             <c:set var="relatedImgPath" value="${product.categoryId == 1 ? 'product' : 'accesory'}"/>
                             <img src="${product.image}"
@@ -455,7 +455,14 @@
 
         </div>
         <div class="view-all-btn">
-            <a href="#"><i class="fa-solid fa-chevron-right"></i> Xem tất cả</a>
+            <c:choose>
+                <c:when test="${product.category.id == 1}">
+                    <a href="${pageContext.request.contextPath}/listproduct?categoryId=${product.category.id}"><i class="fa-solid fa-chevron-right"></i> Xem tất cả</a>
+                </c:when>
+                <c:otherwise>
+                    <a href="${pageContext.request.contextPath}/listproduct_accessory?categoryId=${product.category.id}"><i class="fa-solid fa-chevron-right"></i> Xem tất cả</a>
+                </c:otherwise>
+            </c:choose>
         </div>
     </section>
 </div>

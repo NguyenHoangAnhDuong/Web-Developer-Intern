@@ -1,6 +1,7 @@
 
 document.addEventListener("DOMContentLoaded", function () {
     const selectAll = document.getElementById("selectAll");
+    const clearSelectedBtn = document.getElementById("clearSelectedBtn");
     const itemCheckboxes = document.querySelectorAll(".select-item");
     const checkoutBtn = document.querySelector(".checkout-btn");
 
@@ -19,14 +20,36 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
             const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.getAttribute("data-id"));
-            // Chuyển hướng
             window.location.href = "cart?action=checkout&selectedIds=" + selectedIds.join(",");
         });
     }
 
+    if (clearSelectedBtn) {
+        clearSelectedBtn.addEventListener("click", function () {
+            const selectedCheckboxes = document.querySelectorAll(".select-item:checked:not(:disabled)");
+            if (selectedCheckboxes.length === 0) {
+                showToast("Vui lòng chọn sản phẩm muốn xóa", "error");
+                return;
+            }
+            const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.dataset.id);
+            fetch(`cart?action=clearSelected&selectedIds=${selectedIds.join(",")}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        showToast("Đã xóa sản phẩm đã chọn", "success");
+                        window.location.href = "cart?action=view";
+                    } else {
+                        showToast("Xóa thất bại!", "error");
+                    }
+                })
+                .catch(() => {
+                    showToast("Xóa thất bại!", "error");
+                });
+        });
+    }
     if (selectAll) {
         selectAll.addEventListener("change", function () {
-            document.querySelectorAll(".select-item").forEach(cb => cb.checked = selectAll.checked);
+            document.querySelectorAll(".select-item:not(:disabled)").forEach(cb => cb.checked = selectAll.checked);
             updateTotalPrice();
         });
     }
@@ -39,7 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             // Nếu tất cả ô con được tích, tự động tích ô "Chọn tất cả"
             else {
-                const allChecked = document.querySelectorAll(".select-item:checked").length === itemCheckboxes.length;
+                const allChecked = document.querySelectorAll(".select-item:not(:disabled):checked").length === document.querySelectorAll(".select-item:not(:disabled)").length;
                 if(selectAll) selectAll.checked = allChecked;
             }
             updateTotalPrice();
@@ -119,6 +142,9 @@ function updateTotalPrice() {
     if (checkoutBtn) {
         checkoutBtn.disabled = !hasChecked;
         checkoutBtn.style.opacity = hasChecked ? "1" : "0.5";
+    }
+    if (clearSelectedBtn) {
+        clearSelectedBtn.disabled = !hasChecked;
     }
 }
 // hàm xử lý khi đổi biến thể

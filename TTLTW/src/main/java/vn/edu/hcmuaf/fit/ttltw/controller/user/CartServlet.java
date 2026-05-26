@@ -53,6 +53,9 @@ public class CartServlet extends HttpServlet {
             case "clear":
                 clearCart(request, response, user.getId());
                 break;
+            case "clearSelected":
+                clearSelectedItems(request, response, user.getId());
+                break;
             case "changeVariant":
                 changeVariant(request, response, user.getId());
                 break;
@@ -245,6 +248,26 @@ public class CartServlet extends HttpServlet {
             throws IOException {
         cartService.clearCart(userId);
         response.sendRedirect("cart?action=view");
+    }
+    // Xóa các mục đã chọn trong giỏ hàng
+    private void clearSelectedItems(HttpServletRequest request, HttpServletResponse response, int userId)
+            throws IOException {
+        String selectedIds = request.getParameter("selectedIds");
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        if (selectedIds == null || selectedIds.trim().isEmpty()) {
+            response.getWriter().print("{\"status\": \"error\", \"message\": \"Không có sản phẩm để xóa\"}");
+            return;
+        }
+        String[] ids = selectedIds.split(",");
+        for (String id : ids) {
+            try {
+                int vId = Integer.parseInt(id);
+                cartService.removeCartItem(userId, vId);
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        response.getWriter().print("{\"status\": \"success\"}");
     }
     // Thay đổi biến thể màu/variant
     private void changeVariant(HttpServletRequest request, HttpServletResponse response, int userId)
