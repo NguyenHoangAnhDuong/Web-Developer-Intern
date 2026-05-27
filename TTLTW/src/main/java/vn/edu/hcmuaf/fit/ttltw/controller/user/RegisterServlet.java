@@ -16,8 +16,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import vn.edu.hcmuaf.fit.ttltw.dao.UserDao;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
+import vn.edu.hcmuaf.fit.ttltw.service.CacheService;
 import vn.edu.hcmuaf.fit.ttltw.service.EmailService;
-import vn.edu.hcmuaf.fit.ttltw.service.RedisService;
 
 @WebServlet(name = "RegisterServlet", value = "/register")
 public class RegisterServlet extends HttpServlet {
@@ -112,18 +112,18 @@ public class RegisterServlet extends HttpServlet {
         User pendingUser = new User(fname, lname, username, hashedPassword, email);
 
         // Lưu user vào Redis (TTL 10 phút)
-        RedisService.savePendingUser(email, pendingUser);
+        CacheService.savePendingUser(email, pendingUser);
 
         // Sinh và lưu OTP (TTL 5 phút)
         String otp = generateOtp();
-        RedisService.saveOtp(email, otp);
+        CacheService.saveOtp(email, otp);
 
         // Gửi OTP qua email
         try {
             EmailService.sendOtp(email, otp);
         } catch (Exception e) {
-            RedisService.deletePendingUser(email);
-            RedisService.deleteOtp(email);
+            CacheService.deletePendingUser(email);
+            CacheService.deleteOtp(email);
             Map<String, String> mailErr = new HashMap<>();
             mailErr.put("general", "Không thể gửi email xác thực. Vui lòng thử lại.");
             forwardWithErrors(request, response, mailErr, fname, lname, email, username);
