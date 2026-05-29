@@ -153,7 +153,7 @@
 <template id="phoneVariantTpl">
     <div class="variant">
         <input name="variantName[]" placeholder="Tên phiên bản" required>
-        <input name="basePrice[]" placeholder="Giá gốc" required>
+        <input type="number" name="basePrice[]" placeholder="Giá gốc" min="1000" step="100" required>
 
         <div class="colors"></div> <button type="button" class="btn-add-color" onclick="addColor(this)">Thêm màu</button>
         <button type="button" class="danger" onclick="removeBlock(this)">Xóa phiên bản</button>
@@ -163,7 +163,7 @@
 <template id="partVariantTpl">
     <div class="variant">
         <input name="variantName[]" placeholder="Tên phiên bản" required>
-        <input name="basePrice[]" placeholder="Giá gốc" required>
+        <input type="number" name="basePrice[]" placeholder="Giá gốc" min="0.01" step="0.01" required>
 
         <input name="variantQuantity[]" placeholder="Số lượng tồn kho" required>
 
@@ -187,8 +187,8 @@
             </select>
             <input type="text" name="customColor[]" placeholder="Nhập màu mới" style="display:none">
         </div>
-        <input name="colorPrice[]" placeholder="Giá màu" value="" required>
-        <input name="quantity[]" placeholder="Số lượng" value="" required>
+        <input type="number" name="colorPrice[]" placeholder="Giá màu" value="" min="0.01" step="0.01" required>
+        <input type="number" name="quantity[]" placeholder="Số lượng" value="" min="0" step="1" required>
         <input name="sku[]" placeholder="SKU">
         <input type="file" multiple class="color-image-input" accept="image/*">
         <button type="button" onclick="removeBlock(this)">✖</button>

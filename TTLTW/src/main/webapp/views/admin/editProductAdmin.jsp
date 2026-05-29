@@ -109,7 +109,7 @@
 
                     <div class="form-group">
                         <label>Giá phiên bản (Cơ bản)</label>
-                        <input name="basePrice" type="number" value="${product.base_price}">
+                        <input name="basePrice" type="number" min="1000" step="100" value="${product.base_price}">
                     </div>
                     <div class="form-group">
                         <label>Bảo hành (tháng)</label>
@@ -117,7 +117,7 @@
                     </div>
                     <div class="form-group">
                     <label>Giá theo màu</label>
-                    <input name="colorPrice" type="number" value="${product.color_price}">
+                    <input name="colorPrice" type="number" min="0.01" step="0.01" value="${product.color_price}">
                 </div>
                     <div class="form-group">
                         <label>Giảm giá (%)</label>
@@ -226,7 +226,7 @@
 
                     <div class="form-group">
                         <label>Giá bán</label>
-                        <input type="number" name="colorPrices[]" value="${accessory.color_price}">
+                        <input type="number" name="colorPrices[]" min="0.01" step="0.01" value="${accessory.color_price}">
                     </div>
 
                     <div class="form-group">

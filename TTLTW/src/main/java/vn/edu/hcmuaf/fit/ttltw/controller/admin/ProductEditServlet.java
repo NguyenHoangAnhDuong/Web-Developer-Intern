@@ -11,6 +11,7 @@ import vn.edu.hcmuaf.fit.ttltw.model.*;
 import vn.edu.hcmuaf.fit.ttltw.service.ProductService;
 import vn.edu.hcmuaf.fit.ttltw.service.ProductServiceImpl;
 import vn.edu.hcmuaf.fit.ttltw.utils.PermissionUtil;
+import vn.edu.hcmuaf.fit.ttltw.validation.ProductPriceValidator;
 
 import java.io.IOException;
 import java.util.Map;
@@ -75,6 +76,25 @@ public class ProductEditServlet  extends HttpServlet {
             p.setDescription(req.getParameter("description"));
             p.setMainImage(req.getParameter("currentImage"));
             p.setCategory(new Category(categoryId));
+
+            if (categoryId == 1) {
+                ProductPriceValidator.ValidationResult basePriceResult =
+                        ProductPriceValidator.validatePositivePrice(req.getParameter("basePrice"), "Giá phiên bản (Cơ bản)");
+                if (!basePriceResult.ok) {
+                    throw new IllegalArgumentException(basePriceResult.message);
+                }
+                ProductPriceValidator.ValidationResult colorPriceResult =
+                        ProductPriceValidator.validatePositivePrice(req.getParameter("colorPrice"), "Giá theo màu");
+                if (!colorPriceResult.ok) {
+                    throw new IllegalArgumentException(colorPriceResult.message);
+                }
+            } else {
+                ProductPriceValidator.ValidationResult accessoryPriceResult =
+                        ProductPriceValidator.validatePositivePriceArray(req.getParameterValues("colorPrices[]"), "Giá bán");
+                if (!accessoryPriceResult.ok) {
+                    throw new IllegalArgumentException(accessoryPriceResult.message);
+                }
+            }
             
             String discountStr = req.getParameter("discountPercentage");
             int discount = 0;
