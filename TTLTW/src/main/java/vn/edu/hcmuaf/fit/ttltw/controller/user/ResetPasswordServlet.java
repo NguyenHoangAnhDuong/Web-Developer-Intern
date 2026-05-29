@@ -12,7 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import vn.edu.hcmuaf.fit.ttltw.dao.UserDao;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
-import vn.edu.hcmuaf.fit.ttltw.service.RedisService;
+import vn.edu.hcmuaf.fit.ttltw.service.CacheService;
 
 @WebServlet(name = "ResetPasswordServlet", value = "/reset-password")
 public class ResetPasswordServlet extends HttpServlet {
@@ -44,7 +44,7 @@ public class ResetPasswordServlet extends HttpServlet {
         }
 
         String token    = (String) session.getAttribute("reset_token");
-        String email    = RedisService.getResetTokenEmail(token);
+        String email    = CacheService.getResetTokenEmail(token);
         String password = nullToEmpty(request.getParameter("password"));
         String confirm  = nullToEmpty(request.getParameter("confirm"));
 
@@ -73,7 +73,7 @@ public class ResetPasswordServlet extends HttpServlet {
         User user = userDao.findByEmail(email).orElse(null);
         if (user == null) {
             // Cực hiếm — email đã bị xoá giữa các bước.
-            RedisService.deleteResetToken(token);
+            CacheService.deleteResetToken(token);
             session.removeAttribute("reset_token");
             session.removeAttribute("reset_email");
             response.sendRedirect(request.getContextPath() + "/forgot-password");
@@ -88,7 +88,7 @@ public class ResetPasswordServlet extends HttpServlet {
         }
 
         // Dọn dẹp — chống dùng lại token, và đánh dấu để cho phép vào trang success.
-        RedisService.deleteResetToken(token);
+        CacheService.deleteResetToken(token);
         session.removeAttribute("reset_token");
         session.removeAttribute("reset_email");
         session.setAttribute("reset_password_done", Boolean.TRUE);
@@ -101,7 +101,7 @@ public class ResetPasswordServlet extends HttpServlet {
         if (session == null) return false;
         String token = (String) session.getAttribute("reset_token");
         if (token == null) return false;
-        return RedisService.getResetTokenEmail(token) != null;
+        return CacheService.getResetTokenEmail(token) != null;
     }
 
     private void forwardWithError(HttpServletRequest request, HttpServletResponse response, String message)

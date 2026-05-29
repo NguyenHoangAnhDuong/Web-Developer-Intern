@@ -11,8 +11,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import vn.edu.hcmuaf.fit.ttltw.dao.UserDao;
 import vn.edu.hcmuaf.fit.ttltw.model.User;
+import vn.edu.hcmuaf.fit.ttltw.service.CacheService;
 import vn.edu.hcmuaf.fit.ttltw.service.EmailService;
-import vn.edu.hcmuaf.fit.ttltw.service.RedisService;
 
 @WebServlet(name = "VerifyOtpServlet", value = "/verify-otp")
 public class VerifyOtpServlet extends HttpServlet {
@@ -51,7 +51,7 @@ public class VerifyOtpServlet extends HttpServlet {
 
         // Gửi lại OTP 
         if ("resend".equals(action)) {
-            User pendingUser = RedisService.getPendingUser(email);
+            User pendingUser = CacheService.getPendingUser(email);
             if (pendingUser == null) {
                 session.removeAttribute("pending_email");
                 session.setAttribute("toastMessage", "Phiên đăng ký đã hết hạn. Vui lòng đăng ký lại!");
@@ -61,7 +61,7 @@ public class VerifyOtpServlet extends HttpServlet {
             }
 
             String newOtp = generateOtp();
-            RedisService.saveOtp(email, newOtp);
+            CacheService.saveOtp(email, newOtp);
 
             try {
                 EmailService.sendOtp(email, newOtp);
@@ -78,7 +78,7 @@ public class VerifyOtpServlet extends HttpServlet {
 
         // Xác thực OTP
         String inputOtp  = request.getParameter("otp");
-        String storedOtp = RedisService.getOtp(email);
+        String storedOtp = CacheService.getOtp(email);
 
         if (storedOtp == null) {
             forwardWithError(request, response, email, "Mã OTP đã hết hạn. Nhấn \"Gửi lại\" để nhận mã mới!");
@@ -91,7 +91,7 @@ public class VerifyOtpServlet extends HttpServlet {
         }
 
         // OTP hợp lệ — lấy thông tin user từ Redis
-        User pendingUser = RedisService.getPendingUser(email);
+        User pendingUser = CacheService.getPendingUser(email);
         if (pendingUser == null) {
             forwardWithError(request, response, email, "Phiên đăng ký đã hết hạn. Vui lòng đăng ký lại!");
             return;
@@ -105,8 +105,8 @@ public class VerifyOtpServlet extends HttpServlet {
         }
 
         // Xóa Redis và session tạm
-        RedisService.deleteOtp(email);
-        RedisService.deletePendingUser(email);
+        CacheService.deleteOtp(email);
+        CacheService.deletePendingUser(email);
         session.removeAttribute("pending_email");
 
         // Lấy user đầy đủ (có id, rolesId) để set session đăng nhập
