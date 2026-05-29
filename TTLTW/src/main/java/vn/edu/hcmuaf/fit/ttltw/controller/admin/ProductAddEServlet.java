@@ -6,7 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import vn.edu.hcmuaf.fit.ttltw.model.*;
 import vn.edu.hcmuaf.fit.ttltw.service.*;
-import vn.edu.hcmuaf.fit.ttltw.utils.FileUploadUtil;
+import vn.edu.hcmuaf.fit.ttltw.utils.CloudinaryUtil;
 import vn.edu.hcmuaf.fit.ttltw.utils.PermissionUtil;
 
 import java.io.IOException;
@@ -69,8 +69,7 @@ public class ProductAddEServlet extends HttpServlet {
             product.setDiscountPercentage(discount);
             Part mainImagePart = request.getPart("productImage");
             if (mainImagePart != null && mainImagePart.getSize() > 0) {
-                String path = FileUploadUtil.saveImage(mainImagePart, getServletContext().getRealPath("/"));
-                product.setMainImage(path);
+                product.setMainImage(CloudinaryUtil.uploadImage(mainImagePart, "products"));
             }
             String[] techNames = request.getParameterValues("techName[]");
             String[] techValues = request.getParameterValues("techValue[]");
@@ -95,10 +94,7 @@ public class ProductAddEServlet extends HttpServlet {
                     int variantIndex = Integer.parseInt(partsName[1]);
                     int colorIndex   = Integer.parseInt(partsName[2]);
 
-                    String fileName = FileUploadUtil.saveImage(
-                            part,
-                            getServletContext().getRealPath("/")
-                    );
+                        String fileName = CloudinaryUtil.uploadImage(part, "products/colors");
                     String key = variantIndex + "_" + colorIndex;
                     colorImagesMap
                             .computeIfAbsent(key, k -> new ArrayList<>())

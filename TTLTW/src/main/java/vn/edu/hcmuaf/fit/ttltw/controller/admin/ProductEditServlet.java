@@ -7,9 +7,11 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 import vn.edu.hcmuaf.fit.ttltw.model.*;
 import vn.edu.hcmuaf.fit.ttltw.service.ProductService;
 import vn.edu.hcmuaf.fit.ttltw.service.ProductServiceImpl;
+import vn.edu.hcmuaf.fit.ttltw.utils.CloudinaryUtil;
 import vn.edu.hcmuaf.fit.ttltw.utils.PermissionUtil;
 
 import java.io.IOException;
@@ -68,12 +70,17 @@ public class ProductEditServlet  extends HttpServlet {
         try {
             int productId = Integer.parseInt(req.getParameter("productId"));
             int categoryId = Integer.parseInt(req.getParameter("categoryId"));
+            Part imagePart = req.getPart("image");
 
             Product p = new Product();
             p.setId(productId);
             p.setName(req.getParameter("productName"));
             p.setDescription(req.getParameter("description"));
-            p.setMainImage(req.getParameter("currentImage"));
+            if (imagePart != null && imagePart.getSize() > 0) {
+                p.setMainImage(CloudinaryUtil.uploadImage(imagePart, "products"));
+            } else {
+                p.setMainImage(req.getParameter("currentImage"));
+            }
             p.setCategory(new Category(categoryId));
             
             String discountStr = req.getParameter("discountPercentage");
