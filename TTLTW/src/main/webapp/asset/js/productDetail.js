@@ -80,8 +80,17 @@ document.addEventListener("DOMContentLoaded", () => {
         return header ? header.dataset.contextPath : "";
     }
 
+    function redirectToLogin() {
+        window.location.href = `${getContextPath()}/login`;
+    }
+
     btnCart?.addEventListener("click", e => {
         e.preventDefault();
+
+        if (document.body.dataset.authenticated !== "true") {
+            redirectToLogin();
+            return;
+        }
 
         const activeColor = document.querySelector(".color-item.active");
         if (!activeColor) return showToast("Vui lòng chọn phiên bản và màu","error");
@@ -112,6 +121,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     btnBuy?.addEventListener("click", e => {
         e.preventDefault();
+
+        if (document.body.dataset.authenticated !== "true") {
+            redirectToLogin();
+            return;
+        }
 
         const activeColor = document.querySelector(".color-item.active");
         if (!activeColor) return showToast("Vui lòng chọn phiên bản và màu", "error");

@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/asset/css/listproduct.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/asset/css/listVouchers.css">
 </head>
-<body>
+<body data-authenticated="${not empty sessionScope.user}">
 <%@ include file="/views/includes/toast.jsp" %>
 <div class="app-wrapper">
     <!-- Header -->
