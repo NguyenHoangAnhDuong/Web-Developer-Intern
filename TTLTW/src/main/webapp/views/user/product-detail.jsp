@@ -445,7 +445,8 @@
                         </div>
                         <div class="bottom-info">
                             <span class="sold-count">Đã bán ${product.soldCount}</span>
-                            <button class="cart-btn">
+                            <button class="cart-btn"
+                                    data-variant-color-id="${not empty product.variants and not empty product.variants[0].colors ? product.variants[0].colors[0].id : ''}">
                                 <i class="fa-solid fa-cart-plus"></i>
                             </button>
                         </div>
