@@ -43,6 +43,7 @@ build/
 ### Env files ###
 src/main/resources/.env
 .env.local
+.env
 
 /pom.xml
 src/main/resources/config.properties
