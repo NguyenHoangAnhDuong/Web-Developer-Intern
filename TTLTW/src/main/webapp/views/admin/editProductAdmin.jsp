@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -50,7 +51,14 @@
                     <div class="image-management">
                         <div class="form-group image-box">
                             <div class="current-image-box">
-                                <img src="${pageContext.request.contextPath}/${product.product_img}">
+                                <c:choose>
+                                    <c:when test="${not empty product.product_img and fn:startsWith(product.product_img, 'http')}">
+                                        <img src="${product.product_img}" alt="${product.product_name}">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <img src="${pageContext.request.contextPath}/${product.product_img}" alt="${product.product_name}">
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
                         </div>
 
@@ -174,7 +182,14 @@
                     <div class="image-management">
                         <div class="form-group image-box">
                             <div class="current-image-box">
-                                <img src="${pageContext.request.contextPath}/${accessory.product_img}" alt="Linh kiện">
+                                <c:choose>
+                                    <c:when test="${not empty accessory.product_img and fn:startsWith(accessory.product_img, 'http')}">
+                                        <img src="${accessory.product_img}" alt="Linh kiện">
+                                    </c:when>
+                                    <c:otherwise>
+                                        <img src="${pageContext.request.contextPath}/${accessory.product_img}" alt="Linh kiện">
+                                    </c:otherwise>
+                                </c:choose>
                             </div>
                         </div>
                         <div class="upload-action">
