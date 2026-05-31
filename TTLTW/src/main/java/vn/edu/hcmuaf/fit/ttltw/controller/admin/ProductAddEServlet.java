@@ -8,6 +8,7 @@ import vn.edu.hcmuaf.fit.ttltw.model.*;
 import vn.edu.hcmuaf.fit.ttltw.service.*;
 import vn.edu.hcmuaf.fit.ttltw.utils.CloudinaryUtil;
 import vn.edu.hcmuaf.fit.ttltw.utils.PermissionUtil;
+import vn.edu.hcmuaf.fit.ttltw.validation.ProductPriceValidator;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -84,6 +85,17 @@ public class ProductAddEServlet extends HttpServlet {
             String[] colorIds = request.getParameterValues("colorId[]");
             String[] customColors = request.getParameterValues("customColor[]");
             String[] colorPrices = request.getParameterValues("colorPrice[]");
+
+            ProductPriceValidator.ValidationResult basePriceResult = ProductPriceValidator.validatePositivePriceArray(basePrices, "Giá gốc");
+            if (!basePriceResult.ok) {
+                throw new IllegalArgumentException(basePriceResult.message);
+            }
+            if (categoryId == 1) {
+                ProductPriceValidator.ValidationResult colorPriceResult = ProductPriceValidator.validatePositivePriceArray(colorPrices, "Giá màu");
+                if (!colorPriceResult.ok) {
+                    throw new IllegalArgumentException(colorPriceResult.message);
+                }
+            }
 
             Map<String, List<Image>> colorImagesMap = new HashMap<>();
             for (Part part : request.getParts()) {
