@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
 <fmt:setLocale value="vi_VN"/>
 <!DOCTYPE html>
@@ -64,7 +65,14 @@
                 <input type="hidden" name="selectedItems" value="${item.vc_id}" form="orderForm">
                 <tr class="product-item">
                     <td class="product-info">
-                        <img src="${pageContext.request.contextPath}/assert/img/product/${item.product_img}" alt="${item.product_name}"/>
+                        <c:choose>
+                            <c:when test="${not empty item.product_img and fn:startsWith(item.product_img, 'http')}">
+                                <img src="${item.product_img}" alt="${item.product_name}"/>
+                            </c:when>
+                            <c:otherwise>
+                                <img src="${pageContext.request.contextPath}/assert/img/product/${item.product_img}" alt="${item.product_name}"/>
+                            </c:otherwise>
+                        </c:choose>
                         <div class="details">
                             <p class="name">${item.product_name}</p>
                             <p class="type">${item.variant_name} | ${item.color_name}</p>
