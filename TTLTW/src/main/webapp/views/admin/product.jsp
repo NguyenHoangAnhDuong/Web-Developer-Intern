@@ -90,13 +90,14 @@
                 <tr>
                     <td>
                         <c:choose>
+                            <c:when test="${not empty row.p_img and fn:startsWith(row.p_img, 'http')}">
+                                <img src="${row.p_img}" alt="${row.p_name}">
+                            </c:when>
                             <c:when test="${row.c_id == 1}">
-                                <img src="${pageContext.request.contextPath}/assert/img/product/${row.p_img}"
-                                >
+                                <img src="${pageContext.request.contextPath}/assert/img/product/${row.p_img}" alt="${row.p_name}">
                             </c:when>
                             <c:otherwise>
-                                <img src="${pageContext.request.contextPath}/assert/img/accesory/${row.p_img}"
-                                >
+                                <img src="${pageContext.request.contextPath}/assert/img/accesory/${row.p_img}" alt="${row.p_name}">
                             </c:otherwise>
                         </c:choose>
 

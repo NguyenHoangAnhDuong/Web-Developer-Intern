@@ -7,10 +7,13 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.Part;
 import vn.edu.hcmuaf.fit.ttltw.model.*;
 import vn.edu.hcmuaf.fit.ttltw.service.ProductService;
 import vn.edu.hcmuaf.fit.ttltw.service.ProductServiceImpl;
+import vn.edu.hcmuaf.fit.ttltw.utils.CloudinaryUtil;
 import vn.edu.hcmuaf.fit.ttltw.utils.PermissionUtil;
+import vn.edu.hcmuaf.fit.ttltw.validation.ProductPriceValidator;
 
 import java.io.IOException;
 import java.util.Map;
@@ -68,13 +71,37 @@ public class ProductEditServlet  extends HttpServlet {
         try {
             int productId = Integer.parseInt(req.getParameter("productId"));
             int categoryId = Integer.parseInt(req.getParameter("categoryId"));
+            Part imagePart = req.getPart("image");
 
             Product p = new Product();
             p.setId(productId);
             p.setName(req.getParameter("productName"));
             p.setDescription(req.getParameter("description"));
-            p.setMainImage(req.getParameter("currentImage"));
+            if (imagePart != null && imagePart.getSize() > 0) {
+                p.setMainImage(CloudinaryUtil.uploadImage(imagePart, "products"));
+            } else {
+                p.setMainImage(req.getParameter("currentImage"));
+            }
             p.setCategory(new Category(categoryId));
+
+            if (categoryId == 1) {
+                ProductPriceValidator.ValidationResult basePriceResult =
+                        ProductPriceValidator.validatePositivePrice(req.getParameter("basePrice"), "Giá phiên bản (Cơ bản)");
+                if (!basePriceResult.ok) {
+                    throw new IllegalArgumentException(basePriceResult.message);
+                }
+                ProductPriceValidator.ValidationResult colorPriceResult =
+                        ProductPriceValidator.validatePositivePrice(req.getParameter("colorPrice"), "Giá theo màu");
+                if (!colorPriceResult.ok) {
+                    throw new IllegalArgumentException(colorPriceResult.message);
+                }
+            } else {
+                ProductPriceValidator.ValidationResult accessoryPriceResult =
+                        ProductPriceValidator.validatePositivePriceArray(req.getParameterValues("colorPrices[]"), "Giá bán");
+                if (!accessoryPriceResult.ok) {
+                    throw new IllegalArgumentException(accessoryPriceResult.message);
+                }
+            }
             
             String discountStr = req.getParameter("discountPercentage");
             int discount = 0;
