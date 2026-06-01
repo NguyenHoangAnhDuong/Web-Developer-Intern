@@ -185,33 +185,33 @@
                         <input type="hidden" name="action" id="formAction">
                         <input type="hidden" name="id" id="editId">
                         <label>Mã KM</label>
-                        <input type="text" name="voucherCode" id="promoCode" required>
+                        <input type="text" name="voucherCode" id="promoCode">
 
                         <label>Loại khuyến mãi</label>
-                        <select name="type" id="promoType" required>
+                        <select name="type" id="promoType">
                             <option value="1">Giảm theo %</option>
                             <option value="2">Giảm theo số tiền</option>
                             <option value="3">Tặng quà</option>
                         </select>
 
                         <label>Mức giảm</label>
-                        <input type="number" name="discountAmount" id="discountValue" min="0" required>
+                        <input type="number" name="discountAmount" id="discountValue" min="0">
 
 
                         <label>Giảm tối đa (₫)</label>
-                        <input type="number" name="maxReduce" id="maxDiscount" min="0" required>
+                        <input type="number" name="maxReduce" id="maxDiscount" min="0">
 
                         <label>Đơn tối thiểu (₫)</label>
-                        <input type="number" name="minOrderValue" id="minOrder" min="0" required>
+                        <input type="number" name="minOrderValue" id="minOrder" min="0">
 
                         <label>Số lượng</label>
-                        <input type="number" name="quantity" id="quantity" min="1" required>
+                        <input type="number" name="quantity" id="quantity" min="1">
 
                         <label>Ngày bắt đầu</label>
-                        <input type="date" name="startDate" id="startDate" required>
+                        <input type="date" name="startDate" id="startDate">
 
                         <label>Ngày kết thúc</label>
-                        <input type="date" name="endDate" id="endDate" required>
+                        <input type="date" name="endDate" id="endDate">
 
                         <div class="modal-buttons">
                             <button type="submit" class="btn-save">Lưu</button>
