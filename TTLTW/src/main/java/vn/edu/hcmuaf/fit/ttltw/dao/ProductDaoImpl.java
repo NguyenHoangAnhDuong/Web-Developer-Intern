@@ -1448,12 +1448,16 @@ public class ProductDaoImpl implements ProductDao {
                         p.release_date,
                         v.id AS variant_id,
                         v.name AS variant_name,
-                        vc.price AS variant_price,
-                        (vc.price * (100 - p.discount_percentage) / 100) AS variant_price_new,
+                        vc.id AS variant_color_id,
+                        c.name AS color_name,
+                        c.color_code AS color_code,
+                        vc.price AS variant_color_price,
+                        (vc.price * (100 - p.discount_percentage) / 100) AS variant_color_price_new,
                         COALESCE(AVG(f.rating), 0) AS rating
                     FROM products p
                     LEFT JOIN product_variants v ON p.id = v.product_id
                     LEFT JOIN variant_colors vc ON v.id = vc.variant_id
+                    LEFT JOIN colors c ON vc.color_id = c.id
                     LEFT JOIN feedbacks f ON p.id = f.product_id AND f.status = 1
                     WHERE p.status = 1
                       AND p.brand_id = :brandId
@@ -1461,7 +1465,7 @@ public class ProductDaoImpl implements ProductDao {
                       AND p.id <> :excludeId
                     GROUP BY p.id, p.name, p.img, p.discount_percentage,
                              p.total_sold, p.release_date,
-                             v.id, v.name, vc.price
+                             v.id, v.name, vc.id, c.name, c.color_code, vc.price
                     ORDER BY p.total_sold DESC, p.release_date DESC
                     LIMIT :limit
                 """;
@@ -1482,8 +1486,11 @@ public class ProductDaoImpl implements ProductDao {
                         map.put("soldCount", rs.getInt("soldCount"));
                         map.put("variant_id", rs.getInt("variant_id"));
                         map.put("variant_name", rs.getString("variant_name"));
-                        map.put("variant_price", rs.getDouble("variant_price"));
-                        map.put("variant_price_new", rs.getDouble("variant_price_new"));
+                        map.put("variant_color_id", rs.getInt("variant_color_id"));
+                        map.put("color_name", rs.getString("color_name"));
+                        map.put("color_code", rs.getString("color_code"));
+                        map.put("variant_color_price", rs.getDouble("variant_color_price"));
+                        map.put("variant_color_price_new", rs.getDouble("variant_color_price_new"));
                         return map;
                     }).list();
 
@@ -1506,19 +1513,23 @@ public class ProductDaoImpl implements ProductDao {
                         p.release_date,
                         v.id AS variant_id,
                         v.name AS variant_name,
-                        vc.price AS variant_price,
-                        (vc.price * (100 - p.discount_percentage) / 100) AS variant_price_new,
+                        vc.id AS variant_color_id,
+                        c.name AS color_name,
+                        c.color_code AS color_code,
+                        vc.price AS variant_color_price,
+                        (vc.price * (100 - p.discount_percentage) / 100) AS variant_color_price_new,
                         COALESCE(AVG(f.rating), 0) AS rating
                     FROM products p
                     LEFT JOIN product_variants v ON p.id = v.product_id
                     LEFT JOIN variant_colors vc ON v.id = vc.variant_id
+                    LEFT JOIN colors c ON vc.color_id = c.id
                     LEFT JOIN feedbacks f ON p.id = f.product_id AND f.status = 1
                     WHERE p.status = 1
                       AND p.category_id  = :categoryId
                       AND p.id NOT IN (<excludeIds>)
                     GROUP BY p.id, p.name, p.img, p.discount_percentage,
                              p.total_sold, p.release_date,
-                             v.id, v.name, vc.price
+                             v.id, v.name, vc.id, c.name, c.color_code, vc.price
                     ORDER BY p.total_sold DESC, p.release_date DESC
                     LIMIT :limit
                 """;
@@ -1538,8 +1549,11 @@ public class ProductDaoImpl implements ProductDao {
                         map.put("soldCount", rs.getInt("soldCount"));
                         map.put("variant_id", rs.getInt("variant_id"));
                         map.put("variant_name", rs.getString("variant_name"));
-                        map.put("variant_price", rs.getDouble("variant_price"));
-                        map.put("variant_price_new", rs.getDouble("variant_price_new"));
+                        map.put("variant_color_id", rs.getInt("variant_color_id"));
+                        map.put("color_name", rs.getString("color_name"));
+                        map.put("color_code", rs.getString("color_code"));
+                        map.put("variant_color_price", rs.getDouble("variant_color_price"));
+                        map.put("variant_color_price_new", rs.getDouble("variant_color_price_new"));
                         return map;
                     }).list();
 
@@ -1553,27 +1567,51 @@ public class ProductDaoImpl implements ProductDao {
         for (Map<String, Object> row : rawResults) {
             int productId = (int) row.get("id");
 
-            if (!productMap.containsKey(productId)) {
-                Map<String, Object> product = new HashMap<>();
-                product.put("id", row.get("id"));
-                product.put("name", row.get("name"));
-                product.put("image", row.get("image"));
-                product.put("discount", row.get("discount"));
-                product.put("rating", row.get("rating"));
-                product.put("soldCount", row.get("soldCount"));
-                product.put("variants", new ArrayList<Map<String, Object>>());
-                productMap.put(productId, product);
-            }
-
-            Map<String, Object> variant = new HashMap<>();
-            variant.put("id", row.get("variant_id"));
-            variant.put("name", row.get("variant_name"));
-            variant.put("priceOld", row.get("variant_price"));
-            variant.put("priceNew", row.get("variant_price_new"));
+            Map<String, Object> product = productMap.computeIfAbsent(productId, key -> {
+                Map<String, Object> newProduct = new HashMap<>();
+                newProduct.put("id", row.get("id"));
+                newProduct.put("name", row.get("name"));
+                newProduct.put("image", row.get("image"));
+                newProduct.put("discount", row.get("discount"));
+                newProduct.put("rating", row.get("rating"));
+                newProduct.put("soldCount", row.get("soldCount"));
+                newProduct.put("variants", new ArrayList<Map<String, Object>>());
+                return newProduct;
+            });
 
             @SuppressWarnings("unchecked")
-            List<Map<String, Object>> variants = (List<Map<String, Object>>) productMap.get(productId).get("variants");
-            variants.add(variant);
+            List<Map<String, Object>> variants = (List<Map<String, Object>>) product.get("variants");
+            Integer variantId = (Integer) row.get("variant_id");
+            Map<String, Object> variant = variants.stream()
+                    .filter(existingVariant -> variantId.equals(existingVariant.get("id")))
+                    .findFirst()
+                    .orElseGet(() -> {
+                        Map<String, Object> newVariant = new HashMap<>();
+                        newVariant.put("id", variantId);
+                        newVariant.put("name", row.get("variant_name"));
+                        newVariant.put("priceOld", row.get("variant_color_price"));
+                        newVariant.put("priceNew", row.get("variant_color_price_new"));
+                        newVariant.put("colors", new ArrayList<Map<String, Object>>());
+                        variants.add(newVariant);
+                        return newVariant;
+                    });
+
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> colors = (List<Map<String, Object>>) variant.get("colors");
+            Integer variantColorId = (Integer) row.get("variant_color_id");
+            if (variantColorId != null) {
+                boolean colorExists = colors.stream()
+                        .anyMatch(color -> variantColorId.equals(color.get("id")));
+                if (!colorExists) {
+                    Map<String, Object> color = new HashMap<>();
+                    color.put("id", variantColorId);
+                    color.put("name", row.get("color_name"));
+                    color.put("code", row.get("color_code"));
+                    color.put("priceOld", row.get("variant_color_price"));
+                    color.put("priceNew", row.get("variant_color_price_new"));
+                    colors.add(color);
+                }
+            }
         }
 
         // set giá mặc định
@@ -1582,8 +1620,18 @@ public class ProductDaoImpl implements ProductDao {
             List<Map<String, Object>> variants = (List<Map<String, Object>>) product.get("variants");
 
             if (!variants.isEmpty()) {
-                product.put("priceNew", variants.get(0).get("priceNew"));
-                product.put("priceOld", variants.get(0).get("priceOld"));
+                Map<String, Object> firstVariant = variants.get(0);
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> firstVariantColors = (List<Map<String, Object>>) firstVariant.get("colors");
+                if (firstVariantColors != null && !firstVariantColors.isEmpty()) {
+                    product.put("priceNew", firstVariantColors.get(0).get("priceNew"));
+                    product.put("priceOld", firstVariantColors.get(0).get("priceOld"));
+                    firstVariant.put("priceNew", firstVariantColors.get(0).get("priceNew"));
+                    firstVariant.put("priceOld", firstVariantColors.get(0).get("priceOld"));
+                } else {
+                    product.put("priceNew", firstVariant.get("priceNew"));
+                    product.put("priceOld", firstVariant.get("priceOld"));
+                }
             }
         }
 
