@@ -486,7 +486,7 @@ public class ProductDaoImpl implements ProductDao {
                     LEFT JOIN variant_colors vc ON v.id = vc.variant_id
                     LEFT JOIN colors col ON vc.color_id = col.id
                     LEFT JOIN feedbacks f ON p.id = f.product_id AND f.status = 1
-                    WHERE p.status = 1 AND p.category_id = ?
+                    WHERE p.status = 1 AND p.category_id = ? AND vc.status = 1 AND vc.quantity > 0      
                     GROUP BY p.id, p.name, p.img, p.discount_percentage, p.total_sold,
                              v.id, v.name, vc.price, vc.id, col.name, col.color_code, vc.quantity, vc.sku
                     ORDER BY p.id DESC, v.name ASC, col.name ASC
@@ -627,7 +627,7 @@ public class ProductDaoImpl implements ProductDao {
                     LEFT JOIN variant_colors vc ON v.id = vc.variant_id
                     LEFT JOIN colors col ON vc.color_id = col.id
                     LEFT JOIN feedbacks f ON p.id = f.product_id AND f.status = 1
-                    WHERE p.status = 1 AND p.category_id = ?
+                    WHERE p.status = 1 AND p.category_id = ? AND vc.status = 1 AND vc.quantity > 0
                 """);
 
         List<Object> params = new ArrayList<>();
@@ -852,7 +852,7 @@ public class ProductDaoImpl implements ProductDao {
                     LEFT JOIN variant_colors vc ON v.id = vc.variant_id
                     LEFT JOIN colors col ON vc.color_id = col.id
                     LEFT JOIN feedbacks f ON p.id = f.product_id AND f.status = 1
-                    WHERE p.status = 1 AND p.category_id != 1
+                    WHERE p.status = 1 AND p.category_id != 1 AND vc.status = 1 AND vc.quantity > 0
                     GROUP BY p.id, p.name, p.img, p.discount_percentage, p.total_sold,
                              v.id, v.name, vc.price, vc.id, col.name, col.color_code, c.name
                     ORDER BY p.id DESC, v.name ASC
@@ -1002,7 +1002,7 @@ public class ProductDaoImpl implements ProductDao {
                     LEFT JOIN variant_colors vc ON v.id = vc.variant_id
                     LEFT JOIN colors col ON vc.color_id = col.id
                     LEFT JOIN feedbacks f ON p.id = f.product_id AND f.status = 1
-                    WHERE p.status = 1 AND p.category_id != 1
+                    WHERE p.status = 1 AND p.category_id != 1 AND vc.status = 1 AND vc.quantity > 0
                 """);
 
         List<Object> params = new ArrayList<>();
@@ -1235,7 +1235,7 @@ public class ProductDaoImpl implements ProductDao {
                     LEFT JOIN product_variants v ON p.id = v.product_id
                     LEFT JOIN variant_colors vc ON v.id = vc.variant_id
                     LEFT JOIN feedbacks f ON p.id = f.product_id AND f.status = 1
-                    WHERE p.status = 1
+                    WHERE p.status = 1 AND vc.status = 1 AND vc.quantity > 0
                     GROUP BY p.id, p.name, p.img, p.discount_percentage, p.total_sold
                     ORDER BY p.id DESC
                 """;
@@ -1677,7 +1677,7 @@ public class ProductDaoImpl implements ProductDao {
                     LEFT JOIN variant_colors vc ON v.id = vc.variant_id
                     LEFT JOIN colors col ON vc.color_id = col.id
                     LEFT JOIN feedbacks f ON p.id = f.product_id AND f.status = 1
-                    WHERE p.status = 1 AND p.category_id = ?
+                    WHERE p.status = 1 AND p.category_id = ? AND vc.status = 1 AND vc.quantity > 0
                 """);
 
         List<Object> params = new ArrayList<>();
@@ -1888,7 +1888,7 @@ public class ProductDaoImpl implements ProductDao {
                     LEFT JOIN product_variants v ON p.id = v.product_id
                     LEFT JOIN variant_colors vc ON v.id = vc.variant_id
                     LEFT JOIN colors col ON vc.color_id = col.id
-                    WHERE p.status = 1 AND p.category_id = ?
+                    WHERE p.status = 1 AND p.category_id = ? AND vc.status = 1 AND vc.quantity > 0
                 """);
 
         List<Object> params = new ArrayList<>();
