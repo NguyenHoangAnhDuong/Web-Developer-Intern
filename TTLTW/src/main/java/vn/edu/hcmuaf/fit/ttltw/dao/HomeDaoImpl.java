@@ -23,6 +23,11 @@ public class HomeDaoImpl implements HomeDao {
                     SELECT p.*
                     FROM products p
                     WHERE p.category_id = 1 AND p.status = 1
+                        AND EXISTS (
+                            SELECT 1
+                            FROM product_variants pv2
+                            JOIN variant_colors vc2 ON pv2.id = vc2.variant_id
+                            WHERE pv2.product_id = p.id AND pv2.status = 1 AND vc2.status = 1 AND vc2.quantity > 0 )
                     ORDER BY p.id DESC
                     LIMIT 4
                 ) p
@@ -52,6 +57,11 @@ public class HomeDaoImpl implements HomeDao {
                     SELECT p.*
                     FROM products p
                     WHERE p.category_id != 1 AND p.status = 1
+                        AND EXISTS (
+                            SELECT 1
+                            FROM product_variants pv2
+                            JOIN variant_colors vc2 ON pv2.id = vc2.variant_id
+                            WHERE pv2.product_id = p.id AND pv2.status = 1 AND vc2.status = 1 AND vc2.quantity > 0 )
                     ORDER BY p.release_date DESC
                     LIMIT 4
                 ) p
@@ -96,6 +106,11 @@ public class HomeDaoImpl implements HomeDao {
                     SELECT p.*
                     FROM products p
                     WHERE p.status = 1
+                        AND EXISTS (
+                            SELECT 1
+                            FROM product_variants pv2
+                            JOIN variant_colors vc2 ON pv2.id = vc2.variant_id
+                            WHERE pv2.product_id = p.id AND pv2.status = 1 AND vc2.status = 1 AND vc2.quantity > 0 )
                     ORDER BY p.id DESC, p.total_sold DESC
                     LIMIT 4
                 ) p
