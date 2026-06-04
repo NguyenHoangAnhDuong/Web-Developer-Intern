@@ -168,18 +168,52 @@ document.addEventListener("DOMContentLoaded", () => {
             selectedWard = { name: wardInput.value };
         }
     }
-
+    function setLocationError(inputEl, msg) {
+        clearLocationError(inputEl);
+        inputEl.classList.add("input-error");
+        const err = document.createElement("span");
+        err.className = "field-error";
+        err.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${msg}`;
+        inputEl.parentNode.appendChild(err);
+    }
+    function clearLocationError(inputEl) {
+        inputEl.classList.remove("input-error");
+        const existing = inputEl.parentNode.querySelector(".field-error");
+        if (existing) existing.remove();
+    }
     form?.addEventListener("submit", async e => {
         e.preventDefault();
 
-        if (!validatePhone(inputPhone.value.trim())) {
-            showToast('Số điện thoại phải có 10 chữ số', 'error');
-            return;
+        clearAllErrors();
+        const nameResult = validateName(inputName.value.trim());
+        const phoneResult = validatePhone(inputPhone.value.trim());
+        const addressResult = validateAddress(inputAddress.value.trim());
+        let isValid = true;
+        if (!nameResult.ok) {
+            setFieldError(inputName, nameResult.msg);
+            isValid = false;
         }
-        if (!selectedProvince || !selectedDistrict || !selectedWard) {
-            showToast("Vui lòng chọn đầy đủ Tỉnh / Huyện / Xã", "error");
-            return;
+        if (!phoneResult.ok) {
+            setFieldError(inputPhone, phoneResult.msg);
+            isValid = false;
         }
+        if (!addressResult.ok) {
+            setFieldError(inputAddress, addressResult.msg);
+            isValid = false;
+        }
+        if (!selectedProvince) {
+            setLocationError(provinceInput, "Vui lòng chọn Tỉnh / Thành phố.");
+            isValid = false;
+        }
+        if (!selectedDistrict) {
+            setLocationError(districtInput, "Vui lòng chọn Quận / Huyện.");
+            isValid = false;
+        }
+        if (!selectedWard) {
+            setLocationError(wardInput, "Vui lòng chọn Phường / Xã.");
+            isValid = false;
+        }
+        if (!isValid) return;
         const fullAddress = `${inputAddress.value}, ${selectedWard?.name}, ${selectedDistrict?.name}, ${selectedProvince?.name}`;
         const payload = {
             name: inputName.value.trim(),
@@ -301,6 +335,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderList(filtered, provinceList, (item) => {
             provinceInput.value = item.name;
             selectedProvince = item;
+            clearLocationError(provinceInput);
             provinceList.innerHTML = "";
             // Reset huyện/xã khi đổi tỉnh
             districtInput.value = "";
@@ -331,6 +366,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderList(filtered, districtList, (item) => {
             districtInput.value = item.name;
             selectedDistrict = item;
+            clearLocationError(districtInput);
             districtList.innerHTML = "";
             // Reset xã khi đổi huyện
             wardInput.value = "";
@@ -357,6 +393,7 @@ document.addEventListener("DOMContentLoaded", () => {
         renderList(filtered, wardList, (item) => {
             wardInput.value = item.name;
             selectedWard = item;
+            clearLocationError(wardInput);
             wardList.innerHTML = "";
         });
     });
