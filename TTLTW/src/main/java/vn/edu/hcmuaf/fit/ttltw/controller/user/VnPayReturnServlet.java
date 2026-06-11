@@ -49,8 +49,6 @@ public class VnPayReturnServlet extends HttpServlet {
             int currentStatus = order.getStatus();
             
             // Chuyển từ status 1   sang 2
-            int newStatus =  currentStatus == 1  ? 2 : currentStatus;
-
             // đẩy đơn sang vận chuyển
             if ( currentStatus == 1  ) {
                 orderService.updateStatusOnly(orderId, 2);
@@ -65,7 +63,10 @@ public class VnPayReturnServlet extends HttpServlet {
                                 0 // COD = 0 vì đã thanh toán
                         );
                         if (tracking != null && !tracking.isBlank()) {
-                            shippingService.updateTrackingInfo(orderId, tracking, "SuperAI");
+                            shippingService.updateTrackingInfo(orderId, tracking,
+                                order.getPartnerName() != null && !order.getPartnerName().isBlank()
+                                    ? order.getPartnerName()
+                                    : "SuperAI");
                             System.out.println("tracking saved: " + tracking);
                         }
                     }
