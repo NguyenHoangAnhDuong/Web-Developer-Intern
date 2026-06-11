@@ -109,25 +109,25 @@ public class CheckoutServlet extends HttpServlet {
                         // vnpay
                         String vnpUrl = VnPayConfig.createPaymentUrl(orderId, finalTotal, request);
 
-                        // tự động hủy đơn hàng sau 15s nếu không thanh toán
-//                        new Thread(() -> {
-//                            try {
-//                                Thread.sleep(30000); // 30 seconds
-//                                var opt = orderService.getOrderById(orderId);
-//                                if (opt.isPresent()) {
-//                                    var order = opt.get();
-//                                    if (order.getStatus() == 1 && order.getPaymentTypeId() == 2) {
-//                                        // Cancel với lý do chưa thanh toán sau 15s
-//                                        orderService.cancelOrderWithReason(orderId, "Auto-cancel: VNPay 15s ");
-//                                        System.out.println("Order " + orderId + " auto-cancelled ");
-//                                    }
-//                                }
-//                            } catch (InterruptedException e) {
-//                                Thread.currentThread().interrupt();
-//                            } catch (Exception e) {
-//                                e.printStackTrace();
-//                            }
-//                        }).start();
+                        // tự động hủy đơn hàng sau 45s nếu không thanh toán
+                        new Thread(() -> {
+                            try {
+                                Thread.sleep(45000); // 45 seconds
+                                var opt = orderService.getOrderById(orderId);
+                                if (opt.isPresent()) {
+                                    var order = opt.get();
+                                    if (order.getStatus() == 1 && order.getPaymentTypeId() == 2) {
+                                        // Cancel với lý do chưa thanh toán sau 15s
+                                        orderService.cancelOrderWithReason(orderId, "Auto-cancel: VNPay 15s ");
+                                        System.out.println("Order " + orderId + " auto-cancelled ");
+                                    }
+                                }
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }).start();
 
                         response.sendRedirect(vnpUrl);
                         return;}
