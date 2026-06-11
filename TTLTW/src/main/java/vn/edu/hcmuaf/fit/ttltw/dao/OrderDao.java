@@ -45,8 +45,8 @@ public class OrderDao {
 
     public int createOrder(Order order) {
         String sql = "INSERT INTO orders (status, voucher_id, payment_type_id, fee_shipping, " +
-                "total_amount, discount_amount, user_id, address_id) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            "total_amount, discount_amount, user_id, address_id, partner_name, note) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         return jdbi.withHandle(handle -> handle.createUpdate(sql)
                 .bind(0, order.getStatus())
@@ -56,7 +56,9 @@ public class OrderDao {
                 .bind(4, order.getTotalAmount())
                 .bind(5, order.getDiscountAmount())
                 .bind(6, order.getUserId())
-                .bind(7, order.getAddressId())
+            .bind(7, order.getAddressId())
+            .bind(8, order.getPartnerName())
+            .bind(9, order.getNote())
                 .executeAndReturnGeneratedKeys("id")
                 .mapTo(Integer.class)
                 .one());
@@ -214,9 +216,9 @@ public class OrderDao {
         return jdbi.withHandle(handle -> handle.inTransaction(h -> {
             String sqlOrder = """
                         INSERT INTO orders (user_id, address_id, payment_type_id, voucher_id,
-                                           status, fee_shipping, discount_amount, total_amount, note, created_at)
+                                 status, fee_shipping, discount_amount, total_amount, note, partner_name, created_at)
                         VALUES (:userId, :addressId, :paymentTypeId, :voucherId,
-                               :status, :feeShipping, :discountAmount, :totalAmount,:note, NOW())
+                           :status, :feeShipping, :discountAmount, :totalAmount,:note, :partnerName, NOW())
                     """;
             int orderId = h.createUpdate(sqlOrder)
                     .bindBean(order)

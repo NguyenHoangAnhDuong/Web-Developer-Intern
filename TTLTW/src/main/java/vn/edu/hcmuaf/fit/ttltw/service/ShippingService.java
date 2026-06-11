@@ -23,7 +23,7 @@ public class ShippingService {
         );
 
         if (tracking != null) {
-            boolean updated = shippingDao.updateTrackingInfo(orderId, tracking, "SuperShip");
+            boolean updated = shippingDao.updateTrackingInfo(orderId, tracking, "SuperAI");
 
             if (updated) {
                 System.out.println(" tracking saved: " + tracking);

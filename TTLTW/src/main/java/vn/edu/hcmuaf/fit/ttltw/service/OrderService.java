@@ -177,7 +177,7 @@ public class OrderService {
                 );
 
                 if (tracking != null && !tracking.trim().isEmpty()) {
-                    shippingDao.updateTrackingInfo(orderId, tracking, "SuperShip");
+                    shippingDao.updateTrackingInfo(orderId, tracking, resolveShippingPartner(order.getPartnerName()));
                     apiCalled = true;
                 } else {
                     System.err.println("SuperAI trả về null tracking");
@@ -213,7 +213,7 @@ public class OrderService {
                             System.err.println( orderId + ": " + carrierCancelError+ " "+ fallbackCode );
                         } else {
                             apiCalled = true;
-                            shippingDao.updateTrackingInfo(orderId, fallbackCode, "SuperShip");
+                            shippingDao.updateTrackingInfo(orderId, fallbackCode, resolveShippingPartner(order.getPartnerName()));
                         }
                     } catch (Exception ex) {
                         carrierCancelError = ex.getMessage();
@@ -257,7 +257,8 @@ public class OrderService {
     }
 
     public int processOrder(int userId, int addressId, String paymentMethod, String voucherCode,
-                            Map<Integer, Integer> cart, int paymentStatus, String buyerNote, double shippingFee) {
+                            Map<Integer, Integer> cart, int paymentStatus, String buyerNote, double shippingFee,
+                            String shippingPartner) {
         double subtotal = 0;
         for (Map.Entry<Integer, Integer> entry : cart.entrySet()) {
             Map<String, Object> product = orderDao.getProductForCart(entry.getKey());
@@ -308,11 +309,20 @@ public class OrderService {
         int paymentTypeId = "bank".equalsIgnoreCase(paymentMethod) ? 2 : 1;
         order.setPaymentTypeId(paymentTypeId);// Trạng thái Chờ xác nhận
         order.setFeeShipping(shippingFee);
+        order.setPartnerName(resolveShippingPartner(shippingPartner));
         order.setVoucherId(appliedVoucherId);
         order.setDiscountAmount(discount);
         order.setTotalAmount(subtotal + shippingFee - discount);
         order.setNote(buyerNote);
         return orderDao.insertOrderWithDetails(order, cart);
+    }
+
+    private String resolveShippingPartner(String shippingPartner) {
+        if (shippingPartner == null) {
+            return "SuperAI";
+        }
+        String normalized = shippingPartner.trim();
+        return normalized.isEmpty() ? "SuperAI" : normalized;
     }
 
     public Address getDefaultAddress(int userId) {
