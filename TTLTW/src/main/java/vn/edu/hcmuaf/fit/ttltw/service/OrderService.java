@@ -173,7 +173,7 @@ public class OrderService {
 
                 tracking = superAIService.createRealOrder(
                         orderId, address.getName(), address.getPhoneNumber(),
-                        address.getAddress(), codAmount
+                        address.getAddress(), codAmount, order.getTotalAmount()
                 );
 
                 if (tracking != null && !tracking.trim().isEmpty()) {

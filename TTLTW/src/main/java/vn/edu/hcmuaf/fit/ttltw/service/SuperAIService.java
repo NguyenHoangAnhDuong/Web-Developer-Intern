@@ -1,12 +1,5 @@
 package vn.edu.hcmuaf.fit.ttltw.service;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import vn.edu.hcmuaf.fit.ttltw.model.ShippingZoneFees;
-
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
@@ -21,6 +14,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import vn.edu.hcmuaf.fit.ttltw.model.ShippingZoneFees;
 
 public class SuperAIService {
     private static String API_TOKEN;
@@ -198,7 +199,7 @@ public class SuperAIService {
     }
 
 // Tạo một đơn hàng
-    public String createRealOrder(int orderId, String name, String phone, String fullAddress, double amount) {
+    public String createRealOrder(int orderId, String name, String phone, String fullAddress, double amount, double orderValue) {
         if (MOCK_MODE) {
             String mockTracking = "SHIP" + System.currentTimeMillis() + "-MOCK";
             return mockTracking;
@@ -220,7 +221,7 @@ public class SuperAIService {
             body.put("district", parsed[2]); // huyện
             body.put("province", parsed[3]); // tỉnh
 
-            body.put("amount", (long) amount);
+            body.put("amount", (long) orderValue);
             body.put("value", (long) amount);
             body.put("weight", 200);
             body.put("payer", "1");
