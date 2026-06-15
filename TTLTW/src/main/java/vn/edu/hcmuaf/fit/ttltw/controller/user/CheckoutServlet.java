@@ -33,13 +33,10 @@ public class CheckoutServlet extends HttpServlet {
             // Lấy dữ liệu từ form với validation
             String addressIdStr = request.getParameter("addressId");
             String paymentMethod = request.getParameter("payment");
+            String shippingPartner = request.getParameter("shippingPartner");
             String voucherCode = request.getParameter("appliedVoucher");
             String buyerNote = request.getParameter("buyerNote");
 
-            // nếu thanh toán bằng COD thì gửi thông tin cho superAI
-            String fullName = request.getParameter("fullName");
-            String phone = request.getParameter("phone");
-            String fullAddress = request.getParameter("fullAddress");
             String finalTotalStr = request.getParameter("finalTotal");
             String shippingFeeStr = request.getParameter("shippingFee");
 
@@ -102,7 +99,7 @@ public class CheckoutServlet extends HttpServlet {
 
                 // gọi xử lý đặt hàng
                 int orderId = orderService.processOrder(user.getId(), addressId, paymentMethod, voucherCode,
-                        checkoutCart, paymentStatus, buyerNote,shippingFee);
+                            checkoutCart, paymentStatus, buyerNote, shippingFee, shippingPartner);
 
                 if (orderId > 0) {
                     // Xóa giỏ hàng thành công

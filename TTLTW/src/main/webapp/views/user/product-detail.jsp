@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/asset/css/listproduct.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/asset/css/listVouchers.css">
 </head>
-<body>
+<body data-authenticated="${not empty sessionScope.user}">
 <%@ include file="/views/includes/toast.jsp" %>
 <div class="app-wrapper">
     <!-- Header -->
@@ -445,7 +445,8 @@
                         </div>
                         <div class="bottom-info">
                             <span class="sold-count">Đã bán ${product.soldCount}</span>
-                            <button class="cart-btn">
+                            <button class="cart-btn"
+                                    data-variant-color-id="${not empty product.variants and not empty product.variants[0].colors ? product.variants[0].colors[0].id : ''}">
                                 <i class="fa-solid fa-cart-plus"></i>
                             </button>
                         </div>

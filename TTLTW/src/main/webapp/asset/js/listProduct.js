@@ -577,6 +577,8 @@ function initCartSystem() {
             e.stopPropagation();
 
             const productCard = btn.closest('.product-card');
+            let vcId = btn.dataset.variantColorId || null;
+
             const activeVariant = productCard.querySelector('.capacity button.active');
 
             if (!activeVariant) {
@@ -594,11 +596,9 @@ function initCartSystem() {
                 }
             }
 
-            let vcId = null;
-            
-            if (hasColors) {
+            if (!vcId && hasColors) {
                 const activeColor = productCard.querySelector('.colors .color.active');
-                vcId = activeColor.getAttribute('data-variant-color-id');
+                vcId = activeColor ? activeColor.getAttribute('data-variant-color-id') : null;
             }
             
             if (!vcId) {

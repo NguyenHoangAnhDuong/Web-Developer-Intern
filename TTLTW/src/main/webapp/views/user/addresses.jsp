@@ -95,7 +95,7 @@
                     <i class="fa-solid fa-user"></i> Họ và tên
                 </label>
                 <input type="text" id="name" class="form-input"
-                       placeholder="Nhập họ và tên" required>
+                       placeholder="Nhập họ và tên">
             </div>
 
             <div class="form-row">
@@ -106,7 +106,7 @@
                        placeholder="Nhập số điện thoại"
                        pattern="[0-9]{10}"
                        title="Số điện thoại phải gồm 10 chữ số"
-                       required>
+                       >
             </div>
 
             <div class="form-row">
