@@ -1,10 +1,10 @@
 package vn.edu.hcmuaf.fit.ttltw.service;
 
-import vn.edu.hcmuaf.fit.ttltw.dao.ShippingDao;
-import vn.edu.hcmuaf.fit.ttltw.model.ShippingZoneFees;
-
 import java.util.List;
 import java.util.Map;
+
+import vn.edu.hcmuaf.fit.ttltw.dao.ShippingDao;
+import vn.edu.hcmuaf.fit.ttltw.model.ShippingZoneFees;
 
 public class ShippingService {
     private final ShippingDao shippingDao = new ShippingDao();
@@ -14,12 +14,12 @@ public class ShippingService {
         return shippingDao.updateTrackingInfo(orderId, tracking, partner);
     }
 // Xử lý nghiệp vụ vận chuyển
-    public String createShipment(int orderId, String name, String phone, String address, double amount) {
+    public String createShipment(int orderId, String name, String phone, String address, double amount, double orderValue) {
 
         System.out.println("Creating shipment for order " + orderId);
 
         String tracking = superAI.createRealOrder(
-                orderId, name, phone, address, amount
+                orderId, name, phone, address, amount, orderValue
         );
 
         if (tracking != null) {

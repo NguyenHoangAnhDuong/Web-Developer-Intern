@@ -1,0 +1,108 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id "org.hidetake.ssh" version "2.11.2"
+    id 'war'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+// Tên file WAR output — phải khớp với tên đang dùng trong webapps/ để Tomcat nhận đúng context path
+war {
+    archiveBaseName = 'TTLTW'
+    archiveVersion  = '1.0-SNAPSHOT'
+}
+
+apply plugin: 'org.hidetake.ssh'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Servlet API — Tomcat cung cấp khi chạy, không đóng vào WAR
+    compileOnly 'jakarta.servlet:jakarta.servlet-api:6.1.0'
+
+    // Database
+    implementation 'org.jdbi:jdbi3-core:3.43.0'
+    implementation 'org.jdbi:jdbi3-sqlobject:3.43.0'
+    implementation 'mysql:mysql-connector-java:8.0.33'
+    implementation 'com.zaxxer:HikariCP:5.1.0'
+
+    // JSP / JSTL
+    implementation 'org.apache.tomcat.embed:tomcat-embed-jasper:11.0.0-M15'
+    implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.0'
+    implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1'
+
+    // Tiện ích
+    implementation 'org.mindrot:jbcrypt:0.4'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'com.cloudinary:cloudinary-http44:1.36.0'
+    implementation 'org.eclipse.angus:angus-mail:2.0.3'
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
+
+    // Test
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.13.2'
+    testRuntimeOnly  'org.junit.jupiter:junit-jupiter-engine:5.13.2'
+}
+
+// ─── Kết nối VPS ─────────────────────────────────────────────────────────────
+// user 'deploy' — có NOPASSWD sudo theo VirtualBoxSetup.md mục 5.3
+// IP tĩnh đặt theo VirtualBoxSetup.md mục 4.2 (mặc định 192.168.100.40)
+remotes {
+    host {
+        host     = '192.168.100.40'
+        user     = 'deploy'
+        password = 'deploy@123'
+    }
+}
+
+ssh.settings {
+    knownHosts = allowAnyHosts
+}
+
+// ─── Task 1: Upload WAR lên server ───────────────────────────────────────────
+// Ghi đè TTLTW.war trong /usr/deploy/ttltw/webapps/ (cùng vị trí Maven đang dùng)
+// Tomcat tự hot-deploy sau khi restart
+task docker_upload_file_to_server {
+    doLast {
+        println 'Uploading WAR to /usr/deploy/ttltw/webapps/TTLTW.war ...'
+        ssh.run {
+            session(remotes.host) {
+                execute 'rm -f /usr/deploy/ttltw/webapps/TTLTW.war',   ignoreError: true
+                execute 'rm -rf /usr/deploy/ttltw/webapps/TTLTW/',     ignoreError: true
+                put from: "${project.projectDir}/build/libs/TTLTW-1.0-SNAPSHOT.war",
+                        into: "/usr/deploy/ttltw/webapps/TTLTW.war"
+            }
+        }
+        println 'Upload done.'
+    }
+}
+
+// ─── Task 2: Restart Tomcat qua Docker Compose ───────────────────────────────
+// Dùng 'docker compose restart' — KHÔNG stop/rm/run lại container
+// Giữ nguyên: network ttltw-net, volume, link tới ttltw-mysql
+task docker_app_restart {
+    doLast {
+        println 'Restarting ttltw-tomcat via docker compose ...'
+        ssh.run {
+            session(remotes.host) {
+                execute 'cd /usr/deploy/ttltw && docker compose restart tomcat'
+            }
+        }
+        println 'Tomcat restarted.'
+    }
+}
+
+// ─── Task 3: Pipeline tổng ───────────────────────────────────────────────────
+// Thứ tự: build → upload → restart
+task docker_deploy {
+    docker_deploy.dependsOn docker_app_restart
+    docker_deploy.dependsOn docker_upload_file_to_server
+    docker_deploy.dependsOn build
+    tasks.getByName('docker_app_restart').mustRunAfter docker_upload_file_to_server
+    tasks.getByName('docker_upload_file_to_server').mustRunAfter build
+}

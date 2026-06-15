@@ -1,19 +1,18 @@
 package vn.edu.hcmuaf.fit.ttltw.controller.user;
 
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import vn.edu.hcmuaf.fit.ttltw.config.VnPayConfig;
 import vn.edu.hcmuaf.fit.ttltw.service.OrderService;
 import vn.edu.hcmuaf.fit.ttltw.service.ShippingService;
 import vn.edu.hcmuaf.fit.ttltw.service.SuperAIService;
-import vn.edu.hcmuaf.fit.ttltw.config.VnPayConfig;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import java.io.IOException;
 
 @WebServlet("/vnpay-return")
 public class VnPayReturnServlet extends HttpServlet {
@@ -58,11 +57,12 @@ public class VnPayReturnServlet extends HttpServlet {
                     var address = orderService.getDefaultAddress(order.getUserId());
                     if (address != null) {
                         String tracking = superAI.createRealOrder(
-                                orderId, 
-                                address.getName(), 
+                                orderId,
+                                address.getName(),
                                 address.getPhoneNumber(),
-                                address.getAddress(), 
-                                0 // COD = 0 vì đã thanh toán
+                                address.getAddress(),
+                                0,
+                                order.getTotalAmount()
                         );
                         if (tracking != null && !tracking.isBlank()) {
                             shippingService.updateTrackingInfo(orderId, tracking, "SuperAI");
